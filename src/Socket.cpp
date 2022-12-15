@@ -32,7 +32,7 @@ void Socket::create(void)
 
 void Socket::bind(short port)
 {
-    size_t addressSize = sizeof(struct sockaddr_in);
+    socklen_t addressSize = sizeof(struct sockaddr_in);
 
     this->_address.sin_family = AF_INET;
     this->_address.sin_addr.s_addr = INADDR_ANY;
@@ -50,6 +50,23 @@ void Socket::listen(int backlog)
 
 void Socket::accept(Socket &socket)
 {
+    socklen_t addressSize = sizeof(struct sockaddr_in);
+    int acceptedSocketRef;
+
+    acceptedSocketRef = ::accept(this->_socketRef, (struct sockaddr *)&this->_address, &addressSize);
+
+    if (acceptedSocketRef < 0)
+        throw Socket::SocketAcceptException(strerror(errno));
+
+    socket._socketRef = acceptedSocketRef;
+}
+
+/**
+ * SocketException
+ */
+
+Socket::SocketException::~SocketException() throw()
+{
 }
 
 /**
@@ -65,6 +82,10 @@ const char *Socket::SocketCreateException::what(void) const throw()
     return this->_message.c_str();
 }
 
+Socket::SocketCreateException::~SocketCreateException() throw()
+{
+}
+
 /**
  * SocketBindException
  */
@@ -76,6 +97,10 @@ Socket::SocketBindException::SocketBindException(const std::string &message)
 const char *Socket::SocketBindException::what(void) const throw()
 {
     return this->_message.c_str();
+}
+
+Socket::SocketBindException::~SocketBindException() throw()
+{
 }
 
 /**
@@ -91,6 +116,10 @@ const char *Socket::SocketListenException::what(void) const throw()
     return this->_message.c_str();
 }
 
+Socket::SocketListenException::~SocketListenException() throw()
+{
+}
+
 /**
  * SocketAcceptException
  */
@@ -102,4 +131,8 @@ Socket::SocketAcceptException::SocketAcceptException(const std::string &message)
 const char *Socket::SocketAcceptException::what(void) const throw()
 {
     return this->_message.c_str();
+}
+
+Socket::SocketAcceptException::~SocketAcceptException() throw()
+{
 }

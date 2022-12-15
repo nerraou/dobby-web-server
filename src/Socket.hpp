@@ -1,6 +1,6 @@
 #pragma once
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 #include <sys/socket.h>
@@ -31,47 +31,45 @@ public:
     void listen(int backlog);
     void accept(Socket &socket);
 
-    class SocketException : std::exception
+    class SocketException : public std::exception
     {
+    protected:
+        std::string _message;
+
+    public:
+        virtual ~SocketException() throw();
     };
 
-    class SocketCreateException : SocketException
+    class SocketCreateException : public SocketException
     {
-    private:
-        std::string _message;
 
     public:
         SocketCreateException(const std::string &message);
         virtual const char *what() const throw();
+        virtual ~SocketCreateException() throw();
     };
 
-    class SocketBindException : SocketException
+    class SocketBindException : public SocketException
     {
-    private:
-        std::string _message;
-
     public:
         SocketBindException(const std::string &message);
         virtual const char *what() const throw();
+        virtual ~SocketBindException() throw();
     };
 
-    class SocketListenException : SocketException
+    class SocketListenException : public SocketException
     {
-    private:
-        std::string _message;
-
     public:
         SocketListenException(const std::string &message);
         virtual const char *what() const throw();
+        virtual ~SocketListenException() throw();
     };
 
-    class SocketAcceptException : SocketException
+    class SocketAcceptException : public SocketException
     {
-    private:
-        std::string _message;
-
     public:
         SocketAcceptException(const std::string &message);
         virtual const char *what() const throw();
+        virtual ~SocketAcceptException() throw();
     };
 };

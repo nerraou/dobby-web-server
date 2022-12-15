@@ -4,10 +4,8 @@ CC = c++
 
 OBJECT_FILES=$(SOURCE_FILES:.cpp=.o)
 SOURCE_FILES=\
-	src/main.cpp
-
-test:
-	@echo $(OBJECT_FILES)
+	src/main.cpp\
+	src/Socket.cpp
 
 all: $(NAME)
 
