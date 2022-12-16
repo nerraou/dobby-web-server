@@ -16,6 +16,8 @@ void Server::start(int port)
     char buffer[4096];
     int readyConnectionsCount;
 
+    (void)readyConnectionsCount;
+
     this->_socket.create();
     this->_socket.bind(port);
 
@@ -66,8 +68,8 @@ Connection::PollFd *Server::toPollConnections(void)
         return (NULL);
 
     i = 0;
-    it = this->_connections.cbegin();
-    while (it != this->_connections.cend())
+    it = this->_connections.begin();
+    while (it != this->_connections.end())
     {
         pollConnections[i] = it->second->createPollData();
 

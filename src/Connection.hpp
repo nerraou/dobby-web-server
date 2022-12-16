@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cstring>
 #include <poll.h>
 #include <unistd.h>
 
