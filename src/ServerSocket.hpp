@@ -11,7 +11,7 @@
 #include <cstring>
 #include <cerrno>
 
-#include "ClientSocket.hpp"
+#include "Connection.hpp"
 
 class ServerSocket
 {
@@ -31,7 +31,7 @@ public:
     void create(void);
     void bind(short port);
     void listen(int backlog);
-    bool accept(ClientSocket &client);
+    Connection *accept(void);
 
     class ServerSocketException : public std::exception
     {
@@ -66,12 +66,4 @@ public:
         virtual const char *what() const throw();
         virtual ~ServerSocketListenException() throw();
     };
-
-    // class ServerSocketAcceptException : public ServerSocketException
-    // {
-    // public:
-    //     ServerSocketAcceptException(const std::string &message);
-    //     virtual const char *what() const throw();
-    //     virtual ~ServerSocketAcceptException() throw();
-    // };
 };

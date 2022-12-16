@@ -6,7 +6,8 @@ OBJECT_FILES=$(SOURCE_FILES:.cpp=.o)
 SOURCE_FILES=\
 	src/main.cpp\
 	src/ServerSocket.cpp\
-	src/ClientSocket.cpp\
+	src/Connection.cpp\
+	src/Server.cpp\
 
 all: $(NAME)
 

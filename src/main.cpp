@@ -1,18 +1,14 @@
 #include <iostream>
-#include "ServerSocket.hpp"
+#include "Server.hpp"
 
 int main(void)
 {
-    ServerSocket server;
-    ServerSocket client;
+    Server server;
 
     try
     {
-        server.create();
-        server.bind(8080);
-        server.listen(100);
-        server.accept(client);
         std::cout << "Welcome to Dobby web server" << std::endl;
+        server.start(8080);
     }
     catch (const std::exception &e)
     {

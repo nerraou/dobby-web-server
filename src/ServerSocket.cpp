@@ -37,6 +37,7 @@ void ServerSocket::bind(short port)
     this->_address.sin_family = AF_INET;
     this->_address.sin_addr.s_addr = INADDR_ANY;
     this->_address.sin_port = htons(port);
+    this->_port = port;
 
     if (::bind(this->_socketRef, (struct sockaddr *)&this->_address, addressSize) < 0)
         throw ServerSocket::ServerSocketBindException(strerror(errno));
@@ -48,8 +49,9 @@ void ServerSocket::listen(int backlog)
         throw ServerSocket::ServerSocketListenException(strerror(errno));
 }
 
-bool ServerSocket::accept(ClientSocket &client)
+Connection *ServerSocket::accept(void)
 {
+    Connection *connection;
     socklen_t addressSize = sizeof(struct sockaddr_in);
     int acceptedSocketRef;
 
@@ -57,11 +59,12 @@ bool ServerSocket::accept(ClientSocket &client)
 
     if (acceptedSocketRef >= 0)
     {
-        client.setSocketRef(acceptedSocketRef);
-        return (true);
+        connection = new Connection();
+        connection->setSocketRef(acceptedSocketRef);
+        return (connection);
     }
 
-    return (false);
+    return (NULL);
 }
 
 /**
@@ -122,20 +125,3 @@ const char *ServerSocket::ServerSocketListenException::what(void) const throw()
 ServerSocket::ServerSocketListenException::~ServerSocketListenException() throw()
 {
 }
-
-// /**
-//  * SocketAcceptException
-//  */
-// ServerSocket::ServerSocketAcceptException::ServerSocketAcceptException(const std::string &message)
-// {
-//     this->_message = message;
-// }
-
-// const char *ServerSocket::ServerSocketAcceptException::what(void) const throw()
-// {
-//     return this->_message.c_str();
-// }
-
-// ServerSocket::ServerSocketAcceptException::~ServerSocketAcceptException() throw()
-// {
-// }
