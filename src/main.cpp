@@ -1,10 +1,10 @@
 #include <iostream>
-#include "Socket.hpp"
+#include "ServerSocket.hpp"
 
 int main(void)
 {
-    Socket server;
-    Socket client;
+    ServerSocket server;
+    ServerSocket client;
 
     try
     {
