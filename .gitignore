@@ -29,3 +29,6 @@ dobby
 # Temp
 tmp/
 temp/
+
+# Config
+*.conf
