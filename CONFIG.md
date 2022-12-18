@@ -1,35 +1,39 @@
 - http
 
   1. root
-  2. autoindex
-  3. client_max_body_size
-  4. error_page
+  2. index
+  3. autoindex
+  4. client_max_body_size
+  5. error_page
 
 - server
 
   1. root
-  2. listen
-  3. server_name
-  4. error_page
+  2. index
+  3. listen
+  4. server_name
+  5. error_page
 
 - location
 
   1. root
-  1. autoindex
-  1. client_max_body_size
-  1. accepted_http_methods
-  1. rewrite
+  2. index
+  3. autoindex
+  4. client_max_body_size
+  5. accepted_http_methods
+  6. rewrite
 
-| Attribute                                                     | Type          | Required in context | Default | Inherited | Description                                                                                                                                               |
-| ------------------------------------------------------------- | ------------- | ------------------- | ------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| root[<sup>[1]</sup>](#autoindex)                              | string        | http                | -       | `true`    | Specifies the root directory that will be used to search for a file. syntax: `root: /var/www/html;`                                                       |
-| autoindex[<sup>[2]</sup>](#autoindex)                         | enum(on, off) | -                   | `off`   | `true`    | Used to enable/disable directory listing. example: autoindex: on;                                                                                         |
-| client_max_body_size[<sup>[3]</sup>](#client_max_body_size)   | string        | http                | `1M`    | `true`    | Sets the maximum allowed size of the client request body. syntax: `client_max_body_size: 1M;`                                                             |
-| error_page[<sup>[3]</sup>](#error_page)                       | string        | http                | -       | `true`    | Syntax: `error_page code ... uri;`. example: `error_page 400 404 /40x.html;`                                                                              |
-| listen[<sup>[4]</sup>](#listen)                               | number        | server              | -       | `false`   | Sets port which the server will accept requests. syntax: `listen port_number;`                                                                            |
-| server_name[<sup>[5]</sup>](#server_name)                     | string        | server              | -       | `flase`   | Sets names of a virtual server. syntax: `server_name: example.com www.example.com;`                                                                       |
-| accepted_http_methods[<sup>[6]</sup>](#accepted_http_methods) | string        | -                   | \*      | `false`   | Sets accpeted http methods. syntax: `accepted_http_methods method ...;`. example: `accepted_http_methods GET HEAD POST PUT DELETE CONNECT OPTIONS TRACE;` |
-| rewrite[<sup>[7]</sup>](#rewrite)                             | string        | -                   | -       | `false`   | URI changed as specified in the replacement string. syntax: `rewrite replacement`. example `rewrite /images`                                              |
+| Attribute                                                     | Type          | Required in context | Default      | Inherited | Description                                                                                                                                               |
+| ------------------------------------------------------------- | ------------- | ------------------- | ------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| root[<sup>[1]</sup>](#autoindex)                              | string        | http                | -            | `true`    | Specifies the root directory that will be used to search for a file. syntax: `root: /var/www/html;`                                                       |
+| autoindex[<sup>[2]</sup>](#autoindex)                         | enum(on, off) | -                   | `off`        | `true`    | Used to enable/disable directory listing. example: autoindex: on;                                                                                         |
+| client_max_body_size[<sup>[3]</sup>](#client_max_body_size)   | string        | http                | `1M`         | `true`    | Sets the maximum allowed size of the client request body. syntax: `client_max_body_size: 1M;`                                                             |
+| error_page[<sup>[3]</sup>](#error_page)                       | string        | http                | -            | `true`    | Syntax: `error_page code ... uri;`. example: `error_page 400 404 /40x.html;`                                                                              |
+| listen[<sup>[4]</sup>](#listen)                               | number        | server              | -            | `false`   | Sets port which the server will accept requests. syntax: `listen port_number;`                                                                            |
+| server_name[<sup>[5]</sup>](#server_name)                     | string        | server              | -            | `flase`   | Sets names of a virtual server. syntax: `server_name: example.com www.example.com;`                                                                       |
+| accepted_http_methods[<sup>[6]</sup>](#accepted_http_methods) | string        | -                   | \*           | `false`   | Sets accpeted http methods. syntax: `accepted_http_methods method ...;`. example: `accepted_http_methods GET HEAD POST PUT DELETE CONNECT OPTIONS TRACE;` |
+| rewrite[<sup>[7]</sup>](#rewrite)                             | string        | -                   | -            | `false`   | URI changed as specified in the replacement string. syntax: `rewrite replacement`. example `rewrite /images`                                              |
+| index[<sup>[8]</sup>](#index)                                 | string        | -                   | `index.html` | `true`    | Defines files that will be used as an index. syntax: `index file ...`. example `index index.html index.htm`                                               |
 
 ## Examples
 
@@ -57,6 +61,7 @@ http {
   client_max_body_size 10M;
   autoindex on;
   error_page 404 404.html
+  index index.html index.htm;
 
   server {
     listen 80;
@@ -86,3 +91,4 @@ http {
 6. <a name="server_name">[server name](https://nginx.org/en/docs/http/ngx_http_core_module.html#server_name)</a>
 7. <a name="accepted_http_methods">[accepted http methods](https://datatracker.ietf.org/doc/html/rfc7231#section-4)</a>
 8. <a name="rewrite">[rewrite](https://nginx.org/en/docs/http/ngx_http_rewrite_module.html#rewrite)</a>
+9. <a name="index">[index](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)</a>
