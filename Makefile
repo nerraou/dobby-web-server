@@ -2,6 +2,8 @@ NAME=dobby
 CC_FLAGS = -Wall -Wextra -Werror -std=c++98
 CC = c++
 
+INCLUDE_ARGS= -I src/config/ -I src/
+
 OBJECT_FILES=$(SOURCE_FILES:.cpp=.o)
 SOURCE_FILES=\
 	src/main.cpp\
@@ -29,7 +31,7 @@ $(NAME): $(OBJECT_FILES)
 	$(CC) -o $@ $^
 
 %.o: %.cpp $(HPP_FILES)
-	$(CC) $(CC_FLAGS) -c $< -o $@
+	$(CC) $(CC_FLAGS) $(INCLUDE_ARGS) -c $< -o $@
 
 clean:
 	rm -f $(OBJECT_FILES)

@@ -14,9 +14,9 @@ void ConfigLocation::setRoot(const std::string &root)
     this->_root = root;
 }
 
-const std::string &ConfigLocation::getIndex(int index) const
+const std::string &ConfigLocation::getIndex(size_t index) const
 {
-    if (index < 0 || index >= this->_indexes.size())
+    if (index >= this->_indexes.size())
         throw std::out_of_range("out of range");
     return this->_indexes[index];
 }
@@ -48,7 +48,7 @@ void ConfigLocation::setAutoIndex(bool autoIndex)
 
 const std::string &ConfigLocation::getAllowedHttpMethods(int index)
 {
-    if (index < 0 || index >= this->_indexes.size())
+    if (index < 0 || (size_t)index >= this->_indexes.size())
         throw std::out_of_range("out of range");
     return this->_allowedHttpMethods[index];
 }

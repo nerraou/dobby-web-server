@@ -17,7 +17,7 @@ public:
     ConfigLocation();
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
-    const std::string &getIndex(int index) const;
+    const std::string &getIndex(size_t index) const;
     void addIndex(const std::string &index);
     const int &getClientMaxBodySize() const;
     void setClientMaxBodySize(int size);

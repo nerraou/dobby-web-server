@@ -4,6 +4,11 @@ ConfigHttp::ConfigHttp()
 {
 }
 
+void ConfigHttp::addServerContext(const ConfigServer &server)
+{
+    this->_serversContext.push_back(server);
+}
+
 const std::string &ConfigHttp::getRoot() const
 {
     return this->_root;
@@ -14,9 +19,9 @@ void ConfigHttp::setRoot(const std::string &root)
     this->_root = root;
 }
 
-const std::string &ConfigHttp::getIndex(int indexOfIndex) const
+const std::string &ConfigHttp::getIndex(size_t indexOfIndex) const
 {
-    if (indexOfIndex < 0 || indexOfIndex >= this->_indexes.size())
+    if (indexOfIndex >= this->_indexes.size())
         throw std::out_of_range("out of range");
     return this->_indexes[indexOfIndex];
 }
@@ -35,25 +40,8 @@ void ConfigHttp::setClientMaxBodySize(int size)
 {
     this->_clientMaxBodySize = size;
 }
-// keep those methods until I found the correct way to be implement
-const int &ConfigHttp::getStatusCode() const
-{
-}
 
-void ConfigHttp::setStatusCode(int)
-{
-}
-
-const std::string &ConfigHttp::getErrorPagePath() const
-{
-}
-
-void ConfigHttp::addErrorPagePath(const std::string &path)
-{
-}
-
-////////
-const bool &ConfigHttp::getAutoIndex() const
+bool ConfigHttp::getAutoIndex() const
 {
     return this->_autoIndex;
 }
@@ -61,10 +49,6 @@ const bool &ConfigHttp::getAutoIndex() const
 void ConfigHttp::setAutoIndex(bool autoIndex)
 {
     this->_autoIndex = autoIndex;
-}
-
-const int &ConfigHttp::getStatusCode() const
-{
 }
 
 ConfigHttp::~ConfigHttp()

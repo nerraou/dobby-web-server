@@ -12,15 +12,16 @@ private:
     std::string _root;
     std::vector<std::string> _indexes;
     int _clientMaxBodySize;
-    ErrorPage _errorPage;
     bool _autoIndex;
     std::vector<ConfigServer> _serversContext;
+    std::vector<ErrorPage> _errorPages;
 
 public:
     ConfigHttp();
+    void addServerContext(const ConfigServer &server);
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
-    const std::string &getIndex(int index) const;
+    const std::string &getIndex(size_t index) const;
     void addIndex(const std::string &index);
     const int &getClientMaxBodySize() const;
     void setClientMaxBodySize(int size);
@@ -28,7 +29,7 @@ public:
     void setStatusCode(int status);
     const std::string &getErrorPagePath() const;
     void addErrorPagePath(const std::string &path);
-    const bool &getAutoIndex() const;
+    bool getAutoIndex() const;
     void setAutoIndex(bool);
     ~ConfigHttp();
 };
