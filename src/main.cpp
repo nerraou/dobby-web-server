@@ -1,14 +1,20 @@
 #include <iostream>
 #include "Server.hpp"
+#include "ConfigHttp.hpp"
+#include "ConfigServer.hpp"
 
 int main(void)
 {
     Server server;
+    ConfigHttp httpContext;
+    ConfigServer serverContext;
 
     try
     {
         std::cout << "Welcome to Dobby web server" << std::endl;
-        server.start(8080);
+        serverContext.setPort(80);
+        httpContext.addServerContext(serverContext);
+        server.start(serverContext.getPort());
     }
     catch (const std::exception &e)
     {
