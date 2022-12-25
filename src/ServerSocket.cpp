@@ -14,7 +14,7 @@ ServerSocket::~ServerSocket()
 
 void ServerSocket::create(void)
 {
-    int socketFlags;
+    int socketOption;
 
     if (this->_socketRef >= 0)
         throw ServerSocket::ServerSocketCreateException("socket already initialized");
@@ -24,10 +24,10 @@ void ServerSocket::create(void)
     if (this->_socketRef < 0)
         throw ServerSocket::ServerSocketCreateException(strerror(errno));
 
-    socketFlags = fcntl(this->_socketRef, F_GETFL, 0);
-
-    if (fcntl(this->_socketRef, F_SETFL, socketFlags | O_NONBLOCK) < 0)
+    if (::fcntl(this->_socketRef, F_SETFL, O_NONBLOCK) < 0)
         throw ServerSocket::ServerSocketCreateException(strerror(errno));
+    socketOption = 1;
+    ::setsockopt(this->_socketRef, SOL_SOCKET, SO_REUSEADDR, &socketOption, sizeof(int));
 }
 
 void ServerSocket::bind(short port)
@@ -49,22 +49,14 @@ void ServerSocket::listen(int backlog)
         throw ServerSocket::ServerSocketListenException(strerror(errno));
 }
 
-Connection *ServerSocket::accept(void)
+int ServerSocket::accept(void)
 {
-    Connection *connection;
     socklen_t addressSize = sizeof(struct sockaddr_in);
     int acceptedSocketRef;
 
     acceptedSocketRef = ::accept(this->_socketRef, (struct sockaddr *)&this->_address, &addressSize);
 
-    if (acceptedSocketRef >= 0)
-    {
-        connection = new Connection();
-        connection->setSocketRef(acceptedSocketRef);
-        return (connection);
-    }
-
-    return (NULL);
+    return (acceptedSocketRef);
 }
 
 /**

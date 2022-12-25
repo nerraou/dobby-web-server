@@ -10,6 +10,7 @@ SOURCE_FILES=\
 	src/ServerSocket.cpp\
 	src/Connection.cpp\
 	src/Server.cpp\
+	src/Http.cpp\
 	\
 	src/config/ConfigHttp.cpp\
 	src/config/ConfigLocation.cpp\
@@ -19,6 +20,8 @@ HPP_FILES=\
 	src/ServerSocket.hpp\
 	src/Connection.hpp\
 	src/Server.hpp\
+	src/Http.hpp\
+	src/typedefs.hpp\
 	\
 	src/config/ConfigHttp.hpp\
 	src/config/ConfigLocation.hpp\

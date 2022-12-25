@@ -18,7 +18,7 @@ private:
 
 public:
     ConfigHttp();
-    void addServerContext(const ConfigServer &server);
+    void addServerContext(ConfigServer &server);
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
     const std::string &getIndex(size_t index) const;
@@ -31,5 +31,8 @@ public:
     void addErrorPagePath(const std::string &path);
     bool getAutoIndex() const;
     void setAutoIndex(bool);
+    size_t getServersCount(void) const;
+    ConfigServer &getServerConfig(size_t index);
+
     ~ConfigHttp();
 };

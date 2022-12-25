@@ -4,7 +4,7 @@ ConfigHttp::ConfigHttp()
 {
 }
 
-void ConfigHttp::addServerContext(const ConfigServer &server)
+void ConfigHttp::addServerContext(ConfigServer &server)
 {
     this->_serversContext.push_back(server);
 }
@@ -49,6 +49,16 @@ bool ConfigHttp::getAutoIndex() const
 void ConfigHttp::setAutoIndex(bool autoIndex)
 {
     this->_autoIndex = autoIndex;
+}
+
+size_t ConfigHttp::getServersCount(void) const
+{
+    return this->_serversContext.size();
+}
+
+ConfigServer &ConfigHttp::getServerConfig(size_t index)
+{
+    return this->_serversContext[index];
 }
 
 ConfigHttp::~ConfigHttp()
