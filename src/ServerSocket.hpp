@@ -31,7 +31,7 @@ public:
     void create(void);
     void bind(short port);
     void listen(int backlog);
-    Connection *accept(void);
+    int accept(void);
 
     class ServerSocketException : public std::exception
     {

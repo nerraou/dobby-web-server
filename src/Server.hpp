@@ -1,21 +1,25 @@
 #pragma once
 
-#include <map>
+#include <string>
+#include <sstream>
+#include <set>
 #include <poll.h>
 #include "ServerSocket.hpp"
 #include "Connection.hpp"
+#include "ConfigServer.hpp"
+#include "typedefs.hpp"
 
 class Server
 {
 private:
-    typedef std::map<int, Connection *> ConnectionsMap;
     ServerSocket _socket;
-    ConnectionsMap _connections;
+    std::set<int> _connections;
+    ConfigServer _config;
 
 public:
-    Server(void);
+    Server(const ConfigServer &config);
     ~Server();
 
-    void start(int port);
-    struct pollfd *toPollConnections(void);
+    int acceptConnection(void);
+    void start(std::vector<PollFd> &connections);
 };
