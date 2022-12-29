@@ -2,7 +2,7 @@ NAME=dobby
 CC_FLAGS = -Wall -Wextra -Werror -std=c++98
 CC = c++
 
-INCLUDE_ARGS= -I src/config/ -I src/
+INCLUDE_ARGS= -I src/lib -I src/ParseConfig/ -I src/config/ -I src/
 
 OBJECT_FILES=$(SOURCE_FILES:.cpp=.o)
 SOURCE_FILES=\
@@ -17,6 +17,10 @@ SOURCE_FILES=\
 	src/config/ConfigServer.cpp\
 	\
 	src/lib/lib.cpp\
+	\
+	src/parseConfig/ParseConfig.cpp\
+	\
+	src/lib/lib.cpp\
 
 HPP_FILES=\
 	src/ServerSocket.hpp\
@@ -29,6 +33,10 @@ HPP_FILES=\
 	src/config/ConfigLocation.hpp\
 	src/config/ConfigServer.hpp\
 	src/config/ErrorPage.hpp\
+	\
+	src/lib/lib.hpp\
+	\
+	src/parseConfig/ParseConfig.hpp\
 	\
 	src/lib/lib.hpp\
 
