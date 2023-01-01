@@ -2,16 +2,19 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <cstdlib>
 #include "lib.hpp"
 
 class ParseConfig
 {
 private:
     static std::string parseRoot(std::string &line);
-    static int parseClientMaxBodySize(std::string &line);
-    static void parseAutoIndex();
+    static size_t parseClientMaxBodySize(std::string &line);
+    static size_t checkConvertUnit(int size,const char *str);
+    static size_t convertToUnit(int size, const char unit);
+    static bool parseAutoIndex(std::string &line);
+    static std::vector<std::string> parseIndex(std::string &line);
     static void parseErrorPage();
-    static void parseIndex();
     static void parseListen();
     static void parseServerName();
     static void parseAcceptedHttpMethods();

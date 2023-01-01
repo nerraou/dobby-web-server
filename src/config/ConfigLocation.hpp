@@ -8,7 +8,7 @@ class ConfigLocation
 private:
     std::string _root;
     std::vector<std::string> _indexes;
-    int _clientMaxBodySize;
+    size_t _clientMaxBodySize;
     bool _autoIndex;
     std::vector<std::string> _allowedHttpMethods;
     std::string _rewrite;
@@ -19,8 +19,8 @@ public:
     void setRoot(const std::string &root);
     const std::string &getIndex(size_t index) const;
     void addIndex(const std::string &index);
-    const int &getClientMaxBodySize() const;
-    void setClientMaxBodySize(int size);
+    const size_t &getClientMaxBodySize() const;
+    void setClientMaxBodySize(size_t size);
     const bool &getAutoIndex() const;
     void setAutoIndex(bool);
     const std::string &getAllowedHttpMethods(int index);

@@ -26,12 +26,12 @@ void ConfigLocation::addIndex(const std::string &index)
     this->_indexes.push_back(index);
 }
 
-const int &ConfigLocation::getClientMaxBodySize() const
+const size_t &ConfigLocation::getClientMaxBodySize() const
 {
     return this->_clientMaxBodySize;
 }
 
-void ConfigLocation::setClientMaxBodySize(int size)
+void ConfigLocation::setClientMaxBodySize(size_t size)
 {
     this->_clientMaxBodySize = size;
 }

@@ -31,12 +31,12 @@ void ConfigHttp::addIndex(const std::string &index)
     this->_indexes.push_back(index);
 }
 
-const int &ConfigHttp::getClientMaxBodySize() const
+const size_t &ConfigHttp::getClientMaxBodySize() const
 {
     return this->_clientMaxBodySize;
 }
 
-void ConfigHttp::setClientMaxBodySize(int size)
+void ConfigHttp::setClientMaxBodySize(size_t size)
 {
     this->_clientMaxBodySize = size;
 }
