@@ -12,7 +12,6 @@ void ParseConfig::parse(std::string configPath)
 {
     std::ifstream file(configPath, std::ifstream::in);
     std::string line;
-    std::vector<std::string> strings;
 
     if (file.is_open() == false)
     {
@@ -20,10 +19,7 @@ void ParseConfig::parse(std::string configPath)
     }
     while (std::getline(file, line))
     {
-        strings = ParseConfig::parseIndex(line);
-        std::cout << strings.size();
-        for (size_t i = 0; i < strings.size(); i++)
-            std::cout << strings.at(i) << '\n';
+        std::cout << ParseConfig::parseListen(line);
     }
 }
 
@@ -67,19 +63,33 @@ size_t ParseConfig::parseClientMaxBodySize(std::string &line)
 {
     size_t size;
     int num;
-    std::string bodySize;
     char *pEnd;
-    bodySize = lib::trim(line);
 
-    if (bodySize.length() == 0)
+    line = lib::trim(line);
+    if (line.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
-    num = (int)std::strtol(bodySize.c_str(), &pEnd, 10);
+    num = (int)std::strtol(line.c_str(), &pEnd, 10);
     if (num <= 0)
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
     size = ParseConfig::checkConvertUnit(num, pEnd);
     if (size == 0)
-        throw(ParseConfig::ParseConfigException("Error Bad max body size unit"));
+        throw(ParseConfig::ParseConfigException("Error Bad max body size unit!"));
     return size;
+}
+
+int ParseConfig::parseListen(std::string &line)
+{
+    int listen;
+
+    char *pEnd;
+
+    line = lib::trim(line);
+    if (line.length() == 0)
+        throw(ParseConfig::ParseConfigException("Error Bad Listen!"));
+    listen = (int)std::strtol(line.c_str(), &pEnd, 10);
+    if (listen <= 0 || listen > 65535 || pEnd[0] != '\0')
+        throw(ParseConfig::ParseConfigException("Error Bad Listen!"));
+    return listen;
 }
 
 bool ParseConfig::parseAutoIndex(std::string &line)
@@ -96,10 +106,42 @@ bool ParseConfig::parseAutoIndex(std::string &line)
 
 std::vector<std::string> ParseConfig::parseIndex(std::string &line)
 {
+    line = lib::trim(line);
     if (line.length() == 0)
-        throw(ParseConfig::ParseConfigException("Error Bad index"));
-
+        throw(ParseConfig::ParseConfigException("Error Bad Index"));
     return lib::split(line);
+}
+
+std::vector<std::string> ParseConfig::parseErrorPage(std::string &line)
+{
+    line = lib::trim(line);
+    if (line.length() == 0)
+        throw(ParseConfig::ParseConfigException("Error Bad Error page"));
+    return lib::split(line);
+}
+
+std::vector<std::string> ParseConfig::parseServerName(std::string &line)
+{
+    line = lib::trim(line);
+    if (line.length() == 0)
+        throw(ParseConfig::ParseConfigException("Error Bad Server name"));
+    return lib::split(line);
+}
+
+std::vector<std::string> ParseConfig::parseAcceptedHttpMethods(std::string &line)
+{
+    line = lib::trim(line);
+    if (line.length() == 0)
+        throw(ParseConfig::ParseConfigException("Error Bad Http methods"));
+    return lib::split(line);
+}
+
+std::string ParseConfig::parseRewrite(std::string &line)
+{
+    line = lib::trim(line);
+    if (line.length() == 0)
+        throw(ParseConfig::ParseConfigException("Error Bad Rewrite"));
+    return line;
 }
 
 ParseConfig::ParseConfigException::ParseConfigException(const std::string &message)
