@@ -15,6 +15,8 @@ SOURCE_FILES=\
 	src/config/ConfigHttp.cpp\
 	src/config/ConfigLocation.cpp\
 	src/config/ConfigServer.cpp\
+	\
+	src/lib/lib.cpp\
 
 HPP_FILES=\
 	src/ServerSocket.hpp\
@@ -27,6 +29,8 @@ HPP_FILES=\
 	src/config/ConfigLocation.hpp\
 	src/config/ConfigServer.hpp\
 	src/config/ErrorPage.hpp\
+	\
+	src/lib/lib.hpp\
 
 all: $(NAME)
 
