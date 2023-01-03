@@ -19,8 +19,6 @@ SOURCE_FILES=\
 	src/lib/lib.cpp\
 	\
 	src/parseConfig/ParseConfig.cpp\
-	\
-	src/lib/lib.cpp\
 
 HPP_FILES=\
 	src/ServerSocket.hpp\
@@ -37,8 +35,6 @@ HPP_FILES=\
 	src/lib/lib.hpp\
 	\
 	src/parseConfig/ParseConfig.hpp\
-	\
-	src/lib/lib.hpp\
 
 all: $(NAME)
 
