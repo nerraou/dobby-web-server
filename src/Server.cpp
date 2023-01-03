@@ -31,7 +31,7 @@ void Server::start(std::vector<PollFd> &connections)
     bool hasConnection;
     std::ifstream file;
     char readBuffer[32];
-    const std::string filename("/home/youssef/Projects/personal/dobby/tmp/www/index-1.html");
+    const std::string filename("default.html");
     std::string headers = "HTTP/1.1 200 OK\r\n"
                           "Server: Dobby/0.0.0 (MacOS)\r\n"
                           "Content-Length: ";
