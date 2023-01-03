@@ -2,7 +2,7 @@ NAME=dobby
 CC_FLAGS = -Wall -Wextra -Werror -std=c++98
 CC = c++
 
-INCLUDE_ARGS= -I src/config/ -I src/
+INCLUDE_ARGS= -I src/config/ -I src/ -I src/lib
 
 OBJECT_FILES=$(SOURCE_FILES:.cpp=.o)
 SOURCE_FILES=\
@@ -15,6 +15,8 @@ SOURCE_FILES=\
 	src/config/ConfigHttp.cpp\
 	src/config/ConfigLocation.cpp\
 	src/config/ConfigServer.cpp\
+	\
+	src/HttpRequestHandler.cpp\
 	\
 	src/lib/lib.cpp\
 
@@ -29,6 +31,8 @@ HPP_FILES=\
 	src/config/ConfigLocation.hpp\
 	src/config/ConfigServer.hpp\
 	src/config/ErrorPage.hpp\
+	\
+	src/HttpRequestHandler.hpp\
 	\
 	src/lib/lib.hpp\
 
