@@ -69,7 +69,8 @@ http {
     autoindex on
     error_page 404 404.html
 
-    location /images {
+    location {
+      path /images
       root /data
       autoindex off
       client_max_body_size 10M

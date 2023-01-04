@@ -30,5 +30,6 @@ public:
     void setStatusCode(int status);
     const std::string &getErrorPagePath() const;
     void addErrorPagePath(const std::string &path);
+    bool isGood();
     ~ConfigServer();
 };

@@ -7,20 +7,52 @@ ParseConfig::ParseConfig()
 ParseConfig::~ParseConfig()
 {
 }
+void ParseConfig::parseHttpContext(std::string &line, ConfigHttp &httpContext)
+{
+}
 
-void ParseConfig::parse(std::string configPath)
+void ParseConfig::parseLocationContext(std::string &line, ConfigLocation &locationContext)
+{
+}
+
+void ParseConfig::parseServerContext(std::string &line, ConfigServer &serverContext)
+{
+}
+
+void ParseConfig::setContext(std::string &line, std::string &context)
+{
+    if (line.compare("http {") == 0)
+        context = "http";
+    else if (line.compare("server {") == 0)
+        context = "server";
+    else if (line.compare("location {") == 0)
+        context = "location";
+}
+
+ConfigHttp ParseConfig::parse(std::string configPath)
 {
     std::ifstream file(configPath, std::ifstream::in);
     std::string line;
+    std::vector<std::string> configVector;
+    size_t i;
+    ConfigHttp httpContext;
+    ConfigLocation locationContext;
+    ConfigServer serverContext;
+    std::string context;
 
-    if (file.is_open() == false)
+    i = 0;
+    configVector = ParseConfig::loadConfigFile(configPath);
+    while (i < configVector.size())
     {
-        throw(ParseConfig::FileException());
+        ParseConfig::setContext(configVector[i], context);
+        if (context == "http")
+            ParseConfig::parseHttpContext(configVector[i], httpContext);
+        else if (context == "server")
+            ParseConfig::parseServerContext(configVector[i], serverContext);
+        else
+            ParseConfig::parseLocationContext(configVector[i], locationContext);
     }
-    while (std::getline(file, line))
-    {
-        std::cout << ParseConfig::parseListen(line);
-    }
+    return httpContext;
 }
 
 std::string ParseConfig::parseRoot(std::string &line)
@@ -90,6 +122,23 @@ int ParseConfig::parseListen(std::string &line)
     if (listen <= 0 || listen > 65535 || pEnd[0] != '\0')
         throw(ParseConfig::ParseConfigException("Error Bad Listen!"));
     return listen;
+}
+
+std::vector<std::string> ParseConfig::loadConfigFile(std::string configPath)
+{
+    std::ifstream file(configPath);
+    std::string line;
+    std::vector<std::string> configVector;
+
+    if (file.is_open() == false)
+        throw(ParseConfig::FileException());
+    while (std::getline(file, line))
+    {
+        line = lib::trim(line);
+        if (line.size() != 0)
+            configVector.push_back(line);
+    }
+    return configVector;
 }
 
 bool ParseConfig::parseAutoIndex(std::string &line)

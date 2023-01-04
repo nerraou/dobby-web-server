@@ -12,6 +12,7 @@ private:
     bool _autoIndex;
     std::vector<std::string> _allowedHttpMethods;
     std::string _rewrite;
+    std::string _path;
 
 public:
     ConfigLocation();
@@ -27,5 +28,6 @@ public:
     void addAllowedHttpMethods(const std::string &method);
     const std::string &getRewrite() const;
     void setRewrite(const std::string &rewrite);
+    bool isGood();
     ~ConfigLocation();
 };

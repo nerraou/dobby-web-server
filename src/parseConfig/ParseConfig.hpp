@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cstdlib>
 #include "lib.hpp"
+#include "ConfigHttp.hpp"
 
 class ParseConfig
 {
@@ -19,8 +20,14 @@ private:
     static std::vector<std::string> parseAcceptedHttpMethods(std::string &line);
     static std::string parseRewrite(std::string &line);
     static int parseListen(std::string &line);
+    static void parseHttpContext(std::string &line, ConfigHttp &httpContext);
+    static void parseLocationContext(std::string &line, ConfigLocation &locationContext);
+    static void parseServerContext(std::string &line, ConfigServer &serverContext);
+    static void setContext(std::string &line, std::string &context);
+    
 
 public:
+    static std::vector<std::string> loadConfigFile(std::string configPath);
     ParseConfig();
     class FileException : public std::exception
     {
@@ -39,6 +46,6 @@ public:
         virtual const char *what() const throw();
         virtual ~ParseConfigException() throw();
     };
-    static void parse(std::string configPath);
+    static ConfigHttp parse(std::string configPath);
     ~ParseConfig();
 };

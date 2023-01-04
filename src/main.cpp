@@ -7,10 +7,14 @@
 
 int main(int ac, char *av[])
 {
+    // ConfigHttp http;
+    std::vector<std::string> config;
     try
     {
         if (ac > 1)
-            ParseConfig::parse(av[1]);
+            config = ParseConfig::loadConfigFile(av[1]);
+        for (size_t i = 0; i < config.size(); i++)
+            std::cout << config.at(i) << '\n';
     }
     catch (const std::exception &e)
     {

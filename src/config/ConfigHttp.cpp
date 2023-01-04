@@ -61,6 +61,16 @@ ConfigServer &ConfigHttp::getServerConfig(size_t index)
     return this->_serversContext[index];
 }
 
+bool ConfigHttp::isGood()
+{
+    std::string root;
+
+    root = this->getRoot();
+    if (root.size() == 0 && this->_serversContext.size() == 0)
+        return false;
+    return true;
+}
+
 ConfigHttp::~ConfigHttp()
 {
 }

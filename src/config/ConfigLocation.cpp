@@ -68,6 +68,13 @@ void ConfigLocation::setRewrite(const std::string &rewrite)
     this->_rewrite = rewrite;
 }
 
+bool ConfigLocation::isGood()
+{
+    if (this->_path.size() == 0)
+        return false;
+    return true;
+}
+
 ConfigLocation::~ConfigLocation()
 {
 }

@@ -48,6 +48,13 @@ void ConfigServer::addIndex(const std::string &index)
     this->_indexes.push_back(index);
 }
 
+bool ConfigServer::isGood()
+{
+    if (this->_port == 0)
+        return false;
+    return true;
+}
+
 ConfigServer::~ConfigServer()
 {
 }
