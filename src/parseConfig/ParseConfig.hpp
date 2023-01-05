@@ -26,7 +26,7 @@ private:
     static void setContext(std::string &line, std::string &context);
     
 
-public:
+public: 
     static std::vector<std::string> loadConfigFile(std::string configPath);
     ParseConfig();
     class FileException : public std::exception

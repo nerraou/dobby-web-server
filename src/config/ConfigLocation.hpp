@@ -28,6 +28,6 @@ public:
     void addAllowedHttpMethods(const std::string &method);
     const std::string &getRewrite() const;
     void setRewrite(const std::string &rewrite);
-    bool isGood();
+    bool isGood() const;
     ~ConfigLocation();
 };

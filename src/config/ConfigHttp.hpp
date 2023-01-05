@@ -33,7 +33,7 @@ public:
     void setAutoIndex(bool);
     size_t getServersCount(void) const;
     ConfigServer &getServerConfig(size_t index);
-    bool isGood();
+    bool isGood() const;
 
     ~ConfigHttp();
 };

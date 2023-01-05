@@ -68,9 +68,9 @@ void ConfigLocation::setRewrite(const std::string &rewrite)
     this->_rewrite = rewrite;
 }
 
-bool ConfigLocation::isGood()
+bool ConfigLocation::isGood() const
 {
-    if (this->_path.size() == 0)
+    if (this->_path.empty())
         return false;
     return true;
 }

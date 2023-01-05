@@ -47,10 +47,25 @@ ConfigHttp ParseConfig::parse(std::string configPath)
         ParseConfig::setContext(configVector[i], context);
         if (context == "http")
             ParseConfig::parseHttpContext(configVector[i], httpContext);
+        
         else if (context == "server")
+        {
             ParseConfig::parseServerContext(configVector[i], serverContext);
-        else
+            if (configVector[i] == "}")
+            {
+                //call isGood server and add the server to http context
+                //change context to the parent ; context = http
+            }
+        }
+        else if (context == "location")
+        {
             ParseConfig::parseLocationContext(configVector[i], locationContext);
+             if (configVector[i] == "}")
+            {
+                //call isGood location and add the location to server context
+                //change context to the parent ; context = server
+            }
+        }
     }
     return httpContext;
 }
