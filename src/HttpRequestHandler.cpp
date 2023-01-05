@@ -190,7 +190,7 @@ HttpRequestHandler::~HttpRequestHandler()
 
 int HttpRequestHandler::AHttpRequestException::getHttpStatus(void) const throw()
 {
-    return this->getHttpStatus();
+    return this->_httpStatus;
 }
 
 const char *HttpRequestHandler::AHttpRequestException::what() const throw()

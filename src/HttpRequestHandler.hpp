@@ -40,7 +40,6 @@ private:
     std::string _buffer;
     std::size_t _contentLength;
     int _status;
-    int _requestTimeout;
 
     void parseRequestLine(const std::string &line);
 

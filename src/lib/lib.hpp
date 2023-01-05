@@ -8,5 +8,4 @@ namespace lib
     std::vector<std::string> split(const std::string &str, const std::string &set = " \t");
     void transform(std::string::iterator begin, std::string::iterator end, int (*transformer)(int c));
     std::string toString(int n);
-    std::vector<std::string> split(const std::string &str, const std::string &set = " \t");
 }
