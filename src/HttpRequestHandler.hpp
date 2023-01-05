@@ -8,6 +8,7 @@
 #include <cctype>
 #include <cstdlib>
 
+#include "Url.hpp"
 #include "lib.hpp"
 
 #define CRLF "\r\n"
@@ -32,7 +33,8 @@ private:
     int _connectionRef;
     std::map<std::string, std::string> _headers;
     std::string _method;
-    std::string _requestTarget;
+    Url _requestTarget;
+    std::map<std::string, std::string> _queryParams;
     std::string _httpVersion;
     std::string _body;
     std::string _buffer;
@@ -60,17 +62,6 @@ public:
     bool isRequestReady(void) const;
 
     void read(void);
-
-    void printHeaders(void)
-    {
-        std::map<std::string, std::string>::iterator begin = this->_headers.begin();
-
-        while (begin != this->_headers.end())
-        {
-            std::cout << begin->first << ": " << begin->second << std::endl;
-            begin++;
-        }
-    }
 
     ~HttpRequestHandler();
 

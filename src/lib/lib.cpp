@@ -8,7 +8,7 @@ namespace lib
         size_t end;
         std::string trimmed;
 
-        if (set.length() == 0)
+        if (set.empty())
             return (str);
 
         start = str.find_first_not_of(set);

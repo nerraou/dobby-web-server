@@ -73,7 +73,7 @@ void Server::start(std::vector<PollFd> &connections)
                 connection->fd = -1;
             }
         }
-        catch (const HttpRequestHandler::HttpBadRequestException &e)
+        catch (const std::exception &e)
         {
             std::string body = "HTTP/1.1 400 Bad Request\r\n"
                                "Server: Dobby/0.0.0 (MacOS)\r\n"

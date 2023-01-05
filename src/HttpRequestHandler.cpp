@@ -33,7 +33,7 @@ bool HttpRequestHandler::isHeaderFieldName(const std::string &name)
 {
     const char *set = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
 
-    if (name.length() == 0)
+    if (name.empty())
         return (false);
     return name.find_first_not_of(set) == name.npos;
 }
@@ -85,7 +85,7 @@ void HttpRequestHandler::setMethod(const std::string &method)
 
 void HttpRequestHandler::setRequestTarget(const std::string &requestTarget)
 {
-    this->_requestTarget = requestTarget;
+    this->_requestTarget = Url::parse(requestTarget);
 }
 
 void HttpRequestHandler::setHttpVersion(const std::string &httpVersion)
