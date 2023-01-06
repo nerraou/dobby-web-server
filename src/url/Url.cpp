@@ -36,7 +36,7 @@ void Url::parseScheme(std::string &urlString)
     if (scheme.compare("http") != 0 && scheme.compare("https") != 0)
         throw ParseUrlException("bad url scheme");
 
-    this->scheme.append(scheme);
+    this->scheme.assign(scheme);
     urlString.erase(0, cutPos + 3);
 }
 
@@ -63,7 +63,7 @@ void Url::parsePort(std::string &urlString)
         if (port.empty() || port.find_first_not_of("0123456789") != std::string::npos)
             throw ParseUrlException("bad port");
 
-        this->port = port;
+        this->port.assign(port);
         urlString.erase(cutPos);
     }
 }
@@ -76,7 +76,7 @@ void Url::parseHost(std::string &urlString)
     if (urlString.find_first_not_of("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-.") != std::string::npos)
         throw ParseUrlException("bad hostname");
 
-    this->host = urlString;
+    this->host.assign(urlString);
 }
 
 Url Url::parse(const std::string &urlString)
@@ -95,6 +95,8 @@ Url Url::parse(const std::string &urlString)
     url.parsePort(urlStringCopy);
 
     url.parseHost(urlStringCopy);
+
+    url.origin.assign(urlString);
 
     return url;
 }

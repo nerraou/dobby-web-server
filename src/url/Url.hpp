@@ -19,6 +19,7 @@ private:
     void parseHost(std::string &urlString);
 
 public:
+    std::string origin;
     std::string scheme;
     std::string host;
     std::string path;

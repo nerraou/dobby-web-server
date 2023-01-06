@@ -46,11 +46,7 @@ void Server::start(std::vector<PollFd> &connections)
                 continue;
             HttpRequestHandler &requestHandler = this->_requests.at(connection->fd);
 
-            if (connection->revents & POLLIN)
-            {
-                requestHandler.read();
-            }
-            else if (connection->revents & POLLOUT && requestHandler.isRequestReady())
+            if (connection->revents & POLLOUT && requestHandler.isRequestReady())
             {
                 struct stat fileStat;
                 (void)::stat(filename.c_str(), &fileStat);
@@ -72,6 +68,8 @@ void Server::start(std::vector<PollFd> &connections)
                 this->_requests.erase(connection->fd);
                 connection->fd = -1;
             }
+            else if (connection->revents & POLLIN)
+                requestHandler.read();
         }
         catch (const std::exception &e)
         {

@@ -121,6 +121,9 @@ void HttpRequestHandler::read(void)
     bool hasCRLF;
     std::size_t crlfPosition;
 
+    if (this->_status == REQUEST_READY_STATUS)
+        return;
+
     readedBytes = ::recv(this->_connectionRef, buffer, 511, 0);
     if (readedBytes <= 0)
         return;
@@ -149,7 +152,8 @@ void HttpRequestHandler::read(void)
         else if (crlfPosition == 0)
         {
             this->_status = READING_BODY_STATUS;
-            this->_body.append(this->_buffer.substr(CRLF_LEN));
+            if (this->_method.compare(HTTP_GET) != 0)
+                this->_body.append(this->_buffer.substr(CRLF_LEN));
             this->_buffer.clear();
             break;
         }
@@ -164,7 +168,7 @@ void HttpRequestHandler::read(void)
 
     // handle HEAD method the same as GET read RFC
     // https://www.rfc-editor.org/rfc/rfc7231#section-4
-    if (this->_status == READING_BODY_STATUS && this->_method.compare("GET") == 0)
+    if (this->_status == READING_BODY_STATUS && this->_method.compare(HTTP_GET) == 0)
     {
         this->_status = REQUEST_READY_STATUS;
         return;
