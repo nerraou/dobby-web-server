@@ -1,5 +1,4 @@
 #include "Server.hpp"
-#include <iostream>
 
 Server::Server(const ConfigServer &config)
 {
@@ -19,7 +18,10 @@ int Server::acceptConnection(void)
     this->_socket.listen(100);
     acceptedConnection = this->_socket.accept();
     if (acceptedConnection != -1)
+    {
         this->_connections.insert(acceptedConnection);
+        this->_requests.insert(std::make_pair(acceptedConnection, HttpRequestHandler(acceptedConnection)));
+    }
     return (acceptedConnection);
 }
 
@@ -27,40 +29,61 @@ void Server::start(std::vector<PollFd> &connections)
 {
     PollFd *connection;
     bool hasConnection;
-    ssize_t readedBytes;
-
-    char buffer[4096];
-    std::stringstream response;
-    std::stringstream responseBody;
-
-    response << "HTTP/1.1 200 OK\n"
-                "Server: Dobby/0.0.0 (MacOS)\n"
-                "Content-Length: ";
-    responseBody << "<html><body><h1>Hello, World! from: ";
+    std::ifstream file;
+    char readBuffer[32];
+    const std::string filename("default.html");
+    std::string headers = "HTTP/1.1 200 OK\r\n"
+                          "Server: Dobby/0.0.0 (MacOS)\r\n"
+                          "Content-Length: ";
 
     for (size_t i = 0; i < connections.size(); i++)
     {
-        connection = &connections.at(i);
-        hasConnection = this->_connections.find(connection->fd) != this->_connections.end();
-        if (!hasConnection)
-            continue;
-        if (connection->revents & POLLIN)
+        try
         {
-            readedBytes = ::recv(connection->fd, buffer, 4096, 0);
-            if (readedBytes > 0)
-                ::write(1, buffer, readedBytes);
-        }
-        else if (connection->revents & POLLOUT)
-        {
-            responseBody << this->_config.getPort() << "</h1></body></html>";
-            std::string str = responseBody.str();
-            response << str.length() << "\n\n"
-                     << str;
+            connection = &connections.at(i);
+            hasConnection = this->_connections.find(connection->fd) != this->_connections.end();
+            if (!hasConnection)
+                continue;
+            HttpRequestHandler &requestHandler = this->_requests.at(connection->fd);
 
-            std::string body = response.str();
+            if (connection->revents & POLLOUT && requestHandler.isRequestReady())
+            {
+                struct stat fileStat;
+                (void)::stat(filename.c_str(), &fileStat);
+                headers.append(lib::toString(fileStat.st_size));
+                headers.append("\r\n\r\n");
+                (void)::send(connection->fd, headers.c_str(), headers.length(), 0);
+
+                file.open(filename.c_str());
+                while (true)
+                {
+                    std::istream &i = file.read(readBuffer, 32);
+                    if (i.gcount() == 0)
+                        break;
+                    (void)::send(connection->fd, readBuffer, i.gcount(), 0);
+                }
+
+                ::close(connection->fd);
+                this->_connections.erase(connection->fd);
+                this->_requests.erase(connection->fd);
+                connection->fd = -1;
+            }
+            else if (connection->revents & POLLIN)
+                requestHandler.read();
+        }
+        catch (const std::exception &e)
+        {
+            std::string body = "HTTP/1.1 400 Bad Request\r\n"
+                               "Server: Dobby/0.0.0 (MacOS)\r\n"
+                               "Content-Length: 11\r\n"
+                               "\r\n"
+                               "Bad Request";
+
             (void)::send(connection->fd, body.c_str(), body.length(), 0);
+
             ::close(connection->fd);
             this->_connections.erase(connection->fd);
+            this->_requests.erase(connection->fd);
             connection->fd = -1;
         }
     }
