@@ -21,13 +21,14 @@ public:
     int getPort() const;
     void setPort(int port);
     const std::string &getServerName(size_t index);
-    void addServerName(const std::string &serverName);
+    void addServerNames(std::vector<std::string> serverNames);
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
     const std::string &getIndex(size_t index) const;
-    void addIndex(const std::string &index);
+    void addIndex(std::vector<std::string> index);
     int getStatusCode() const;
     void setStatusCode(int status);
+    void setErrorPage(std::vector<std::string> errorPage);
     const std::string &getErrorPagePath() const;
     void addErrorPagePath(const std::string &path);
     bool isGood() const;

@@ -22,11 +22,12 @@ public:
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
     const std::string &getIndex(size_t index) const;
-    void addIndex(const std::string &index);
+    void addIndex(std::vector<std::string> index);
     const size_t &getClientMaxBodySize() const;
     void setClientMaxBodySize(size_t size);
     const int &getStatusCode() const;
     void setStatusCode(int status);
+    void setErrorPage(std::vector<std::string> errorPage);
     const std::string &getErrorPagePath() const;
     void addErrorPagePath(const std::string &path);
     bool getAutoIndex() const;

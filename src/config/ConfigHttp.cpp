@@ -26,9 +26,9 @@ const std::string &ConfigHttp::getIndex(size_t indexOfIndex) const
     return this->_indexes[indexOfIndex];
 }
 
-void ConfigHttp::addIndex(const std::string &index)
+void ConfigHttp::addIndex(std::vector<std::string> index)
 {
-    this->_indexes.push_back(index);
+    this->_indexes = index;
 }
 
 const size_t &ConfigHttp::getClientMaxBodySize() const
@@ -39,6 +39,19 @@ const size_t &ConfigHttp::getClientMaxBodySize() const
 void ConfigHttp::setClientMaxBodySize(size_t size)
 {
     this->_clientMaxBodySize = size;
+}
+
+void ConfigHttp::setErrorPage(std::vector<std::string> errorPage)
+{
+    ErrorPage preparedErrorPage;
+    size_t i;
+
+    for (i = 0; i < errorPage.size() - 1; i++)
+    {
+        preparedErrorPage.statusCodes.push_back(std::atoi(errorPage[i].c_str()));
+    }
+    preparedErrorPage.path = errorPage[i];
+    this->_errorPages.push_back(preparedErrorPage);
 }
 
 bool ConfigHttp::getAutoIndex() const

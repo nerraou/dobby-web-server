@@ -7,16 +7,97 @@ ParseConfig::ParseConfig()
 ParseConfig::~ParseConfig()
 {
 }
-void ParseConfig::parseHttpContext(std::string &line, ConfigHttp &httpContext)
+
+void ParseConfig::parseHttpContext(const std::string &line, ConfigHttp &httpContext)
 {
+    size_t index;
+    index = 0;
+
+    index = line.find_first_of(" \t");
+    if (line.find("root ") == 0)
+    {
+        httpContext.setRoot(ParseConfig::parseRoot(line.substr(index)));
+    }
+    else if (line.find("client_max_body_size ") == 0)
+    {
+        httpContext.setClientMaxBodySize(ParseConfig::parseClientMaxBodySize(line.substr(index)));
+    }
+    else if (line.find("autoindex ") == 0)
+    {
+        httpContext.setAutoIndex(ParseConfig::parseAutoIndex(line.substr(index)));
+    }
+    else if (line.find("error_page ") == 0)
+    {
+        httpContext.setErrorPage(ParseConfig::parseErrorPage(line.substr(index)));
+    }
+    else if (line.find("index ") == 0)
+    {
+        httpContext.addIndex(ParseConfig::parseIndex(line.substr(index)));
+    }
 }
 
-void ParseConfig::parseLocationContext(std::string &line, ConfigLocation &locationContext)
+void ParseConfig::parseServerContext(const std::string &line, ConfigServer &serverContext)
 {
+    size_t index;
+    index = 0;
+
+    index = line.find_first_of(" \t");
+    if (line.find("listen ") == 0)
+    {
+        serverContext.setPort(ParseConfig::parseListen(line.substr(index)));
+    }
+    else if (line.find("server_name ") == 0)
+    {
+        serverContext.addServerNames(ParseConfig::parseServerName(line.substr(index)));
+    }
+    else if (line.find("root ") == 0)
+    {
+        serverContext.setRoot(ParseConfig::parseRoot(line.substr(index)));
+    }
+    else if (line.find("error_page ") == 0)
+    {
+        serverContext.setErrorPage(ParseConfig::parseErrorPage(line.substr(index)));
+    }
+    else if (line.find("index ") == 0)
+    {
+        serverContext.addIndex(ParseConfig::parseIndex(line.substr(index)));
+    }
 }
 
-void ParseConfig::parseServerContext(std::string &line, ConfigServer &serverContext)
+void ParseConfig::parseLocationContext(const std::string &line, ConfigLocation &locationContext)
 {
+    size_t index;
+
+    index = 0;
+    index = line.find_first_of(" \t");
+    if (line.find("path ") == 0)
+    {
+        locationContext.setPath(ParseConfig::parsePath(line.substr(index)));
+    }
+    else if (line.find("accepted_http_methods ") == 0)
+    {
+        locationContext.addAllowedHttpMethods(ParseConfig::parseAcceptedHttpMethods(line.substr(index)));
+    }
+    else if (line.find("rewrite ") == 0)
+    {
+        locationContext.setRewrite(ParseConfig::parseRewrite(line.substr(index)));
+    }
+    else if (line.find("root ") == 0)
+    {
+        locationContext.setRoot(ParseConfig::parseRoot(line.substr(index)));
+    }
+    else if (line.find("client_max_body_size ") == 0)
+    {
+        locationContext.setClientMaxBodySize(ParseConfig::parseClientMaxBodySize(line.substr(index)));
+    }
+    else if (line.find("autoindex ") == 0)
+    {
+        locationContext.setAutoIndex(ParseConfig::parseAutoIndex(line.substr(index)));
+    }
+    else if (line.find("index ") == 0)
+    {
+        locationContext.addIndex(ParseConfig::parseIndex(line.substr(index)));
+    }
 }
 
 void ParseConfig::setContext(std::string &line, std::string &context)
@@ -31,7 +112,7 @@ void ParseConfig::setContext(std::string &line, std::string &context)
 
 ConfigHttp ParseConfig::parse(std::string configPath)
 {
-    std::ifstream file(configPath, std::ifstream::in);
+    std::ifstream file(configPath.c_str(), std::ifstream::in);
     std::string line;
     std::vector<std::string> configVector;
     size_t i;
@@ -47,30 +128,30 @@ ConfigHttp ParseConfig::parse(std::string configPath)
         ParseConfig::setContext(configVector[i], context);
         if (context == "http")
             ParseConfig::parseHttpContext(configVector[i], httpContext);
-        
+
         else if (context == "server")
         {
             ParseConfig::parseServerContext(configVector[i], serverContext);
             if (configVector[i] == "}")
             {
-                //call isGood server and add the server to http context
-                //change context to the parent ; context = http
+                // call isGood server and add the server to http context
+                // change context to the parent ; context = http
             }
         }
         else if (context == "location")
         {
             ParseConfig::parseLocationContext(configVector[i], locationContext);
-             if (configVector[i] == "}")
+            if (configVector[i] == "}")
             {
-                //call isGood location and add the location to server context
-                //change context to the parent ; context = server
+                // call isGood location and add the location to server context
+                // change context to the parent ; context = server
             }
         }
     }
     return httpContext;
 }
 
-std::string ParseConfig::parseRoot(std::string &line)
+std::string ParseConfig::parseRoot(const std::string &line)
 {
     std::string root;
 
@@ -106,16 +187,17 @@ size_t ParseConfig::checkConvertUnit(int size, const char *str)
     return (0);
 }
 
-size_t ParseConfig::parseClientMaxBodySize(std::string &line)
+size_t ParseConfig::parseClientMaxBodySize(const std::string &line)
 {
     size_t size;
     int num;
     char *pEnd;
+    std::string trimLine;
 
-    line = lib::trim(line);
-    if (line.length() == 0)
+    trimLine = lib::trim(line);
+    if (trimLine.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
-    num = (int)std::strtol(line.c_str(), &pEnd, 10);
+    num = (int)std::strtol(trimLine.c_str(), &pEnd, 10);
     if (num <= 0)
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
     size = ParseConfig::checkConvertUnit(num, pEnd);
@@ -124,16 +206,16 @@ size_t ParseConfig::parseClientMaxBodySize(std::string &line)
     return size;
 }
 
-int ParseConfig::parseListen(std::string &line)
+int ParseConfig::parseListen(const std::string &line)
 {
     int listen;
-
     char *pEnd;
 
-    line = lib::trim(line);
-    if (line.length() == 0)
+    std::string trimLine;
+    trimLine = lib::trim(line);
+    if (trimLine.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad Listen!"));
-    listen = (int)std::strtol(line.c_str(), &pEnd, 10);
+    listen = (int)std::strtol(trimLine.c_str(), &pEnd, 10);
     if (listen <= 0 || listen > 65535 || pEnd[0] != '\0')
         throw(ParseConfig::ParseConfigException("Error Bad Listen!"));
     return listen;
@@ -141,7 +223,7 @@ int ParseConfig::parseListen(std::string &line)
 
 std::vector<std::string> ParseConfig::loadConfigFile(std::string configPath)
 {
-    std::ifstream file(configPath);
+    std::ifstream file(configPath.c_str());
     std::string line;
     std::vector<std::string> configVector;
 
@@ -156,56 +238,78 @@ std::vector<std::string> ParseConfig::loadConfigFile(std::string configPath)
     return configVector;
 }
 
-bool ParseConfig::parseAutoIndex(std::string &line)
+bool ParseConfig::parseAutoIndex(const std::string &line)
 {
-    line = lib::trim(line);
+    std::string trimLine;
 
-    if (std::strcmp(line.c_str(), "on") == 0)
+    trimLine = lib::trim(line);
+
+    if (std::strcmp(trimLine.c_str(), "on") == 0)
         return (true);
-    else if (std::strcmp(line.c_str(), "off") == 0)
+    else if (std::strcmp(trimLine.c_str(), "off") == 0)
         return false;
     else
         throw(ParseConfig::ParseConfigException("Error Bad AutoIndex"));
 }
 
-std::vector<std::string> ParseConfig::parseIndex(std::string &line)
+std::vector<std::string> ParseConfig::parseIndex(const std::string &line)
 {
-    line = lib::trim(line);
-    if (line.length() == 0)
+    std::string trimLine;
+
+    trimLine = lib::trim(line);
+    if (trimLine.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad Index"));
-    return lib::split(line);
+    return lib::split(trimLine);
 }
 
-std::vector<std::string> ParseConfig::parseErrorPage(std::string &line)
+std::vector<std::string> ParseConfig::parseErrorPage(const std::string &line)
 {
-    line = lib::trim(line);
-    if (line.length() == 0)
+    std::string trimLine;
+
+    trimLine = lib::trim(line);
+    if (trimLine.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad Error page"));
-    return lib::split(line);
+    return lib::split(trimLine);
 }
 
-std::vector<std::string> ParseConfig::parseServerName(std::string &line)
+std::vector<std::string> ParseConfig::parseServerName(const std::string &line)
 {
-    line = lib::trim(line);
-    if (line.length() == 0)
+    std::string trimLine;
+
+    trimLine = lib::trim(line);
+    if (trimLine.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad Server name"));
-    return lib::split(line);
+    return lib::split(trimLine);
 }
 
-std::vector<std::string> ParseConfig::parseAcceptedHttpMethods(std::string &line)
+std::vector<std::string> ParseConfig::parseAcceptedHttpMethods(const std::string &line)
 {
-    line = lib::trim(line);
-    if (line.length() == 0)
+    std::string trimLine;
+
+    trimLine = lib::trim(line);
+    if (trimLine.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad Http methods"));
-    return lib::split(line);
+    return lib::split(trimLine);
 }
 
-std::string ParseConfig::parseRewrite(std::string &line)
+std::string ParseConfig::parseRewrite(const std::string &line)
 {
-    line = lib::trim(line);
-    if (line.length() == 0)
+    std::string trimLine;
+
+    trimLine = lib::trim(line);
+    if (trimLine.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad Rewrite"));
-    return line;
+    return trimLine;
+}
+
+std::string ParseConfig::parsePath(const std::string &line)
+{
+    std::string trimLine;
+
+    trimLine = lib::trim(line);
+    if (trimLine.length() == 0)
+        throw(ParseConfig::ParseConfigException("Error Bad Path"));
+    return trimLine;
 }
 
 ParseConfig::ParseConfigException::ParseConfigException(const std::string &message)

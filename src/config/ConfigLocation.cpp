@@ -21,9 +21,9 @@ const std::string &ConfigLocation::getIndex(size_t index) const
     return this->_indexes[index];
 }
 
-void ConfigLocation::addIndex(const std::string &index)
+void ConfigLocation::addIndex(std::vector<std::string> index)
 {
-    this->_indexes.push_back(index);
+    this->_indexes = index;
 }
 
 const size_t &ConfigLocation::getClientMaxBodySize() const
@@ -53,9 +53,9 @@ const std::string &ConfigLocation::getAllowedHttpMethods(int index)
     return this->_allowedHttpMethods[index];
 }
 
-void ConfigLocation::addAllowedHttpMethods(const std::string &method)
+void ConfigLocation::addAllowedHttpMethods(std::vector<std::string> method)
 {
-    this->_allowedHttpMethods.push_back(method);
+    this->_allowedHttpMethods = method;
 }
 
 const std::string &ConfigLocation::getRewrite() const
@@ -66,6 +66,11 @@ const std::string &ConfigLocation::getRewrite() const
 void ConfigLocation::setRewrite(const std::string &rewrite)
 {
     this->_rewrite = rewrite;
+}
+
+void ConfigLocation::setPath(const std::string &path)
+{
+    this->_path = path;
 }
 
 bool ConfigLocation::isGood() const

@@ -21,9 +21,22 @@ const std::string &ConfigServer::getServerName(size_t index)
     return this->_serverNames[index];
 }
 
-void ConfigServer::addServerName(const std::string &serverName)
+void ConfigServer::setErrorPage(std::vector<std::string> errorPage)
 {
-    this->_serverNames.push_back(serverName);
+    ErrorPage preparedErrorPage;
+    size_t i;
+
+    for (i = 0; i < errorPage.size() - 1; i++)
+    {
+        preparedErrorPage.statusCodes.push_back(std::atoi(errorPage[i].c_str()));
+    }
+    preparedErrorPage.path = errorPage[i];
+    this->_errorPages.push_back(preparedErrorPage);
+}
+
+void ConfigServer::addServerNames(std::vector<std::string> serverNames)
+{
+    this->_serverNames = serverNames;
 }
 
 const std::string &ConfigServer::getRoot() const
@@ -43,9 +56,9 @@ const std::string &ConfigServer::getIndex(size_t indexOfIndex) const
     return this->_indexes[indexOfIndex];
 }
 
-void ConfigServer::addIndex(const std::string &index)
+void ConfigServer::addIndex(std::vector<std::string> index)
 {
-    this->_indexes.push_back(index);
+    this->_indexes = index;
 }
 
 bool ConfigServer::isGood() const

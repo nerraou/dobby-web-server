@@ -2,7 +2,7 @@ NAME=dobby
 CC_FLAGS = -Wall -Wextra -Werror -std=c++98
 CC = c++
 
-INCLUDE_ARGS= -I src/lib -I src/ParseConfig/ -I src/config/ -I src/
+INCLUDE_ARGS= -I src/lib -I src/parseConfig/ -I src/config/ -I src/
 
 OBJECT_FILES=$(SOURCE_FILES:.cpp=.o)
 SOURCE_FILES=\
