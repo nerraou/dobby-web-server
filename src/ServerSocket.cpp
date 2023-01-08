@@ -55,8 +55,24 @@ int ServerSocket::accept(void)
     int acceptedSocketRef;
 
     acceptedSocketRef = ::accept(this->_socketRef, (struct sockaddr *)&this->_address, &addressSize);
+    if (acceptedSocketRef != -1)
+        this->setRemoteAddress();
 
     return (acceptedSocketRef);
+}
+
+const std::string &ServerSocket::getRemoteAddress(void) const
+{
+    return this->_remoteAddress;
+}
+
+void ServerSocket::setRemoteAddress(void)
+{
+    char str[INET_ADDRSTRLEN];
+
+    (void)::inet_ntop(AF_INET, &this->_address.sin_addr, str, INET_ADDRSTRLEN);
+
+    this->_remoteAddress.assign(str);
 }
 
 /**

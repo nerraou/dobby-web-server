@@ -2,14 +2,10 @@
 
 Http::Http(const ConfigHttp &config)
 {
-    this->_config = config;
-}
-
-void Http::start(void)
-{
     Server *virtualServer;
     ConfigServer configServer;
-    PollFd connection;
+
+    this->_config = config;
 
     for (size_t i = 0; i < this->_config.getServersCount(); i++)
     {
@@ -17,13 +13,37 @@ void Http::start(void)
         virtualServer = new Server(configServer);
         this->_virtualServers.push_back(virtualServer);
     }
+}
 
-    std::cout << "servers count: " << this->_config.getServersCount() << std::endl;
+inline bool Http::comparePollFdByFd(const PollFd &a, const PollFd &b)
+{
+    return a.fd > b.fd;
+}
+
+inline bool Http::isBadPollFd(const PollFd &a)
+{
+    return a.fd == -1;
+}
+
+inline void Http::removeBadConnections(void)
+{
+    std::vector<PollFd>::iterator last;
+
+    std::sort(this->_connections.begin(), this->_connections.end(), Http::comparePollFdByFd);
+    last = std::find_if(this->_connections.begin(), this->_connections.end(), Http::isBadPollFd);
+
+    if (last != this->_connections.end())
+        this->_connections.erase(last);
+}
+
+void Http::start(void)
+{
     while (true)
     {
-        // accept new connections
         for (size_t i = 0; i < this->_config.getServersCount(); i++)
         {
+            PollFd connection;
+
             connection.fd = this->_virtualServers.at(i)->acceptConnection();
             if (connection.fd != -1)
             {
@@ -31,21 +51,17 @@ void Http::start(void)
                 this->_connections.push_back(connection);
             }
         }
+
         if (this->_connections.size() == 0)
             continue;
-        // run poll
+
         int readyCount = ::poll(&this->_connections[0], this->_connections.size(), 10);
         (void)readyCount;
 
-        // run start method for each virtual server to handle requests/responses
+        this->removeBadConnections();
+
         for (size_t i = 0; i < this->_virtualServers.size(); i++)
-        {
-            // each start method must
-            //   - read request data
-            //   - write response data
-            // connections maybe an array of PollFd struct or someting that serve the same purpose!
             this->_virtualServers[i]->start(this->_connections);
-        }
     }
 }
 

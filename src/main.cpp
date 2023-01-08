@@ -12,7 +12,6 @@ int main(void)
 
     try
     {
-        std::cout << "Welcome to Dobby web server" << std::endl;
         serverContext1.setPort(8081);
         serverContext2.setPort(8082);
         httpContext.addServerContext(serverContext1);
@@ -20,6 +19,9 @@ int main(void)
 
         // attach http config to http instance
         Http http(httpContext);
+
+        std::cout << "Welcome to Dobby web server" << std::endl;
+        std::cout << "servers count: " << httpContext.getServersCount() << std::endl;
 
         // start event loop
         http.start();

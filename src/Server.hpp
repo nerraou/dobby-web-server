@@ -21,6 +21,8 @@ private:
     std::map<int, HttpRequestHandler> _requests;
     ConfigServer _config;
 
+    void logAccess(const HttpRequestHandler &request, int httpStatus, off_t contentLength) const;
+
 public:
     Server(const ConfigServer &config);
     ~Server();
