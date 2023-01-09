@@ -7,24 +7,25 @@
 
 int main(int ac, char *av[])
 {
-    ConfigHttp http;
-    std::vector<std::string> config;
+    ConfigHttp httpConfig;
+
     try
     {
-        if (ac > 1)
-            http = ParseConfig::parse(av[1]);
-        if (http.isGood() == true)
+        if (ac != 2)
         {
-            std::cout << "http is good \n";
-            http.display(true);
-        }
-        else 
-        {
-            std::cout << "http is not good \n";
-            http.display(true);
-
+            std::cerr << "usage: ./dobby config_file_path" << std::endl;
+            return 1;
         }
 
+        httpConfig = ParseConfig::parse(av[1]);
+
+        if (httpConfig.isGood() == true)
+        {
+            Http http(httpConfig);
+            http.start();
+        }
+        else
+            std::cerr << "check config file" << std::endl;
     }
     catch (const std::exception &e)
     {
