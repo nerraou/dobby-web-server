@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 #include "ErrorPage.hpp"
 #include "ConfigServer.hpp"

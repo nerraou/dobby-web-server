@@ -86,6 +86,11 @@
     "thread": "cpp",
     "typeindex": "cpp",
     "unordered_set": "cpp",
-    "valarray": "cpp"
+    "valarray": "cpp",
+    "*.tcc": "cpp",
+    "compare": "cpp",
+    "concepts": "cpp",
+    "memory_resource": "cpp",
+    "numbers": "cpp"
   }
 }

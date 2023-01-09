@@ -58,6 +58,10 @@ void ParseConfig::parseServerContext(const std::string &line, ConfigServer &serv
     {
         serverContext.setErrorPage(ParseConfig::parseErrorPage(line.substr(index)));
     }
+    else if (line.find("autoindex ") == 0)
+    {
+        serverContext.setAutoIndex(ParseConfig::parseAutoIndex(line.substr(index)));
+    }
     else if (line.find("index ") == 0)
     {
         serverContext.addIndex(ParseConfig::parseIndex(line.substr(index)));
@@ -112,8 +116,7 @@ void ParseConfig::setContext(std::string &line, std::string &context)
 
 ConfigHttp ParseConfig::parse(std::string configPath)
 {
-    std::ifstream file(configPath.c_str(), std::ifstream::in);
-    std::string line;
+
     std::vector<std::string> configVector;
     size_t i;
     ConfigHttp httpContext;
@@ -134,8 +137,18 @@ ConfigHttp ParseConfig::parse(std::string configPath)
             ParseConfig::parseServerContext(configVector[i], serverContext);
             if (configVector[i] == "}")
             {
-                // call isGood server and add the server to http context
-                // change context to the parent ; context = http
+                if (serverContext.isGood() == true)
+                {
+                    std::cout << "server is  good \n";
+
+                    context = "http";
+                    httpContext.addServerContext(serverContext);
+
+                    // change context to the parent ; context = http
+                }
+                else
+                    std::cout << "server is not good \n";
+                // ese throw an exception
             }
         }
         else if (context == "location")
@@ -143,11 +156,25 @@ ConfigHttp ParseConfig::parse(std::string configPath)
             ParseConfig::parseLocationContext(configVector[i], locationContext);
             if (configVector[i] == "}")
             {
-                // call isGood location and add the location to server context
-                // change context to the parent ; context = server
+                if (locationContext.isGood() == true)
+                {
+                    std::cout << "location is  good \n";
+                    context = "server";
+                    serverContext.addLocationContext(locationContext);
+                    // call isGood location and add the location to server context
+                    // change context to the parent ; context = server
+                }
+                // ELSE throw an excepation
+                else
+                    std::cout << "location is not good \n";
             }
         }
+        i++;
     }
+    // check if http is good then return it else throw exception
+    //  if(httpContext.isGood() == false)
+    // throw exception
+
     return httpContext;
 }
 

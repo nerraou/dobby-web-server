@@ -13,7 +13,15 @@ void ConfigServer::setPort(int port)
 {
     this->_port = port;
 }
+const bool &ConfigServer::getAutoIndex() const
+{
+    return this->_autoIndex;
+}
 
+void ConfigServer::setAutoIndex(bool autoIndex)
+{
+    this->_autoIndex = autoIndex;
+}
 const std::string &ConfigServer::getServerName(size_t index)
 {
     if (index >= this->_serverNames.size())
@@ -59,6 +67,11 @@ const std::string &ConfigServer::getIndex(size_t indexOfIndex) const
 void ConfigServer::addIndex(std::vector<std::string> index)
 {
     this->_indexes = index;
+}
+
+void ConfigServer::addLocationContext(ConfigLocation &location)
+{
+    this->_locationsContext.push_back(location);
 }
 
 bool ConfigServer::isGood() const

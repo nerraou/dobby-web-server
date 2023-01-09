@@ -7,14 +7,17 @@
 
 int main(int ac, char *av[])
 {
-    // ConfigHttp http;
+    ConfigHttp http;
     std::vector<std::string> config;
     try
     {
         if (ac > 1)
-            config = ParseConfig::loadConfigFile(av[1]);
-        for (size_t i = 0; i < config.size(); i++)
-            std::cout << config.at(i) << '\n';
+            http = ParseConfig::parse(av[1]);
+        if (http.isGood() == true)
+            std::cout << "http is good \n";
+        else 
+            std::cout << "http is not good \n";
+
     }
     catch (const std::exception &e)
     {
