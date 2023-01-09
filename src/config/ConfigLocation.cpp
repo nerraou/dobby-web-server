@@ -85,18 +85,19 @@ void ConfigLocation::display() const
     std::cout << "Root " << this->getRoot() << std::endl;
     std::cout << "AutoIndex " << this->getAutoIndex() << std::endl;
     std::cout << "Client Max body size " << this->getClientMaxBodySize() << std::endl;
-    std::cout << "Indexes : \n";
+    std::cout << "Indexes: \n";
     for (size_t i = 0; i < this->_indexes.size(); i++)
     {
-        std::cout << this->_indexes[i] << std::endl;
+        std::cout << " -"<< this->_indexes[i] << std::endl;
     }
+    std::cout << "Accepted methods: \n";
     for (size_t i = 0; i < this->_allowedHttpMethods.size(); i++)
     {
-        std::cout << this->_allowedHttpMethods[i] << std::endl;
+        std::cout << "  -" << this->_allowedHttpMethods[i] << std::endl;
         
     }
     std::cout << "Rewrite " << this->_rewrite << std::endl;
-    std::cout << "Rewrite " << this->_path << std::endl;
+    std::cout << "Path " << this->_path << std::endl;
 }
 
 ConfigLocation::~ConfigLocation()

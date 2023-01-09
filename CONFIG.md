@@ -54,12 +54,12 @@ http {
 
 ### Full example
 
-```
+```                                          
 
 http {
   root /var/www/html
   client_max_body_size 10M
-  autoindex on
+  autoindex on                                     
   error_page 404 404.html
   index index.html index.htm
 

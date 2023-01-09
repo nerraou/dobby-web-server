@@ -86,31 +86,32 @@ void ConfigHttp::display(bool displayServer) const
     std::cout << "Root " << this->getRoot() << std::endl;
     std::cout << "Client Max body size " << this->getClientMaxBodySize() << std::endl;
     std::cout << "AutoIndex " << this->getAutoIndex() << std::endl;
-    std::cout << "Indexes "; 
+    std::cout << "Indexes: \n";
     for (size_t i = 0; i < this->_indexes.size(); i++)
     {
-        std::cout << this->_indexes[i] << std::endl;
+        std::cout << " -" << this->_indexes[i] << std::endl;
     }
+    std::cout << "Error Pages status: \n";
     for (size_t i = 0; i < this->_errorPages.size(); i++)
     {
-        size_t j= 0;
+        size_t j = 0;
         while (j < this->_errorPages[i].statusCodes.size())
         {
-        std::cout << this->_errorPages[i].statusCodes[j] << std::endl;
+            std::cout << " -" << this->_errorPages[i].statusCodes[j] << std::endl;
             j++;
         }
-        
-        std::cout << this->_errorPages[i].path << std::endl;
+        std::cout << "Error Pages Path: \n";
+        std::cout << " -" << this->_errorPages[i].path << std::endl;
     }
     if (displayServer)
     {
-     
-    std::cout << "------------------------SERVER  CONTEXT \n";
+
+        std::cout << "------------------------SERVER  CONTEXT \n";
         for (size_t i = 0; i < this->_serversContext.size(); i++)
         {
             this->_serversContext[i].display(true);
+            std::cout << std::endl;
         }
-        
     }
 }
 
