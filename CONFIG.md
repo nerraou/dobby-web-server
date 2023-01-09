@@ -13,6 +13,7 @@
   3. listen
   4. server_name
   5. error_page
+  6. autoindex
 
 - location
 
@@ -22,6 +23,7 @@
   4. client_max_body_size
   5. accepted_http_methods
   6. rewrite
+  7. path
 
 | Attribute                                                                            | Type          | Required in context | Default      | Inherited | Description                                                                                                                                             |
 | ------------------------------------------------------------------------------------ | ------------- | ------------------- | ------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -34,6 +36,7 @@
 | accepted_http_methods[<sup>[7]</sup>](#accepted_http_methods)                        | string        | -                   | \*           | `false`   | Sets accpeted http methods. syntax: `accepted_http_methods method ...`. example: `accepted_http_methods GET HEAD POST PUT DELETE CONNECT OPTIONS TRACE` |
 | rewrite[<sup>[8]</sup>](#rewrite)                                                    | string        | -                   | -            | `false`   | URI changed as specified in the replacement string. syntax: `rewrite replacement`. example `rewrite /images`                                            |
 | index[<sup>[9]</sup>](#index)                                                        | string        | -                   | `index.html` | `true`    | Defines files that will be used as an index. syntax: `index file ...`. example `index index.html index.htm`                                             |
+| path[<sup>[11]</sup>](#path_1)[<sup>[12]</sup>](#path_2)                             | string        | location            | -            | `false`   | Defines the location path. syntax: `path location_path`. example `path /`                                                                               |
 
 ## Examples
 
@@ -54,12 +57,12 @@ http {
 
 ### Full example
 
-```
+```                                          
 
 http {
   root /var/www/html
   client_max_body_size 10M
-  autoindex on
+  autoindex on                                     
   error_page 404 404.html
   index index.html index.htm
 
@@ -69,7 +72,8 @@ http {
     autoindex on
     error_page 404 404.html
 
-    location /images {
+    location {
+      path /images
       root /data
       autoindex off
       client_max_body_size 10M
@@ -93,3 +97,5 @@ http {
 8. <a name="rewrite">[rewrite](https://nginx.org/en/docs/http/ngx_http_rewrite_module.html#rewrite)</a>
 9. <a name="index">[index](https://nginx.org/en/docs/http/ngx_http_index_module.html#index)</a>
 10. <a name="units">[units](https://nginx.org/en/docs/syntax.html)</a>
+11. <a name="path_1">[path](https://nginx.org/en/docs/http/ngx_http_core_module.html#location)</a>
+12. <a name="path_2">[path](https://www.digitalocean.com/community/tutorials/nginx-location-directive)</a>

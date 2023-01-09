@@ -6,5 +6,5 @@
 struct ErrorPage
 {
     std::vector<int> statusCodes;
-    std::vector<std::string> path;
+    std::string path;
 };

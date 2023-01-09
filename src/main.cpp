@@ -3,32 +3,34 @@
 #include "ConfigHttp.hpp"
 #include "ConfigServer.hpp"
 #include "Http.hpp"
+#include "ParseConfig.hpp"
 
-int main(void)
+int main(int ac, char *av[])
 {
-    ConfigHttp httpContext;
-    ConfigServer serverContext1;
-    ConfigServer serverContext2;
+    ConfigHttp httpConfig;
 
     try
     {
-        serverContext1.setPort(8081);
-        serverContext2.setPort(8082);
-        httpContext.addServerContext(serverContext1);
-        httpContext.addServerContext(serverContext2);
+        if (ac != 2)
+        {
+            std::cerr << "usage: ./dobby config_file_path" << std::endl;
+            return 1;
+        }
 
-        // attach http config to http instance
-        Http http(httpContext);
+        httpConfig = ParseConfig::parse(av[1]);
 
-        std::cout << "Welcome to Dobby web server" << std::endl;
-        std::cout << "servers count: " << httpContext.getServersCount() << std::endl;
-
-        // start event loop
-        http.start();
+        if (httpConfig.isGood() == true)
+        {
+            Http http(httpConfig);
+            http.start();
+        }
+        else
+            std::cerr << "check config file" << std::endl;
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
     }
+
     return (0);
 }
