@@ -8,7 +8,7 @@ namespace lib
         size_t end;
         std::string trimmed;
 
-        if (set.length() == 0)
+        if (set.empty())
             return (str);
 
         start = str.find_first_not_of(set);
@@ -46,5 +46,40 @@ namespace lib
                 break;
         }
         return strings;
+    }
+
+    void transform(std::string::iterator begin, std::string::iterator end, int (*transformer)(int c))
+    {
+        while (begin != end)
+        {
+            *begin = transformer(*begin);
+            begin++;
+        }
+    }
+
+    std::string toString(int n)
+    {
+        char buffer[12] = {0};
+        int index = 10;
+        bool isNegative;
+
+        if (n == 0)
+            return std::string("0");
+        isNegative = n < 0;
+        while (n != 0)
+        {
+            if (n >= 0)
+                buffer[index] = n % 10 + '0';
+            else
+                buffer[index] = -(n % 10) + '0';
+            n /= 10;
+            index--;
+        }
+        if (isNegative)
+        {
+            buffer[index] = '-';
+            index--;
+        }
+        return std::string(buffer + index + 1);
     }
 }
