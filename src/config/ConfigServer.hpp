@@ -37,5 +37,6 @@ public:
     void addErrorPagePath(const std::string &path);
     void addLocationContext(ConfigLocation &location);
     bool isGood() const;
+    void display(bool displayLocation) const;
     ~ConfigServer();
 };

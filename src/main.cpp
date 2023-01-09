@@ -14,9 +14,16 @@ int main(int ac, char *av[])
         if (ac > 1)
             http = ParseConfig::parse(av[1]);
         if (http.isGood() == true)
+        {
             std::cout << "http is good \n";
+            http.display(true);
+        }
         else 
+        {
             std::cout << "http is not good \n";
+            http.display(true);
+
+        }
 
     }
     catch (const std::exception &e)

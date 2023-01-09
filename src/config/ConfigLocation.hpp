@@ -2,6 +2,7 @@
 
 #include <istream>
 #include <vector>
+#include <iostream>
 
 class ConfigLocation
 {
@@ -31,5 +32,6 @@ public:
     void setPath(const std::string &path);
     std::string getPath() const;
     bool isGood() const;
+    void display() const;
     ~ConfigLocation();
 };

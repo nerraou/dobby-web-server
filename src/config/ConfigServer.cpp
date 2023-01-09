@@ -1,6 +1,6 @@
 #include "ConfigServer.hpp"
 
-ConfigServer::ConfigServer()
+ConfigServer::ConfigServer() : _port(0)
 {
 }
 
@@ -79,6 +79,46 @@ bool ConfigServer::isGood() const
     if (this->_port == 0)
         return false;
     return true;
+}
+
+void ConfigServer::display(bool displayLocation) const
+{
+    std::cout << "Root " << this->getRoot() << std::endl;
+    std::cout << "Port " << this->getPort() << std::endl;
+    std::cout << "AutoIndex " << this->getAutoIndex() << std::endl;
+    std::cout << "Indexes : \n";
+    for (size_t i = 0; i < this->_indexes.size(); i++)
+    {
+        std::cout << this->_indexes[i] << std::endl;
+    }
+    std::cout << "Error Pages: \n";
+    for (size_t i = 0; i < this->_errorPages.size(); i++)
+    {
+        size_t j = 0;
+        while (j < this->_errorPages[i].statusCodes.size())
+        {
+            std::cout << this->_errorPages[i].statusCodes[j] << std::endl;
+            j++;
+        }
+
+        std::cout << this->_errorPages[i].path << std::endl;
+    }
+    std::cout << "server Names: \n";
+    for (size_t i = 0; i < this->_serverNames.size(); i++)
+    {
+        std::cout << this->_serverNames[i] << std::endl;
+        
+    }
+    std::cout << "------------------------LOCATION CONTEXT \n";
+    if (displayLocation)
+   {
+    for (size_t i = 0; i < this->_locationsContext.size(); i++)
+    {
+        this->_locationsContext[i].display();
+    }
+    
+   }
+    
 }
 
 ConfigServer::~ConfigServer()

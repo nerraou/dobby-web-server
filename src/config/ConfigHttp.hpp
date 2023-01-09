@@ -36,6 +36,7 @@ public:
     size_t getServersCount(void) const;
     ConfigServer &getServerConfig(size_t index);
     bool isGood() const;
+    void display(bool displayServer) const;
 
     ~ConfigHttp();
 };

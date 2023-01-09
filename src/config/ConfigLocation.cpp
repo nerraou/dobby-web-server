@@ -80,6 +80,25 @@ bool ConfigLocation::isGood() const
     return true;
 }
 
+void ConfigLocation::display() const
+{
+    std::cout << "Root " << this->getRoot() << std::endl;
+    std::cout << "AutoIndex " << this->getAutoIndex() << std::endl;
+    std::cout << "Client Max body size " << this->getClientMaxBodySize() << std::endl;
+    std::cout << "Indexes : \n";
+    for (size_t i = 0; i < this->_indexes.size(); i++)
+    {
+        std::cout << this->_indexes[i] << std::endl;
+    }
+    for (size_t i = 0; i < this->_allowedHttpMethods.size(); i++)
+    {
+        std::cout << this->_allowedHttpMethods[i] << std::endl;
+        
+    }
+    std::cout << "Rewrite " << this->_rewrite << std::endl;
+    std::cout << "Rewrite " << this->_path << std::endl;
+}
+
 ConfigLocation::~ConfigLocation()
 {
 }
