@@ -21,17 +21,17 @@ const std::string &ConfigLocation::getIndex(size_t index) const
     return this->_indexes[index];
 }
 
-void ConfigLocation::addIndex(const std::string &index)
+void ConfigLocation::addIndex(std::vector<std::string> index)
 {
-    this->_indexes.push_back(index);
+    this->_indexes = index;
 }
 
-const int &ConfigLocation::getClientMaxBodySize() const
+const size_t &ConfigLocation::getClientMaxBodySize() const
 {
     return this->_clientMaxBodySize;
 }
 
-void ConfigLocation::setClientMaxBodySize(int size)
+void ConfigLocation::setClientMaxBodySize(size_t size)
 {
     this->_clientMaxBodySize = size;
 }
@@ -53,9 +53,9 @@ const std::string &ConfigLocation::getAllowedHttpMethods(int index)
     return this->_allowedHttpMethods[index];
 }
 
-void ConfigLocation::addAllowedHttpMethods(const std::string &method)
+void ConfigLocation::addAllowedHttpMethods(std::vector<std::string> method)
 {
-    this->_allowedHttpMethods.push_back(method);
+    this->_allowedHttpMethods = method;
 }
 
 const std::string &ConfigLocation::getRewrite() const
@@ -66,6 +66,38 @@ const std::string &ConfigLocation::getRewrite() const
 void ConfigLocation::setRewrite(const std::string &rewrite)
 {
     this->_rewrite = rewrite;
+}
+
+void ConfigLocation::setPath(const std::string &path)
+{
+    this->_path = path;
+}
+
+bool ConfigLocation::isGood() const
+{
+    if (this->_path.empty())
+        return false;
+    return true;
+}
+
+void ConfigLocation::display() const
+{
+    std::cout << "Root " << this->getRoot() << std::endl;
+    std::cout << "AutoIndex " << this->getAutoIndex() << std::endl;
+    std::cout << "Client Max body size " << this->getClientMaxBodySize() << std::endl;
+    std::cout << "Indexes: \n";
+    for (size_t i = 0; i < this->_indexes.size(); i++)
+    {
+        std::cout << " -"<< this->_indexes[i] << std::endl;
+    }
+    std::cout << "Accepted methods: \n";
+    for (size_t i = 0; i < this->_allowedHttpMethods.size(); i++)
+    {
+        std::cout << "  -" << this->_allowedHttpMethods[i] << std::endl;
+        
+    }
+    std::cout << "Rewrite " << this->_rewrite << std::endl;
+    std::cout << "Path " << this->_path << std::endl;
 }
 
 ConfigLocation::~ConfigLocation()

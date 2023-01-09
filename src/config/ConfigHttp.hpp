@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 #include "ErrorPage.hpp"
 #include "ConfigServer.hpp"
@@ -11,7 +12,7 @@ class ConfigHttp
 private:
     std::string _root;
     std::vector<std::string> _indexes;
-    int _clientMaxBodySize;
+    size_t _clientMaxBodySize;
     bool _autoIndex;
     std::vector<ConfigServer> _serversContext;
     std::vector<ErrorPage> _errorPages;
@@ -22,17 +23,20 @@ public:
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
     const std::string &getIndex(size_t index) const;
-    void addIndex(const std::string &index);
-    const int &getClientMaxBodySize() const;
-    void setClientMaxBodySize(int size);
+    void addIndex(std::vector<std::string> index);
+    const size_t &getClientMaxBodySize() const;
+    void setClientMaxBodySize(size_t size);
     const int &getStatusCode() const;
     void setStatusCode(int status);
+    void setErrorPage(std::vector<std::string> errorPage);
     const std::string &getErrorPagePath() const;
     void addErrorPagePath(const std::string &path);
     bool getAutoIndex() const;
     void setAutoIndex(bool);
     size_t getServersCount(void) const;
     ConfigServer &getServerConfig(size_t index);
+    bool isGood() const;
+    void display(bool displayServer) const;
 
     ~ConfigHttp();
 };
