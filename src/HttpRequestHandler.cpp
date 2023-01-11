@@ -24,7 +24,14 @@ void HttpRequestHandler::parseRequestLine(const std::string &line)
     if (end == line.npos)
         throw HttpBadRequestException();
 
-    this->setRequestTarget(line.substr(start, end - start));
+    try
+    {
+        this->setRequestTarget(line.substr(start, end - start));
+    }
+    catch (const Url::ParseUrlException &e)
+    {
+        throw HttpBadRequestException();
+    }
 
     this->setHttpVersion(lib::trim(line.c_str() + end));
 }
@@ -204,6 +211,47 @@ void HttpRequestHandler::read(void)
     }
 }
 
+off_t HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, const std::string &statusMessage)
+{
+    try
+    {
+        std::stringstream headers;
+        const FileStat &stat = FileStat::open(path);
+
+        headers << "HTTP/1.1 " << httpStatus << " " << statusMessage << CRLF;
+        headers << "Content-Length: " << stat.getSize() << CRLF;
+        // headers << "Content-Type: " << this->getFileContentType(path) << CRLF;
+        headers << CRLF;
+
+        const std::string &headersString = headers.str();
+        (void)::send(this->_connectionRef, headersString.c_str(), headersString.length(), 0);
+
+        this->sendFile(path);
+
+        return stat.getSize();
+    }
+    catch (const std::exception &e)
+    {
+        return -1;
+    }
+}
+
+void HttpRequestHandler::sendFile(const std::string &path) const
+{
+    std::ifstream file;
+    char readBuffer[32];
+
+    file.open(path.c_str());
+
+    while (true)
+    {
+        std::istream &i = file.read(readBuffer, 32);
+        if (i.gcount() == 0)
+            break;
+        (void)::send(this->_connectionRef, readBuffer, i.gcount(), 0);
+    }
+}
+
 HttpRequestHandler::~HttpRequestHandler()
 {
 }
@@ -240,6 +288,19 @@ HttpRequestHandler::HttpBadRequestException::HttpBadRequestException(void)
 }
 
 HttpRequestHandler::HttpBadRequestException::~HttpBadRequestException() throw()
+{
+}
+
+/**
+ * HttpNotFoundException
+ */
+HttpRequestHandler::HttpNotFoundException::HttpNotFoundException(void)
+{
+    this->_httpStatus = 404;
+    this->_message = "Not Found";
+}
+
+HttpRequestHandler::HttpNotFoundException::~HttpNotFoundException() throw()
 {
 }
 

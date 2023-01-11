@@ -4,12 +4,15 @@
 #include <iostream>
 #include <cstring>
 #include <sstream>
+#include <fstream>
 #include <sys/socket.h>
 #include <cctype>
 #include <cstdlib>
+#include <sys/stat.h>
 
 #include "Url.hpp"
 #include "lib.hpp"
+#include "FileStat.hpp"
 
 #define CRLF "\r\n"
 #define CRLF_LEN 2
@@ -72,6 +75,13 @@ public:
 
     void read(void);
 
+    /**
+     * serve static files using this->_requestTarget
+     */
+    off_t serveStatic(const std::string &root, int httpStatus, const std::string &statusMessage);
+
+    void sendFile(const std::string &path) const;
+
     ~HttpRequestHandler();
 
     /**
@@ -94,6 +104,13 @@ public:
     public:
         HttpBadRequestException(void);
         virtual ~HttpBadRequestException() throw();
+    };
+
+    class HttpNotFoundException : public AHttpRequestException
+    {
+    public:
+        HttpNotFoundException(void);
+        virtual ~HttpNotFoundException() throw();
     };
 
     class HttpRequestTimeoutException : public AHttpRequestException

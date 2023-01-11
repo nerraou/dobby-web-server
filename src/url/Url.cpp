@@ -46,7 +46,11 @@ void Url::parsePath(std::string &urlString)
 
     if (cutPos != std::string::npos)
     {
-        this->path.append(urlString, cutPos + 1);
+        this->path.assign(urlString, cutPos);
+        this->path.assign(lib::normalizePath(this->path));
+        if (this->path.empty())
+            this->path.assign("/");
+
         urlString.erase(cutPos);
     }
 }
@@ -84,6 +88,8 @@ Url Url::parse(const std::string &urlString)
     Url url;
     std::string urlStringCopy(urlString);
 
+    url.origin.assign(urlString);
+
     url.parseFragment(urlStringCopy);
 
     url.parseQueryString(urlStringCopy);
@@ -96,7 +102,8 @@ Url Url::parse(const std::string &urlString)
 
     url.parseHost(urlStringCopy);
 
-    url.origin.assign(urlString);
+    if (!url.scheme.empty() && url.path.empty())
+        url.path = "/";
 
     return url;
 }

@@ -25,16 +25,18 @@ int Server::acceptConnection(void)
     return (acceptedConnection);
 }
 
+void Server::closeConnection(int &fd)
+{
+    ::close(fd);
+    this->_connections.erase(fd);
+    this->_requests.erase(fd);
+    fd = -1;
+}
+
 void Server::start(std::vector<PollFd> &connections)
 {
     PollFd *connection;
     bool hasConnection;
-    std::ifstream file;
-    char readBuffer[32];
-    const std::string filename("default.html");
-    std::string headers = "HTTP/1.1 200 OK\r\n"
-                          "Server: Dobby/0.0.0 (MacOS)\r\n"
-                          "Content-Length: ";
     HttpRequestHandler *requestHandler = NULL;
     time_t nowTimestamp = ::time(NULL);
 
@@ -56,52 +58,37 @@ void Server::start(std::vector<PollFd> &connections)
 
             if (connection->revents & POLLOUT && requestHandler->isRequestReady())
             {
-                struct stat fileStat;
-                (void)::stat(filename.c_str(), &fileStat);
+                if (requestHandler->getRequestTarget().path.empty())
+                    throw HttpRequestHandler::HttpBadRequestException();
 
-                headers.append(lib::toString(fileStat.st_size));
-                headers.append("\r\n\r\n");
-                (void)::send(connection->fd, headers.c_str(), headers.length(), 0);
+                const std::string &path = this->_config.getRoot() + requestHandler->getRequestTarget().path;
 
-                file.open(filename.c_str());
-                while (true)
-                {
-                    std::istream &i = file.read(readBuffer, 32);
-                    if (i.gcount() == 0)
-                        break;
-                    (void)::send(connection->fd, readBuffer, i.gcount(), 0);
-                }
+                off_t responseContentLength = requestHandler->serveStatic(path, 200, "OK");
 
-                ::close(connection->fd);
-                this->_connections.erase(connection->fd);
-                this->_requests.erase(connection->fd);
-                connection->fd = -1;
+                if (responseContentLength == -1)
+                    throw HttpRequestHandler::HttpNotFoundException();
 
-                this->logAccess(*requestHandler, 200, fileStat.st_size);
+                this->logAccess(*requestHandler, 200, responseContentLength);
+
+                this->closeConnection(connection->fd);
             }
             else if (connection->revents & POLLIN)
                 requestHandler->read();
         }
-        catch (const std::exception &e)
+        catch (const HttpRequestHandler::AHttpRequestException &e)
         {
-            std::string body = "HTTP/1.1 400 Bad Request\r\n"
-                               "Server: Dobby/0.0.0 (MacOS)\r\n"
-                               "Content-Length: 11\r\n"
-                               "\r\n"
-                               "Bad Request";
+            const std::string &path = this->_config.getRoot() + "/" + lib::toString(e.getHttpStatus()) + ".html";
 
-            (void)::send(connection->fd, body.c_str(), body.length(), 0);
+            off_t responseContentLength = requestHandler->serveStatic(path, e.getHttpStatus(), e.what());
 
-            ::close(connection->fd);
-            this->_connections.erase(connection->fd);
-            this->_requests.erase(connection->fd);
-            connection->fd = -1;
-            this->logAccess(*requestHandler, 400, 11);
+            this->logAccess(*requestHandler, e.getHttpStatus(), responseContentLength);
+
+            this->closeConnection(connection->fd);
         }
     }
 }
 
-void Server::logAccess(const HttpRequestHandler &request, int httpStatus, off_t contentLength) const
+void Server::logAccess(const HttpRequestHandler &request, int httpStatus, std::size_t contentLength) const
 {
     char dateString[27];
 

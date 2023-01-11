@@ -32,3 +32,6 @@ temp/
 
 # Config
 *.conf
+
+# vscode
+.vscode/
