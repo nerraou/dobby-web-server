@@ -102,6 +102,8 @@ HttpRequestHandler::HttpRequestHandler(int connectionRef)
 {
     this->_connectionRef = connectionRef;
     this->_status = READING_REQUEST_LINE_STATUS;
+    this->_requestReadTimeout = 5;
+    this->_requestLastRead = ::time(NULL);
 }
 
 int HttpRequestHandler::getConnectionRef(void) const
@@ -112,6 +114,26 @@ int HttpRequestHandler::getConnectionRef(void) const
 bool HttpRequestHandler::isRequestReady(void) const
 {
     return this->_status == REQUEST_READY_STATUS;
+}
+
+const std::string &HttpRequestHandler::getMethod(void) const
+{
+    return this->_method;
+}
+
+const Url &HttpRequestHandler::getRequestTarget(void) const
+{
+    return this->_requestTarget;
+}
+
+time_t HttpRequestHandler::getRequestLastRead(void) const
+{
+    return this->_requestLastRead;
+}
+
+int HttpRequestHandler::getRequestTimeout(void) const
+{
+    return this->_requestReadTimeout;
 }
 
 void HttpRequestHandler::read(void)
@@ -127,6 +149,8 @@ void HttpRequestHandler::read(void)
     readedBytes = ::recv(this->_connectionRef, buffer, 511, 0);
     if (readedBytes <= 0)
         return;
+
+    this->_requestLastRead = ::time(NULL);
 
     buffer[readedBytes] = '\0';
 
@@ -216,5 +240,18 @@ HttpRequestHandler::HttpBadRequestException::HttpBadRequestException(void)
 }
 
 HttpRequestHandler::HttpBadRequestException::~HttpBadRequestException() throw()
+{
+}
+
+/**
+ * HttpRequestTimeoutException
+ */
+HttpRequestHandler::HttpRequestTimeoutException::HttpRequestTimeoutException(void)
+{
+    this->_httpStatus = 408;
+    this->_message = "Request Timeout";
+}
+
+HttpRequestHandler::HttpRequestTimeoutException::~HttpRequestTimeoutException() throw()
 {
 }

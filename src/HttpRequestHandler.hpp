@@ -40,6 +40,8 @@ private:
     std::string _buffer;
     std::size_t _contentLength;
     int _status;
+    int _requestReadTimeout;
+    time_t _requestLastRead;
 
     void parseRequestLine(const std::string &line);
 
@@ -59,6 +61,14 @@ public:
     int getConnectionRef(void) const;
 
     bool isRequestReady(void) const;
+
+    const std::string &getMethod(void) const;
+
+    const Url &getRequestTarget(void) const;
+
+    time_t getRequestLastRead(void) const;
+
+    int getRequestTimeout(void) const;
 
     void read(void);
 
@@ -84,5 +94,12 @@ public:
     public:
         HttpBadRequestException(void);
         virtual ~HttpBadRequestException() throw();
+    };
+
+    class HttpRequestTimeoutException : public AHttpRequestException
+    {
+    public:
+        HttpRequestTimeoutException(void);
+        virtual ~HttpRequestTimeoutException() throw();
     };
 };

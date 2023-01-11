@@ -16,9 +16,12 @@
 class ServerSocket
 {
 private:
+    std::string _remoteAddress;
     int _port;
     int _socketRef;
     struct sockaddr_in _address;
+
+    void setRemoteAddress(void);
 
 public:
     ServerSocket();
@@ -32,6 +35,7 @@ public:
     void bind(short port);
     void listen(int backlog);
     int accept(void);
+    const std::string &getRemoteAddress(void) const;
 
     class ServerSocketException : public std::exception
     {

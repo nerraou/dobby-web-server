@@ -82,4 +82,11 @@ namespace lib
         }
         return std::string(buffer + index + 1);
     }
+
+    std::size_t formatTime(char *buffer, std::size_t bufferSize, const std::string &format, const time_t timestamp)
+    {
+        const struct tm *time = ::localtime(&timestamp);
+
+        return ::strftime(buffer, bufferSize, format.c_str(), time);
+    }
 }
