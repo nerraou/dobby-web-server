@@ -40,7 +40,7 @@ void Http::start(void)
 {
     while (true)
     {
-        for (size_t i = 0; i < this->_config.getServersCount(); i++)
+        for (size_t i = 0; i < this->_virtualServers.size(); i++)
         {
             PollFd connection;
 

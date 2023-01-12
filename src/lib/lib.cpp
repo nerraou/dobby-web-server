@@ -69,7 +69,9 @@ namespace lib
         std::stringstream normalizedPath;
         std::vector<std::string> pathParts;
         std::list<std::string> normalizedPathParts;
+        bool hasTrainlingSlash;
 
+        hasTrainlingSlash = path[path.size() - 1] == '/';
         pathParts = lib::split(path, "/");
 
         for (size_t i = 0; i < pathParts.size(); i++)
@@ -95,10 +97,9 @@ namespace lib
 
             normalizedPathParts.pop_front();
 
-            if (!normalizedPathParts.empty())
+            if (normalizedPathParts.empty() || hasTrainlingSlash)
                 normalizedPath << '/';
         }
-
         return normalizedPath.str();
     }
 }
