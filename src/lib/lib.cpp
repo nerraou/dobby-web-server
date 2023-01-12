@@ -97,7 +97,7 @@ namespace lib
 
             normalizedPathParts.pop_front();
 
-            if (normalizedPathParts.empty() || hasTrainlingSlash)
+            if (!normalizedPathParts.empty() || hasTrainlingSlash)
                 normalizedPath << '/';
         }
         return normalizedPath.str();

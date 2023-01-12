@@ -36,7 +36,6 @@ HPP_FILES=\
 	src/config/ConfigHttp.hpp\
 	src/config/ConfigLocation.hpp\
 	src/config/ConfigServer.hpp\
-	src/config/ErrorPage.hpp\
 	\
 	src/HttpRequestHandler.hpp\
 	\

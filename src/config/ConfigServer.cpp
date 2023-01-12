@@ -29,17 +29,31 @@ const std::string &ConfigServer::getServerName(size_t index)
     return this->_serverNames[index];
 }
 
-void ConfigServer::setErrorPage(std::vector<std::string> errorPage)
+void ConfigServer::setErrorPages(const std::map<int, std::string> &errorPages)
 {
-    ErrorPage preparedErrorPage;
-    size_t i;
+    this->_errorPages = errorPages;
+}
 
-    for (i = 0; i < errorPage.size() - 1; i++)
+void ConfigServer::setErrorPagesFromList(const std::vector<std::string> &statuses, const std::string &path)
+{
+    int status;
+
+    for (size_t i = 0; i < statuses.size(); i++)
     {
-        preparedErrorPage.statusCodes.push_back(std::atoi(errorPage[i].c_str()));
+        status = ::atoi(statuses.at(i).c_str());
+        this->_errorPages[status] = path;
     }
-    preparedErrorPage.path = errorPage[i];
-    this->_errorPages.push_back(preparedErrorPage);
+}
+
+const std::map<int, std::string> &ConfigServer::getErrorPages() const
+{
+    return this->_errorPages;
+}
+
+void ConfigServer::addErrorPage(int status, const std::string &path)
+{
+    if (this->_errorPages.count(status) == 0)
+        this->_errorPages[status] = path;
 }
 
 void ConfigServer::addServerNames(std::vector<std::string> serverNames)
@@ -57,6 +71,11 @@ void ConfigServer::setRoot(const std::string &root)
     this->_root = root;
 }
 
+const std::vector<std::string> &ConfigServer::getIndexes() const
+{
+    return this->_indexes;
+}
+
 const std::string &ConfigServer::getIndex(size_t indexOfIndex) const
 {
     if (indexOfIndex >= this->_indexes.size())
@@ -67,6 +86,16 @@ const std::string &ConfigServer::getIndex(size_t indexOfIndex) const
 void ConfigServer::addIndex(std::vector<std::string> index)
 {
     this->_indexes = index;
+}
+
+const size_t &ConfigServer::getClientMaxBodySize() const
+{
+    return this->_clientMaxBodySize;
+}
+
+void ConfigServer::setClientMaxBodySize(size_t size)
+{
+    this->_clientMaxBodySize = size;
 }
 
 void ConfigServer::addLocationContext(ConfigLocation &location)
@@ -81,28 +110,34 @@ bool ConfigServer::isGood() const
     return true;
 }
 
+void ConfigServer::inherit(const ConfigHttp &configHttp)
+{
+    this->setRoot(configHttp.getRoot());
+    this->setAutoIndex(configHttp.getAutoIndex());
+    this->setClientMaxBodySize(configHttp.getClientMaxBodySize());
+    this->_indexes = configHttp.getIndexes();
+    this->_errorPages = configHttp.getErrorPages();
+}
+
 void ConfigServer::display(bool displayLocation) const
 {
     std::cout << "Root " << this->getRoot() << std::endl;
     std::cout << "Port " << this->getPort() << std::endl;
     std::cout << "AutoIndex " << this->getAutoIndex() << std::endl;
+    std::cout << "Client Max body size " << this->getClientMaxBodySize() << std::endl;
+
     std::cout << "Indexes: \n";
     for (size_t i = 0; i < this->_indexes.size(); i++)
     {
         std::cout << " -" << this->_indexes[i] << std::endl;
     }
-    std::cout << "Error Pages status: \n";
-    for (size_t i = 0; i < this->_errorPages.size(); i++)
+
+    std::cout << "Error Pages:\n";
+    for (std::map<int, std::string>::const_iterator i = this->_errorPages.begin(); i != this->_errorPages.end(); ++i)
     {
-        size_t j = 0;
-        while (j < this->_errorPages[i].statusCodes.size())
-        {
-            std::cout << " -" << this->_errorPages[i].statusCodes[j] << std::endl;
-            j++;
-        }
-        std::cout << "Error Pages Path: \n";
-        std::cout <<  " -"<< this->_errorPages[i].path << std::endl;
+        std::cout << " -" << i->first << ": " << i->second << std::endl;
     }
+
     std::cout << "server Names: \n";
     for (size_t i = 0; i < this->_serverNames.size(); i++)
     {

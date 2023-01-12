@@ -19,6 +19,11 @@ void ConfigHttp::setRoot(const std::string &root)
     this->_root = root;
 }
 
+const std::vector<std::string> &ConfigHttp::getIndexes() const
+{
+    return this->_indexes;
+}
+
 const std::string &ConfigHttp::getIndex(size_t indexOfIndex) const
 {
     if (indexOfIndex >= this->_indexes.size())
@@ -41,17 +46,31 @@ void ConfigHttp::setClientMaxBodySize(size_t size)
     this->_clientMaxBodySize = size;
 }
 
-void ConfigHttp::setErrorPage(std::vector<std::string> errorPage)
+void ConfigHttp::setErrorPagesFromList(const std::vector<std::string> &statuses, const std::string &path)
 {
-    ErrorPage preparedErrorPage;
-    size_t i;
+    int status;
 
-    for (i = 0; i < errorPage.size() - 1; i++)
+    for (size_t i = 0; i < statuses.size(); i++)
     {
-        preparedErrorPage.statusCodes.push_back(std::atoi(errorPage[i].c_str()));
+        status = ::atoi(statuses.at(i).c_str());
+        this->_errorPages[status] = path;
     }
-    preparedErrorPage.path = errorPage[i];
-    this->_errorPages.push_back(preparedErrorPage);
+}
+
+void ConfigHttp::addErrorPage(int status, const std::string &path)
+{
+    if (this->_errorPages.count(status) == 0)
+        this->_errorPages[status] = path;
+}
+
+void ConfigHttp::setErrorPages(const std::map<int, std::string> &errorPages)
+{
+    this->_errorPages = errorPages;
+}
+
+const std::map<int, std::string> &ConfigHttp::getErrorPages() const
+{
+    return this->_errorPages;
 }
 
 bool ConfigHttp::getAutoIndex() const
@@ -91,18 +110,13 @@ void ConfigHttp::display(bool displayServer) const
     {
         std::cout << " -" << this->_indexes[i] << std::endl;
     }
-    std::cout << "Error Pages status: \n";
-    for (size_t i = 0; i < this->_errorPages.size(); i++)
+
+    std::cout << "Error Pages:\n";
+    for (std::map<int, std::string>::const_iterator i = this->_errorPages.begin(); i != this->_errorPages.end(); ++i)
     {
-        size_t j = 0;
-        while (j < this->_errorPages[i].statusCodes.size())
-        {
-            std::cout << " -" << this->_errorPages[i].statusCodes[j] << std::endl;
-            j++;
-        }
-        std::cout << "Error Pages Path: \n";
-        std::cout << " -" << this->_errorPages[i].path << std::endl;
+        std::cout << " -" << i->first << ": " << i->second << std::endl;
     }
+
     if (displayServer)
     {
 
