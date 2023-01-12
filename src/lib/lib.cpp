@@ -57,36 +57,49 @@ namespace lib
         }
     }
 
-    std::string toString(int n)
-    {
-        char buffer[12] = {0};
-        int index = 10;
-        bool isNegative;
-
-        if (n == 0)
-            return std::string("0");
-        isNegative = n < 0;
-        while (n != 0)
-        {
-            if (n >= 0)
-                buffer[index] = n % 10 + '0';
-            else
-                buffer[index] = -(n % 10) + '0';
-            n /= 10;
-            index--;
-        }
-        if (isNegative)
-        {
-            buffer[index] = '-';
-            index--;
-        }
-        return std::string(buffer + index + 1);
-    }
-
     std::size_t formatTime(char *buffer, std::size_t bufferSize, const std::string &format, const time_t timestamp)
     {
         const struct tm *time = ::localtime(&timestamp);
 
         return ::strftime(buffer, bufferSize, format.c_str(), time);
+    }
+
+    std::string normalizePath(const std::string &path)
+    {
+        std::stringstream normalizedPath;
+        std::vector<std::string> pathParts;
+        std::list<std::string> normalizedPathParts;
+        bool hasTrainlingSlash;
+
+        hasTrainlingSlash = path[path.size() - 1] == '/';
+        pathParts = lib::split(path, "/");
+
+        for (size_t i = 0; i < pathParts.size(); i++)
+        {
+            if (pathParts.at(i).compare(".") == 0)
+                continue;
+            if (pathParts.at(i).compare("..") == 0)
+            {
+                if (normalizedPathParts.empty())
+                    throw std::invalid_argument("bad path");
+                normalizedPathParts.pop_back();
+            }
+            else
+                normalizedPathParts.push_back(pathParts.at(i));
+        }
+
+        if (path.at(0) == '/')
+            normalizedPath << '/';
+
+        while (!normalizedPathParts.empty())
+        {
+            normalizedPath << normalizedPathParts.front();
+
+            normalizedPathParts.pop_front();
+
+            if (normalizedPathParts.empty() || hasTrainlingSlash)
+                normalizedPath << '/';
+        }
+        return normalizedPath.str();
     }
 }
