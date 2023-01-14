@@ -25,7 +25,7 @@ private:
     static void parseHttpContext(const std::string &line, ConfigHttp &httpContext);
     static void parseLocationContext(const std::string &line, ConfigLocation &locationContext);
     static void parseServerContext(const std::string &line, ConfigServer &serverContext);
-    static void setContext(std::string &line, std::string &context);
+    static bool setContext(std::string &line, std::string &context);
 
 public:
     static std::vector<std::string> loadConfigFile(std::string configPath);

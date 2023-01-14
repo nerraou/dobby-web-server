@@ -19,18 +19,12 @@ int main(int ac, char *av[])
 
         httpConfig = ParseConfig::parse(av[1]);
 
-        if (httpConfig.isGood() == true)
-        {
-            Http http(httpConfig);
-            http.start();
-        }
-        else
-            std::cerr << "check config file" << std::endl;
+        Http http(httpConfig);
+        http.start();
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
     }
-
     return (0);
 }
