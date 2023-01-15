@@ -39,6 +39,8 @@ void ParseConfig::parseHttpContext(const std::string &line, ConfigHttp &httpCont
     {
         httpContext.addIndex(ParseConfig::parseIndex(line.substr(index)));
     }
+    else
+        throw ParseConfigException(std::string("unknown http directive: ").append(line));
 }
 
 void ParseConfig::parseServerContext(const std::string &line, ConfigServer &serverContext)
@@ -80,6 +82,8 @@ void ParseConfig::parseServerContext(const std::string &line, ConfigServer &serv
     {
         serverContext.setClientMaxBodySize(ParseConfig::parseClientMaxBodySize(line.substr(index)));
     }
+    else
+        throw ParseConfigException(std::string("unknown server directive: ").append(line));
 }
 
 void ParseConfig::parseLocationContext(const std::string &line, ConfigLocation &locationContext)
@@ -116,16 +120,34 @@ void ParseConfig::parseLocationContext(const std::string &line, ConfigLocation &
     {
         locationContext.addIndex(ParseConfig::parseIndex(line.substr(index)));
     }
+    else
+        throw ParseConfigException(std::string("unknown location directive: ").append(line));
 }
 
-void ParseConfig::setContext(std::string &line, std::string &context)
+bool ParseConfig::setContext(std::string &line, std::string &context)
 {
+    std::string newContext;
+
     if (line.compare("http {") == 0)
-        context = "http";
+        newContext = "http";
     else if (line.compare("server {") == 0)
-        context = "server";
+        newContext = "server";
     else if (line.compare("location {") == 0)
-        context = "location";
+        newContext = "location";
+    else
+        return false;
+
+    if (newContext.compare("http") == 0 && !context.empty())
+        throw ParseConfigException(std::string("can't have http nested inside ") + context);
+
+    if (newContext.compare("server") == 0 && context.compare("http") != 0)
+        throw ParseConfigException(std::string("can't have server nested inside ") + context);
+
+    if (newContext.compare("location") == 0 && context.compare("server") != 0)
+        throw ParseConfigException(std::string("can't have location nested inside ") + context);
+
+    context = newContext;
+    return true;
 }
 
 ConfigHttp ParseConfig::parse(std::string configPath)
@@ -144,12 +166,25 @@ ConfigHttp ParseConfig::parse(std::string configPath)
 
     i = 0;
     configVector = ParseConfig::loadConfigFile(configPath);
-    while (i < configVector.size())
+    for (i = 0; i < configVector.size(); ++i)
     {
-        ParseConfig::setContext(configVector[i], context);
-        if (context == "http")
-            ParseConfig::parseHttpContext(configVector[i], httpContext);
+        if (ParseConfig::setContext(configVector[i], context))
+            continue;
 
+        if (context == "http")
+        {
+            if (configVector[i].compare("}") == 0)
+            {
+                if (i != configVector.size() - 1)
+                    throw ParseConfigException("bad config file");
+
+                // check if http is good then return it else throw exception
+                if (httpContext.isGood() == false)
+                    throw ParseConfigException("bad http context");
+                return httpContext;
+            }
+            ParseConfig::parseHttpContext(configVector[i], httpContext);
+        }
         else if (context == "server")
         {
             if (isNewServerContext)
@@ -158,23 +193,20 @@ ConfigHttp ParseConfig::parse(std::string configPath)
                 isNewServerContext = false;
             }
 
-            ParseConfig::parseServerContext(configVector[i], serverContext);
             if (configVector[i] == "}")
             {
                 isNewServerContext = true;
                 if (serverContext.isGood() == true)
                 {
-                    std::cout << "server is  good \n";
-
                     context = "http";
                     httpContext.addServerContext(serverContext);
-
                     // change context to the parent ; context = http
                 }
                 else
-                    std::cout << "server is not good \n";
-                // ese throw an exception
+                    throw ParseConfigException("bad server context");
             }
+            else
+                ParseConfig::parseServerContext(configVector[i], serverContext);
         }
         else if (context == "location")
         {
@@ -184,30 +216,25 @@ ConfigHttp ParseConfig::parse(std::string configPath)
                 isNewLocationContext = false;
             }
 
-            ParseConfig::parseLocationContext(configVector[i], locationContext);
             if (configVector[i] == "}")
             {
                 isNewLocationContext = true;
                 if (locationContext.isGood() == true)
                 {
-                    std::cout << "location is  good \n";
                     context = "server";
                     serverContext.addLocationContext(locationContext);
                     // call isGood location and add the location to server context
                     // change context to the parent ; context = server
                 }
-                // ELSE throw an excepation
                 else
-                    std::cout << "location is not good \n";
+                    throw ParseConfigException("bad location context");
             }
+            else
+                ParseConfig::parseLocationContext(configVector[i], locationContext);
         }
-        i++;
     }
-    // check if http is good then return it else throw exception
-    //  if(httpContext.isGood() == false)
-    // throw exception
 
-    return httpContext;
+    throw ParseConfigException("bad config file");
 }
 
 std::string ParseConfig::parseRoot(const std::string &line)
@@ -291,7 +318,7 @@ std::vector<std::string> ParseConfig::loadConfigFile(std::string configPath)
     while (std::getline(file, line))
     {
         line = lib::trim(line);
-        if (line.size() != 0)
+        if (line.size() != 0 && line[0] != '#')
             configVector.push_back(line);
     }
     return configVector;
