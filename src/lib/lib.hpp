@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <list>
+#include <unistd.h>
 
 namespace lib
 {
@@ -12,6 +13,7 @@ namespace lib
     void transform(std::string::iterator begin, std::string::iterator end, int (*transformer)(int c));
     std::size_t formatTime(char *buffer, std::size_t bufferSize, const std::string &format, const time_t timestamp);
     std::string normalizePath(const std::string &path);
+    bool isFileExist(const std::string &path);
 
     template <typename T>
     std::string toString(T value)

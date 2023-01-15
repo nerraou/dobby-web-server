@@ -9,6 +9,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <sys/stat.h>
+#include <vector>
 
 #include "Url.hpp"
 #include "lib.hpp"
@@ -79,6 +80,7 @@ public:
      * serve static files using this->_requestTarget
      */
     off_t serveStatic(const std::string &root, int httpStatus, const std::string &statusMessage);
+    off_t serveIndexFile(const std::string &root, std::vector<std::string> indexs);
 
     void sendFile(const std::string &path) const;
 
@@ -102,21 +104,27 @@ public:
     class HttpBadRequestException : public AHttpRequestException
     {
     public:
-        HttpBadRequestException(void);
+        HttpBadRequestException(void) throw();
         virtual ~HttpBadRequestException() throw();
     };
 
     class HttpNotFoundException : public AHttpRequestException
     {
     public:
-        HttpNotFoundException(void);
+        HttpNotFoundException(void) throw();
         virtual ~HttpNotFoundException() throw();
     };
 
     class HttpRequestTimeoutException : public AHttpRequestException
     {
     public:
-        HttpRequestTimeoutException(void);
+        HttpRequestTimeoutException(void) throw();
         virtual ~HttpRequestTimeoutException() throw();
+    };
+    class HttpForbiddenException : public AHttpRequestException
+    {
+    public:
+        HttpForbiddenException(void) throw();
+        virtual ~HttpForbiddenException() throw();
     };
 };

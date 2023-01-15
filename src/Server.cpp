@@ -62,14 +62,17 @@ void Server::start(std::vector<PollFd> &connections)
                     throw HttpRequestHandler::HttpBadRequestException();
 
                 const std::string &path = this->_config.getRoot() + requestHandler->getRequestTarget().path;
+                bool hasTrainlingSlash;
 
-                off_t responseContentLength = requestHandler->serveStatic(path, 200, "OK");
+                hasTrainlingSlash = requestHandler->getRequestTarget().path[requestHandler->getRequestTarget().path.size() - 1] == '/';
+                off_t responseContentLength;
 
-                if (responseContentLength == -1)
-                    throw HttpRequestHandler::HttpNotFoundException();
+                if (hasTrainlingSlash)
+                    responseContentLength = requestHandler->serveIndexFile(path, this->_config.getIndexes());
+                else
+                    responseContentLength = requestHandler->serveStatic(path, 200, "OK");
 
                 this->logAccess(*requestHandler, 200, responseContentLength);
-
                 this->closeConnection(connection->fd);
             }
             else if (connection->revents & POLLIN)

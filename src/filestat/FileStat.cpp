@@ -9,16 +9,25 @@ void FileStat::callStat()
     if (statReturn == -1)
         throw FileStatException(strerror(errno));
     this->_size = fileStat.st_size;
-    this->_createdAt = fileStat.st_ctim;
-    this->_updatedAt = fileStat.st_mtim;
-    this->_lastAccessAt = fileStat.st_atim;
+    this->_createdAt = fileStat.st_ctimespec;
+    this->_updatedAt = fileStat.st_ctimespec;
+    this->_lastAccessAt = fileStat.st_ctimespec;
     this->_mode = fileStat.st_mode;
+}
+
+FileStat::FileStat()
+{
 }
 
 FileStat::FileStat(const std::string &path)
 {
     this->_path = path;
     this->callStat();
+}
+
+bool FileStat::isFolder()
+{
+    return (S_ISDIR(this->_mode));
 }
 
 off_t FileStat::getSize() const
