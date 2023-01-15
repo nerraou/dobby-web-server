@@ -26,9 +26,8 @@ private:
     static void parseLocationContext(const std::string &line, ConfigLocation &locationContext);
     static void parseServerContext(const std::string &line, ConfigServer &serverContext);
     static void setContext(std::string &line, std::string &context);
-    
 
-public: 
+public:
     static std::vector<std::string> loadConfigFile(std::string configPath);
     ParseConfig();
     class FileException : public std::exception

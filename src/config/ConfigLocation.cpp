@@ -80,6 +80,14 @@ bool ConfigLocation::isGood() const
     return true;
 }
 
+void ConfigLocation::inherit(const ConfigServer &configServer)
+{
+    this->setRoot(configServer.getRoot());
+    this->setAutoIndex(configServer.getAutoIndex());
+    this->setClientMaxBodySize(configServer.getClientMaxBodySize());
+    this->_indexes = configServer.getIndexes();
+}
+
 void ConfigLocation::display() const
 {
     std::cout << "Root " << this->getRoot() << std::endl;
@@ -88,13 +96,12 @@ void ConfigLocation::display() const
     std::cout << "Indexes: \n";
     for (size_t i = 0; i < this->_indexes.size(); i++)
     {
-        std::cout << " -"<< this->_indexes[i] << std::endl;
+        std::cout << " -" << this->_indexes[i] << std::endl;
     }
     std::cout << "Accepted methods: \n";
     for (size_t i = 0; i < this->_allowedHttpMethods.size(); i++)
     {
         std::cout << "  -" << this->_allowedHttpMethods[i] << std::endl;
-        
     }
     std::cout << "Rewrite " << this->_rewrite << std::endl;
     std::cout << "Path " << this->_path << std::endl;

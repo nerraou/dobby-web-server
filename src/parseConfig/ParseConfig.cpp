@@ -11,7 +11,8 @@ ParseConfig::~ParseConfig()
 void ParseConfig::parseHttpContext(const std::string &line, ConfigHttp &httpContext)
 {
     size_t index;
-    index = 0;
+    std::vector<std::string> parsedErrorPages;
+    std::string errorPagePath;
 
     index = line.find_first_of(" \t");
     if (line.find("root ") == 0)
@@ -28,7 +29,11 @@ void ParseConfig::parseHttpContext(const std::string &line, ConfigHttp &httpCont
     }
     else if (line.find("error_page ") == 0)
     {
-        httpContext.setErrorPage(ParseConfig::parseErrorPage(line.substr(index)));
+        parsedErrorPages = ParseConfig::parseErrorPage(line.substr(index));
+        errorPagePath = parsedErrorPages.back();
+        parsedErrorPages.pop_back();
+
+        httpContext.setErrorPagesFromList(parsedErrorPages, errorPagePath);
     }
     else if (line.find("index ") == 0)
     {
@@ -39,7 +44,8 @@ void ParseConfig::parseHttpContext(const std::string &line, ConfigHttp &httpCont
 void ParseConfig::parseServerContext(const std::string &line, ConfigServer &serverContext)
 {
     size_t index;
-    index = 0;
+    std::vector<std::string> parsedErrorPages;
+    std::string errorPagePath;
 
     index = line.find_first_of(" \t");
     if (line.find("listen ") == 0)
@@ -56,7 +62,11 @@ void ParseConfig::parseServerContext(const std::string &line, ConfigServer &serv
     }
     else if (line.find("error_page ") == 0)
     {
-        serverContext.setErrorPage(ParseConfig::parseErrorPage(line.substr(index)));
+        parsedErrorPages = ParseConfig::parseErrorPage(line.substr(index));
+        errorPagePath = parsedErrorPages.back();
+        parsedErrorPages.pop_back();
+
+        serverContext.setErrorPagesFromList(parsedErrorPages, errorPagePath);
     }
     else if (line.find("autoindex ") == 0)
     {
@@ -65,6 +75,10 @@ void ParseConfig::parseServerContext(const std::string &line, ConfigServer &serv
     else if (line.find("index ") == 0)
     {
         serverContext.addIndex(ParseConfig::parseIndex(line.substr(index)));
+    }
+    else if (line.find("client_max_body_size ") == 0)
+    {
+        serverContext.setClientMaxBodySize(ParseConfig::parseClientMaxBodySize(line.substr(index)));
     }
 }
 
@@ -116,13 +130,17 @@ void ParseConfig::setContext(std::string &line, std::string &context)
 
 ConfigHttp ParseConfig::parse(std::string configPath)
 {
-
     std::vector<std::string> configVector;
     size_t i;
     ConfigHttp httpContext;
     ConfigLocation locationContext;
     ConfigServer serverContext;
     std::string context;
+    bool isNewServerContext;
+    bool isNewLocationContext;
+
+    isNewServerContext = true;
+    isNewLocationContext = true;
 
     i = 0;
     configVector = ParseConfig::loadConfigFile(configPath);
@@ -134,9 +152,16 @@ ConfigHttp ParseConfig::parse(std::string configPath)
 
         else if (context == "server")
         {
+            if (isNewServerContext)
+            {
+                serverContext.inherit(httpContext);
+                isNewServerContext = false;
+            }
+
             ParseConfig::parseServerContext(configVector[i], serverContext);
             if (configVector[i] == "}")
             {
+                isNewServerContext = true;
                 if (serverContext.isGood() == true)
                 {
                     std::cout << "server is  good \n";
@@ -153,9 +178,16 @@ ConfigHttp ParseConfig::parse(std::string configPath)
         }
         else if (context == "location")
         {
+            if (isNewLocationContext)
+            {
+                locationContext.inherit(serverContext);
+                isNewLocationContext = false;
+            }
+
             ParseConfig::parseLocationContext(configVector[i], locationContext);
             if (configVector[i] == "}")
             {
+                isNewLocationContext = true;
                 if (locationContext.isGood() == true)
                 {
                     std::cout << "location is  good \n";

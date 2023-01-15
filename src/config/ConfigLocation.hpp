@@ -3,6 +3,9 @@
 #include <istream>
 #include <vector>
 #include <iostream>
+#include "ConfigServer.hpp"
+
+class ConfigServer;
 
 class ConfigLocation
 {
@@ -32,6 +35,7 @@ public:
     void setPath(const std::string &path);
     std::string getPath() const;
     bool isGood() const;
+    void inherit(const ConfigServer &configServer);
     void display() const;
     ~ConfigLocation();
 };
