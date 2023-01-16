@@ -14,6 +14,7 @@
 #include "Url.hpp"
 #include "lib.hpp"
 #include "FileStat.hpp"
+#include "httpStatus.hpp"
 
 #define CRLF "\r\n"
 #define CRLF_LEN 2

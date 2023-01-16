@@ -2,7 +2,7 @@ NAME=dobby
 CC_FLAGS = -Wall -Wextra -Werror -std=c++98
 CC = c++
 
-INCLUDE_ARGS= -I src/lib -I src/parseConfig/ -I src/config/ -I src/ -I src/url -I src/filestat
+INCLUDE_ARGS= -I src/lib -I src/parseConfig/ -I src/config/ -I src/ -I src/url -I src/filestat -I src/httpStatus 
 
 OBJECT_FILES=$(SOURCE_FILES:.cpp=.o)
 SOURCE_FILES=\
@@ -45,7 +45,9 @@ HPP_FILES=\
 	\
 	src/url/Url.hpp\
 	\
-	src/filestat/FileStat.hpp
+	src/filestat/FileStat.hpp\
+	\
+	src/httpStatus/httpStatus.hpp
 
 all: $(NAME)
 

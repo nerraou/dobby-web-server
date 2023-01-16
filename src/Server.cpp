@@ -70,9 +70,9 @@ void Server::start(std::vector<PollFd> &connections)
                 if (hasTrainlingSlash)
                     responseContentLength = requestHandler->serveIndexFile(path, this->_config.getIndexes());
                 else
-                    responseContentLength = requestHandler->serveStatic(path, 200, "OK");
+                    responseContentLength = requestHandler->serveStatic(path, _200, _200_MESSAGE);
 
-                this->logAccess(*requestHandler, 200, responseContentLength);
+                this->logAccess(*requestHandler, _200, responseContentLength);
                 this->closeConnection(connection->fd);
             }
             else if (connection->revents & POLLIN)
