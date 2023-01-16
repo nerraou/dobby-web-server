@@ -232,7 +232,37 @@ off_t HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, c
     }
     catch (const std::exception &e)
     {
-        return -1;
+        throw HttpNotFoundException();
+    }
+}
+
+off_t HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std::string> indexs)
+{
+    std::stringstream headers;
+    FileStat stat;
+    std::string indexPath;
+
+    try
+    {
+        size_t i;
+        for (i = 0; i < indexs.size(); i++)
+        {
+            indexPath = path + indexs[i];
+            if (lib::isFileExist(indexPath) == true)
+            {
+                stat = FileStat::open(indexPath);
+                if (stat.isFolder() == true)
+                    throw HttpForbiddenException();
+                break;
+            }
+        }
+        if (i == indexs.size())
+            throw HttpForbiddenException();
+        return this->serveStatic(indexPath, 200, "OK");
+    }
+    catch (const std::exception &e)
+    {
+        throw HttpForbiddenException();
     }
 }
 
@@ -281,7 +311,7 @@ HttpRequestHandler::AHttpRequestException::~AHttpRequestException() throw()
 /**
  * HttpBadRequestException
  */
-HttpRequestHandler::HttpBadRequestException::HttpBadRequestException(void)
+HttpRequestHandler::HttpBadRequestException::HttpBadRequestException(void) throw()
 {
     this->_httpStatus = 400;
     this->_message = "Bad Request";
@@ -294,7 +324,7 @@ HttpRequestHandler::HttpBadRequestException::~HttpBadRequestException() throw()
 /**
  * HttpNotFoundException
  */
-HttpRequestHandler::HttpNotFoundException::HttpNotFoundException(void)
+HttpRequestHandler::HttpNotFoundException::HttpNotFoundException(void) throw()
 {
     this->_httpStatus = 404;
     this->_message = "Not Found";
@@ -307,12 +337,26 @@ HttpRequestHandler::HttpNotFoundException::~HttpNotFoundException() throw()
 /**
  * HttpRequestTimeoutException
  */
-HttpRequestHandler::HttpRequestTimeoutException::HttpRequestTimeoutException(void)
+HttpRequestHandler::HttpRequestTimeoutException::HttpRequestTimeoutException(void) throw()
 {
     this->_httpStatus = 408;
     this->_message = "Request Timeout";
 }
 
 HttpRequestHandler::HttpRequestTimeoutException::~HttpRequestTimeoutException() throw()
+{
+}
+
+/**
+ * HttpForbidden
+ */
+
+HttpRequestHandler::HttpForbiddenException::HttpForbiddenException(void) throw()
+{
+    this->_httpStatus = 403;
+    this->_message = "Forbidden";
+}
+
+HttpRequestHandler::HttpForbiddenException::~HttpForbiddenException() throw()
 {
 }

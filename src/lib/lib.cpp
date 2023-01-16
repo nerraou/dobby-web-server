@@ -102,4 +102,8 @@ namespace lib
         }
         return normalizedPath.str();
     }
+    bool isFileExist(const std::string &path)
+    {
+        return (::access(path.c_str(), F_OK) == 0);
+    }
 }
