@@ -258,7 +258,7 @@ off_t HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<st
         }
         if (i == indexs.size())
             throw HttpForbiddenException();
-        return this->serveStatic(indexPath, _200, _200_MESSAGE);
+        return this->serveStatic(indexPath, HTTP_OK, HTTP_OK_MESSAGE);
     }
     catch (const std::exception &e)
     {
@@ -313,8 +313,8 @@ HttpRequestHandler::AHttpRequestException::~AHttpRequestException() throw()
  */
 HttpRequestHandler::HttpBadRequestException::HttpBadRequestException(void) throw()
 {
-    this->_httpStatus = _400;
-    this->_message = _400_MESSAGE;
+    this->_httpStatus = HTTP_BAD_REQUEST;
+    this->_message = HTTP_BAD_REQUEST_MESSAGE;
 }
 
 HttpRequestHandler::HttpBadRequestException::~HttpBadRequestException() throw()
@@ -326,8 +326,8 @@ HttpRequestHandler::HttpBadRequestException::~HttpBadRequestException() throw()
  */
 HttpRequestHandler::HttpNotFoundException::HttpNotFoundException(void) throw()
 {
-    this->_httpStatus = _404;
-    this->_message = _404_MESSAGE;
+    this->_httpStatus = HTTP_NOT_FOUND;
+    this->_message = HTTP_NOT_FOUND_MESSAGE;
 }
 
 HttpRequestHandler::HttpNotFoundException::~HttpNotFoundException() throw()
@@ -339,8 +339,8 @@ HttpRequestHandler::HttpNotFoundException::~HttpNotFoundException() throw()
  */
 HttpRequestHandler::HttpRequestTimeoutException::HttpRequestTimeoutException(void) throw()
 {
-    this->_httpStatus = _408;
-    this->_message = _408_MESSAGE;
+    this->_httpStatus = HTTP_REQUEST_TIMEOUT;
+    this->_message = HTTP_REQUEST_TIMEOUT_MESSAGE;
 }
 
 HttpRequestHandler::HttpRequestTimeoutException::~HttpRequestTimeoutException() throw()
@@ -353,8 +353,8 @@ HttpRequestHandler::HttpRequestTimeoutException::~HttpRequestTimeoutException() 
 
 HttpRequestHandler::HttpForbiddenException::HttpForbiddenException(void) throw()
 {
-    this->_httpStatus = _403;
-    this->_message = _403_MESSAGE;
+    this->_httpStatus = HTTP_FORBIDDEN;
+    this->_message = HTTP_FORBIDDEN_MESSAGE;
 }
 
 HttpRequestHandler::HttpForbiddenException::~HttpForbiddenException() throw()

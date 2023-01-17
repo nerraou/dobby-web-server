@@ -2,37 +2,34 @@
 
 // 1xx informational response
 
-
 // 2xx success
 
-#define _200 200
-#define _200_MESSAGE "OK"
+#define HTTP_OK 200
+#define HTTP_OK_MESSAGE "OK"
 
 // 3xx redirection
 
-
 // 4xx client errors
 
-#define _400 400
-#define _400_MESSAGE "Bad Request"
+#define HTTP_BAD_REQUEST 400
+#define HTTP_BAD_REQUEST_MESSAGE "Bad Request"
 
-#define _403 403
-#define _403_MESSAGE "Forbidden"
+#define HTTP_FORBIDDEN 403
+#define HTTP_FORBIDDEN_MESSAGE "Forbidden"
 
-#define _404 404
-#define _404_MESSAGE "Not Found"
+#define HTTP_NOT_FOUND 404
+#define HTTP_NOT_FOUND_MESSAGE "Not Found"
 
-#define _408 408
-#define _408_MESSAGE "Request Timeout"
+#define HTTP_REQUEST_TIMEOUT 408
+#define HTTP_REQUEST_TIMEOUT_MESSAGE "Request Timeout"
 
-#define _413 413
-#define _413_MESSAGE "Payload Too Large"
-
+#define HTTP_PAYLOAD_TOO_LARGE 413
+#define HTTP_PAYLOAD_TOO_LARGE_MESSAGE "Payload Too Large"
 
 // 5xx server errors
 
-#define _500 500
-#define _500_MESSAGE "Internal Server Error"
+#define HTTP_INTERNAL_SERVER_ERROR 500
+#define HTTP_INTERNAL_SERVER_ERROR_MESSAGE "Internal Server Error"
 
-#define _505 505
-#define _505_MESSAGE "HTTP Version Not Supported"
+#define HTTP_VERSION_NOT_SUPPORTED 505
+#define HTTP_VERSION_NOT_SUPPORTED_MESSAGE "HTTP Version Not Supported"
