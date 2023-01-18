@@ -84,7 +84,7 @@ public:
     off_t serveStatic(const std::string &root, int httpStatus, const std::string &statusMessage);
     off_t serveIndexFile(const std::string &root, std::vector<std::string> indexs, bool autoIndex);
 
-    void directoryListing(const std::string &dirPath);
+    off_t directoryListing(const std::string &dirPath);
 
     void sendFile(const std::string &path) const;
 
