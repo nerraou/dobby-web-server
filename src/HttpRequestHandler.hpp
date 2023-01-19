@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <sys/stat.h>
 #include <vector>
+#include <dirent.h>
 
 #include "Url.hpp"
 #include "lib.hpp"
@@ -81,7 +82,9 @@ public:
      * serve static files using this->_requestTarget
      */
     off_t serveStatic(const std::string &root, int httpStatus, const std::string &statusMessage);
-    off_t serveIndexFile(const std::string &root, std::vector<std::string> indexs);
+    off_t serveIndexFile(const std::string &root, std::vector<std::string> indexs, bool autoIndex);
+
+    off_t directoryListing(const std::string &dirPath);
 
     void sendFile(const std::string &path) const;
 

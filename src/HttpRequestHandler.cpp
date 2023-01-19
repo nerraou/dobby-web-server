@@ -236,7 +236,7 @@ off_t HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, c
     }
 }
 
-off_t HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std::string> indexs)
+off_t HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std::string> indexs, bool autoIndex)
 {
     std::stringstream headers;
     FileStat stat;
@@ -257,13 +257,53 @@ off_t HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<st
             }
         }
         if (i == indexs.size())
-            throw HttpForbiddenException();
+        {
+            if (autoIndex == true)
+                return this->directoryListing(path);
+            else
+                throw HttpForbiddenException();
+        }
         return this->serveStatic(indexPath, HTTP_OK, HTTP_OK_MESSAGE);
     }
     catch (const std::exception &e)
     {
         throw HttpForbiddenException();
     }
+}
+
+off_t HttpRequestHandler::directoryListing(const std::string &dirPath)
+{
+    struct dirent **entity;
+    std::stringstream headers;
+    std::stringstream body;
+    std::string stringBody;
+    int fileNumber;
+
+    body << "<html><head><title>Directory listing for</title></head><body><ul>";
+    fileNumber = scandir(dirPath.c_str(), &entity, NULL, alphasort);
+    for (int i = 0; i < fileNumber; i++)
+    {
+        if (entity[i]->d_type == DT_DIR)
+        {
+            body << "<li><a href=" << entity[i]->d_name << "/"
+                 << ">" << entity[i]->d_name << "/"
+                 << "</a></li>" << std::endl;
+        }
+        else
+            body << "<li><a href=" << entity[i]->d_name << ">" << entity[i]->d_name << "</a></li>" << std::endl;
+        free(entity[i]);
+    }
+    free(entity);
+    body << "</ul></body>";
+    stringBody = body.str();
+    headers << "HTTP/1.1 " << HTTP_OK << " " << HTTP_OK_MESSAGE << CRLF;
+    headers << "Content-Length: " << stringBody.length() << CRLF;
+    // headers << "Content-Type: " << this->getFileContentType(path) << CRLF;
+    headers << CRLF;
+
+    const std::string &response = headers.str() + stringBody;
+    (void)::send(this->_connectionRef, response.c_str(), response.length(), 0);
+    return stringBody.length();
 }
 
 void HttpRequestHandler::sendFile(const std::string &path) const
