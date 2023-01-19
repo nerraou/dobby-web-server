@@ -67,7 +67,7 @@ void Server::start(std::vector<PollFd> &connections)
                 hasTrainlingSlash = requestHandler->getRequestTarget().path[requestHandler->getRequestTarget().path.size() - 1] == '/';
                 off_t responseContentLength;
 
-                if (hasTrainlingSlash)            
+                if (hasTrainlingSlash)
                     responseContentLength = requestHandler->serveIndexFile(path, this->_config.getIndexes(), this->_config.getAutoIndex());
                 else
                     responseContentLength = requestHandler->serveStatic(path, HTTP_OK, HTTP_OK_MESSAGE);
