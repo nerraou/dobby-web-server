@@ -322,6 +322,26 @@ void HttpRequestHandler::sendFile(const std::string &path) const
     }
 }
 
+void HttpRequestHandler::logAccess(const HttpRequestHandler &request, int httpStatus, std::size_t contentLength, const std::string &remoteAddress) const
+{
+    char dateString[27];
+
+    const time_t nowTimestamp = ::time(NULL);
+
+    lib::formatTime(dateString, 27, "%d/%b/%Y:%X %z", nowTimestamp);
+
+    std::cout << remoteAddress << " - ["
+              << dateString
+              << "] \""
+              << request.getMethod()
+              << " "
+              << request.getRequestTarget().origin
+              << "\" "
+              << httpStatus
+              << " "
+              << contentLength << std::endl;
+}
+
 HttpRequestHandler::~HttpRequestHandler()
 {
 }

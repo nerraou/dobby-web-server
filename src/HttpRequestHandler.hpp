@@ -87,6 +87,8 @@ public:
     off_t directoryListing(const std::string &dirPath);
 
     void sendFile(const std::string &path) const;
+//
+    void logAccess(const HttpRequestHandler &request, int httpStatus, std::size_t contentLength,const std::string &remoteAddress) const;
 
     ~HttpRequestHandler();
 

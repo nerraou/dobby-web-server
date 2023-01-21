@@ -25,7 +25,5 @@ public:
     Server(const ConfigServer &config);
     ~Server();
 
-    int acceptConnection(void);
-    void closeConnection(int &fd);
     void start(std::vector<PollFd> &connections);
 };

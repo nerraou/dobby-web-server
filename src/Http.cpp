@@ -2,17 +2,11 @@
 
 Http::Http(const ConfigHttp &config)
 {
-    Server *virtualServer;
+
     ConfigServer configServer;
 
     this->_config = config;
-
-    for (size_t i = 0; i < this->_config.getServersCount(); i++)
-    {
-        configServer = this->_config.getServerConfig(i);
-        virtualServer = new Server(configServer);
-        this->_virtualServers.push_back(virtualServer);
-    }
+    this->createServerGroups();
 }
 
 inline bool Http::comparePollFdByFd(const PollFd &a, const PollFd &b)
@@ -34,6 +28,27 @@ inline void Http::removeBadConnections(void)
 
     if (last != this->_connections.end())
         this->_connections.erase(last);
+}
+
+void Http::createServerGroups()
+{
+    ServerGroup *serverGroup;
+
+    for (size_t i = 0; i < this->_config.getServersCount(); i++)
+    {
+        int port;
+
+        port = this->_config.getServerConfig(i).getPort();
+        if (this->_serverGroups.count(port) != 0)
+        {
+            serverGroup = new ServerGroup(this->_config.getServerConfig(i));
+            this->_serverGroups.insert(std::pair<int, ServerGroup *>(port, serverGroup));
+        }
+        else
+        {
+            this->_serverGroups[port]->addServerGroup(this->_config.getServerConfig(i));
+        }
+    }
 }
 
 void Http::start(void)

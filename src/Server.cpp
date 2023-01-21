@@ -3,35 +3,12 @@
 Server::Server(const ConfigServer &config)
 {
     this->_config = config;
-    this->_socket.create();
-    this->_socket.bind(this->_config.getPort());
 }
 
 Server::~Server()
 {
 }
 
-int Server::acceptConnection(void)
-{
-    int acceptedConnection;
-
-    this->_socket.listen(100);
-    acceptedConnection = this->_socket.accept();
-    if (acceptedConnection != -1)
-    {
-        this->_connections.insert(acceptedConnection);
-        this->_requests.insert(std::make_pair(acceptedConnection, HttpRequestHandler(acceptedConnection)));
-    }
-    return (acceptedConnection);
-}
-
-void Server::closeConnection(int &fd)
-{
-    ::close(fd);
-    this->_connections.erase(fd);
-    this->_requests.erase(fd);
-    fd = -1;
-}
 
 void Server::start(std::vector<PollFd> &connections)
 {
