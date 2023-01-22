@@ -2,9 +2,6 @@
 
 Http::Http(const ConfigHttp &config)
 {
-
-    ConfigServer configServer;
-
     this->_config = config;
     this->createServerGroups();
 }
@@ -39,32 +36,38 @@ void Http::createServerGroups()
         int port;
 
         port = this->_config.getServerConfig(i).getPort();
-        if (this->_serverGroups.count(port) != 0)
+        if (this->_serverGroups.count(port) == 0)
         {
-            serverGroup = new ServerGroup(this->_config.getServerConfig(i));
+            serverGroup = new ServerGroup(port);
+            serverGroup->addVirtualServer(this->_config.getServerConfig(i));
             this->_serverGroups.insert(std::pair<int, ServerGroup *>(port, serverGroup));
         }
         else
         {
-            this->_serverGroups[port]->addServerGroup(this->_config.getServerConfig(i));
+            this->_serverGroups[port]->addVirtualServer(this->_config.getServerConfig(i));
         }
     }
 }
 
 void Http::start(void)
 {
+    std::map<int, ServerGroup *>::const_iterator it;
+
     while (true)
     {
-        for (size_t i = 0; i < this->_virtualServers.size(); i++)
+        it = this->_serverGroups.begin();
+        while (it != this->_serverGroups.end())
         {
             PollFd connection;
 
-            connection.fd = this->_virtualServers.at(i)->acceptConnection();
+            connection.fd = it->second->acceptConnection();
+
             if (connection.fd != -1)
             {
                 connection.events = POLLIN | POLLOUT;
                 this->_connections.push_back(connection);
             }
+            ++it;
         }
 
         if (this->_connections.size() == 0)
@@ -75,15 +78,21 @@ void Http::start(void)
 
         this->removeBadConnections();
 
-        for (size_t i = 0; i < this->_virtualServers.size(); i++)
-            this->_virtualServers[i]->start(this->_connections);
+        it = this->_serverGroups.begin();
+        while (it != this->_serverGroups.end())
+        {
+            it->second->start(this->_connections);
+            ++it;
+        }
     }
 }
 
 Http::~Http()
 {
-    for (size_t i = 0; i < this->_virtualServers.size(); i++)
+    std::map<int, ServerGroup *>::iterator it = this->_serverGroups.begin();
+    while (it != this->_serverGroups.end())
     {
-        delete this->_virtualServers[i];
+        delete it->second;
+        ++it;
     }
 }

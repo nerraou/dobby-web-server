@@ -26,7 +26,7 @@ SOURCE_FILES=\
 	\
 	src/filestat/FileStat.cpp\
 	\
-	src/ServerGroup/ServerGroup.hpp
+	src/ServerGroup/ServerGroup.cpp
 
 HPP_FILES=\
 	src/ServerSocket.hpp\

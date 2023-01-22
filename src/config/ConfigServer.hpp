@@ -30,6 +30,7 @@ public:
     const bool &getAutoIndex() const;
     void setAutoIndex(bool);
     const std::string &getServerName(size_t index);
+    bool isServerNameExist(const std::string &host) const;
     void addServerNames(std::vector<std::string> serverNames);
     const std::string &getRoot() const;
     void setRoot(const std::string &root);

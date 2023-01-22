@@ -7,24 +7,32 @@ bool ServerGroup::hasConnection(int fd)
     return false;
 }
 
+int ServerGroup::hasServerHost(const std::string &host) const
+{
+    for (size_t i = 0; i < this->_virtualServers.size(); i++)
+    {
+        if (this->_virtualServers[i]->isServerNameExist(host))
+            return i;
+    }
+    return -1;
+}
+
 ServerGroup::ServerGroup()
 {
 }
 
-ServerGroup::ServerGroup(const ConfigServer &configServer)
+ServerGroup::ServerGroup(int serverGroupPort)
 {
-    Server *virtualServer;
-    this->_config = configServer;
-
     this->_socket.create();
-    this->_socket.bind(this->_config.getPort());
-    virtualServer = new Server(this->_config);
-    this->_virtualServers.push_back(virtualServer);
+    this->_socket.bind(serverGroupPort);
 }
 
-void ServerGroup::addServerGroup(const ConfigServer &configServer)
+void ServerGroup::addVirtualServer(const ConfigServer &configServer)
 {
-    ServerGroup(configServer);
+    Server *virtualServer;
+
+    virtualServer = new Server(configServer);
+    this->_virtualServers.push_back(virtualServer);
 }
 
 int ServerGroup::acceptConnection(void)
@@ -61,6 +69,7 @@ void ServerGroup::start(std::vector<PollFd> &connections)
     HttpRequestHandler *requestHandler = NULL;
     time_t nowTimestamp = ::time(NULL);
     int connectionFd;
+    int serverIndex;
 
     try
     {
@@ -74,19 +83,29 @@ void ServerGroup::start(std::vector<PollFd> &connections)
             this->handleTimeout(nowTimestamp, requestHandler->getRequestLastRead(), requestHandler->getRequestTimeout());
             if (connection->revents & POLLOUT && requestHandler->isRequestReady())
             {
-                
-            }
+                const char *host = requestHandler->getRequestHost();
+                serverIndex = this->hasServerHost(host);
 
+                if (host == nullptr || serverIndex == -1)
+                    this->_virtualServers[0]->start(*requestHandler, this->_socket.getRemoteAddress());
+                else
+                    this->_virtualServers[serverIndex]->start(*requestHandler, this->_socket.getRemoteAddress());
+            }
+            else if (connection->revents & POLLIN)
+                requestHandler->read();
         }
     }
-    catch (const HttpRequestHandler::AHttpRequestException &e)
+    catch (const HttpRequestHandler::HttpRequestTimeoutException &e)
     {
-        const std::string &path = this->_config.getRoot() + "/" + lib::toString(e.getHttpStatus()) + ".html";
+        const std::string &path = this->_virtualServers[serverIndex]->getRoot() + "/" + lib::toString(e.getHttpStatus()) + ".html";
 
         off_t responseContentLength = requestHandler->serveStatic(path, e.getHttpStatus(), e.what());
 
-        requestHandler->logAccess(*requestHandler, e.getHttpStatus(), responseContentLength);
-
+        requestHandler->logAccess(e.getHttpStatus(), responseContentLength, this->_socket.getRemoteAddress());
+        this->closeConnection(connection->fd);
+    }
+    catch (const HttpRequestHandler::AHttpRequestException &e)
+    {
         this->closeConnection(connection->fd);
     }
 }

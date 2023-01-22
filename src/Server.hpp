@@ -19,11 +19,11 @@ private:
     std::map<int, HttpRequestHandler> _requests;
     ConfigServer _config;
 
-    void logAccess(const HttpRequestHandler &request, int httpStatus, std::size_t contentLength) const;
-
 public:
     Server(const ConfigServer &config);
+    const std::string &getRoot() const;
+    bool isServerNameExist(const std::string &host) const;
     ~Server();
 
-    void start(std::vector<PollFd> &connections);
+    void start(HttpRequestHandler &HttpRequestHandler, const std::string &remoteAddress);
 };

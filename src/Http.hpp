@@ -13,7 +13,6 @@ class Http
 {
 private:
     ConfigHttp _config;
-    std::vector<Server *> _virtualServers;
     std::vector<PollFd> _connections;
     std::map<int, ServerGroup *> _serverGroups;
 
