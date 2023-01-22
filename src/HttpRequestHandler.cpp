@@ -81,7 +81,7 @@ void HttpRequestHandler::setMethod(const std::string &method)
 
     for (int i = 0; i < methodsCount; i++)
     {
-        if (method.compare(methods[i]) != 0)
+        if (method.compare(methods[i]) == 0)
         {
             this->_method = method;
             return;
@@ -211,6 +211,13 @@ void HttpRequestHandler::read(void)
     }
 }
 
+const char *HttpRequestHandler::getRequestHost() const
+{
+    if (this->_headers.count("host") == 0)
+        return NULL;
+    return this->_headers.at("host").c_str();
+}
+
 off_t HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, const std::string &statusMessage)
 {
     try
@@ -320,6 +327,26 @@ void HttpRequestHandler::sendFile(const std::string &path) const
             break;
         (void)::send(this->_connectionRef, readBuffer, i.gcount(), 0);
     }
+}
+
+void HttpRequestHandler::logAccess(int httpStatus, std::size_t contentLength, const std::string &remoteAddress) const
+{
+    char dateString[27];
+
+    const time_t nowTimestamp = ::time(NULL);
+
+    lib::formatTime(dateString, 27, "%d/%b/%Y:%X %z", nowTimestamp);
+
+    std::cout << remoteAddress << " - ["
+              << dateString
+              << "] \""
+              << this->getMethod()
+              << " "
+              << this->getRequestTarget().origin
+              << "\" "
+              << httpStatus
+              << " "
+              << contentLength << std::endl;
 }
 
 HttpRequestHandler::~HttpRequestHandler()

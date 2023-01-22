@@ -78,6 +78,8 @@ public:
 
     void read(void);
 
+    const char *getRequestHost() const;
+
     /**
      * serve static files using this->_requestTarget
      */
@@ -87,6 +89,8 @@ public:
     off_t directoryListing(const std::string &dirPath);
 
     void sendFile(const std::string &path) const;
+//
+    void logAccess(int httpStatus, std::size_t contentLength,const std::string &remoteAddress) const;
 
     ~HttpRequestHandler();
 

@@ -29,6 +29,11 @@ const std::string &ConfigServer::getServerName(size_t index)
     return this->_serverNames[index];
 }
 
+bool ConfigServer::isServerNameExist(const std::string &host) const
+{
+    return std::find(this->_serverNames.begin(), this->_serverNames.end(), host) != this->_serverNames.end();
+}
+
 void ConfigServer::setErrorPages(const std::map<int, std::string> &errorPages)
 {
     this->_errorPages = errorPages;
