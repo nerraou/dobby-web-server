@@ -214,7 +214,7 @@ void HttpRequestHandler::read(void)
 const char *HttpRequestHandler::getRequestHost() const
 {
     if (this->_headers.count("host") == 0)
-        return nullptr;
+        return NULL;
     return this->_headers.at("host").c_str();
 }
 

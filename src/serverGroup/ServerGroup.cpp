@@ -86,7 +86,7 @@ void ServerGroup::start(std::vector<PollFd> &connections)
                 const char *host = requestHandler->getRequestHost();
                 serverIndex = this->hasServerHost(host);
 
-                if (host == nullptr || serverIndex == -1)
+                if (host == NULL || serverIndex == -1)
                     this->_virtualServers[0]->start(*requestHandler, this->_socket.getRemoteAddress());
                 else
                     this->_virtualServers[serverIndex]->start(*requestHandler, this->_socket.getRemoteAddress());

@@ -28,6 +28,7 @@ void Server::start(HttpRequestHandler &requestHandler, const std::string &remote
 
         hasTrainlingSlash = requestHandler.getRequestTarget().path[requestHandler.getRequestTarget().path.size() - 1] == '/';
         off_t responseContentLength;
+        (void)responseContentLength;
 
         if (hasTrainlingSlash)
             responseContentLength = requestHandler.serveIndexFile(path, this->_config.getIndexes(), this->_config.getAutoIndex());
