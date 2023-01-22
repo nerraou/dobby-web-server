@@ -9,9 +9,9 @@ void FileStat::callStat()
     if (statReturn == -1)
         throw FileStatException(strerror(errno));
     this->_size = fileStat.st_size;
-    this->_createdAt = fileStat.st_ctimespec;
-    this->_updatedAt = fileStat.st_ctimespec;
-    this->_lastAccessAt = fileStat.st_ctimespec;
+    this->_createdAt = fileStat.STAT_MEMBER_CTIME;
+    this->_updatedAt = fileStat.STAT_MEMBER_MTIME;
+    this->_lastAccessAt = fileStat.STAT_MEMBER_ATIME;
     this->_mode = fileStat.st_mode;
 }
 
