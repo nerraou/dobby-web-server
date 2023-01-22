@@ -23,10 +23,11 @@ void Server::start(HttpRequestHandler &requestHandler, const std::string &remote
 {
     try
     {
-        const std::string &path = this->_config.getRoot() + requestHandler.getRequestTarget().path;
+        const std::string &path = this->_config.getRoot() + requestHandler.getHttpParser().getRequestTarget().path;
         bool hasTrainlingSlash;
+        const std::string &requestPath = requestHandler.getHttpParser().getRequestTarget().path;
 
-        hasTrainlingSlash = requestHandler.getRequestTarget().path[requestHandler.getRequestTarget().path.size() - 1] == '/';
+        hasTrainlingSlash = requestPath[requestPath.length() - 1] == '/';
         off_t responseContentLength;
         (void)responseContentLength;
 
@@ -34,13 +35,13 @@ void Server::start(HttpRequestHandler &requestHandler, const std::string &remote
             responseContentLength = requestHandler.serveIndexFile(path, this->_config.getIndexes(), this->_config.getAutoIndex());
         else
             responseContentLength = requestHandler.serveStatic(path, HTTP_OK, HTTP_OK_MESSAGE);
-        throw HttpRequestHandler::AHttpRequestException();
+        throw AHttpRequestException();
     }
-    catch (const HttpRequestHandler::AHttpRequestException &e)
+    catch (const AHttpRequestException &e)
     {
         const std::string &path = this->_config.getRoot() + "/" + lib::toString(e.getHttpStatus()) + ".html";
         off_t responseContentLength = requestHandler.serveStatic(path, e.getHttpStatus(), e.what());
         requestHandler.logAccess(e.getHttpStatus(), responseContentLength, remoteAddress);
-        throw HttpRequestHandler::AHttpRequestException();
+        throw AHttpRequestException();
     }
 }

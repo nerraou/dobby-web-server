@@ -24,4 +24,15 @@ namespace lib
 
         return stream.str();
     }
+
+    template <typename InputIt, typename UnaryPredicate>
+    InputIt findIfNot(InputIt first, InputIt last, UnaryPredicate q)
+    {
+        for (; first != last; ++first)
+        {
+            if (!q(*first))
+                return first;
+        }
+        return (last);
+    }
 }
