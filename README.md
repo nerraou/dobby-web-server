@@ -11,12 +11,52 @@ make && ./dobby config_file
 ```
 .
 ├── README.md
+├── CONFIG.md
 ├── .gitignore
 ├── Makefile
-├── include
+├── wwww/
 └── src
-    ├── *.cpp
-    └── *.hpp
+    └── config
+    │   ├── ConfigHttp.cpp
+    │   ├── ConfigHttp.hpp
+    │   ├── ConfigLocation.cpp
+    │   ├── ConfigLocation.hpp
+    │   ├── ConfigServer.cpp
+    │   └── ConfigServer.hpp
+    ├── fileStat
+    │   ├── FileStat.cpp
+    │   └── FileStat.hpp
+    ├── http
+    │   ├── Http.cpp
+        ├── Http.hpp
+    │   ├── HttpException.cpp
+    │   ├── HttpException.hpp
+    │   ├── HttpParser.cpp
+    │   ├── HttpParser.hpp
+    │   ├── HttpRequestHandler.cpp
+    │   ├── HttpRequestHandler.hpp
+    │   ├── Server.hpp
+    │   └── Server.hpp
+    ├── httpStatus
+    │   └── httpStatus.hpp
+    ├── lib
+    │   ├── lib.cpp
+    │   └── lib.hpp
+    ├── parseConfig
+    │   ├── ParseConfig.cpp
+    │   └── ParseConfig.hpp
+    ├── serverGroup
+    │   ├── ServerGroup.cpp
+    │   └── ServerGroup.hpp
+    ├── socket
+    │   ├── ServerSocket.cpp
+    │   └── ServerSocket.hpp
+    ├── url
+    │   ├── Url.cpp
+    │   └── Url.hpp
+    ├── typedefs
+    │   └── typedefs.hpp
+    └── main.cpp
 ```
 
 ## Naming conventions

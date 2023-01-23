@@ -11,7 +11,6 @@
 #include <cstring>
 #include <cerrno>
 
-#include "Connection.hpp"
 
 class ServerSocket
 {
