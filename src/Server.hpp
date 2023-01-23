@@ -5,6 +5,7 @@
 #include <set>
 #include <map>
 #include <poll.h>
+#include "HttpException.hpp"
 #include "ServerSocket.hpp"
 #include "Connection.hpp"
 #include "ConfigServer.hpp"
