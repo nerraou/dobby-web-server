@@ -7,7 +7,6 @@
 #include <poll.h>
 #include "HttpException.hpp"
 #include "ServerSocket.hpp"
-#include "Connection.hpp"
 #include "ConfigServer.hpp"
 #include "HttpRequestHandler.hpp"
 #include "typedefs.hpp"
