@@ -1,0 +1,43 @@
+text : xml
+text : css
+text : csv
+text : html
+text : plain
+text : javascript
+
+image : gif
+image : png
+image : jpeg
+image : svg+xml
+image : tiff
+image : x-icon
+image : vnd.djvu
+
+application : zip
+application : pdf
+application : xml
+application : ogg
+application : json
+application : ld+json
+application : EDI-X12
+application : EDIFACT
+application : javascript
+application : xhtml+xml
+application : java-archive
+application : octet-stream
+application : x-shockwave-flash
+application :  x-www-form-urlencoded
+
+audio : mpeg
+audio : x-wav
+audio : x-ms-wma
+audio : vnd.rn-realaudio
+
+video : quicktime
+video : webm
+video : mpeg
+video : mp4
+video : x-flv
+video : x-msvideo
+video : x-ms-wmv
+
