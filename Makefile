@@ -5,7 +5,8 @@ CC = c++
 INCLUDE_ARGS=\
 	-I src/lib/ -I src/parseConfig/ -I src/config/ \
 	-I src/ -I src/url/ -I src/fileStat/ -I src/httpStatus/ \
-	-I src/serverGroup/ -I src/http/ -I src/socket -I src/typedefs
+	-I src/serverGroup/ -I src/http/ -I src/socket -I src/typedefs/ \
+	-I src/contentType/
 
 OBJECT_FILES=$(SOURCE_FILES:.cpp=.o)
 SOURCE_FILES=\
@@ -32,6 +33,9 @@ SOURCE_FILES=\
 	src/http/HttpRequestHandler.cpp\
 	\
 	src/socket/ServerSocket.cpp\
+	\
+	src/contentType/ContentType.cpp\
+
 
 HPP_FILES=\
 	src/typedefs/typedefs.hpp\
@@ -59,6 +63,8 @@ HPP_FILES=\
 	src/http/HttpParser.hpp\
 	\
 	src/socket/ServerSocket.hpp\
+	\
+	src/contentType/ContentType.hpp\
 
 all: $(NAME)
 

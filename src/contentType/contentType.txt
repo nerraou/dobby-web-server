@@ -1,43 +1,47 @@
-text : xml
-text : css
-text : csv
-text : html
-text : plain
-text : javascript
+#TEXT
+css : text/css    
+csv : text/csv    
+html : text/html 
+plain : text/plain    
+xml : text/xml
 
-image : gif
-image : png
-image : jpeg
-image : svg+xml
-image : tiff
-image : x-icon
-image : vnd.djvu
+#IMAGE
+gif : image/gif   
+jpeg : image/jpeg   
+png : image/png   
+tiff : image/tiff    
+vnd.microsoft.icon: image/vnd.microsoft.icon    
+x-icon : image/x-icon   
+vnd.djvu : image/vnd.djvu   
+svg+xml: image/svg+xml 
 
-application : zip
-application : pdf
-application : xml
-application : ogg
-application : json
-application : ld+json
-application : EDI-X12
-application : EDIFACT
-application : javascript
-application : xhtml+xml
-application : java-archive
-application : octet-stream
-application : x-shockwave-flash
-application :  x-www-form-urlencoded
+#APPLICATION
+java-archive : application/java-archive
+EDI-X12 : application/EDI-X12   
+EDIFACT : application/EDIFACT   
+javascript : application/javascript   
+octet-stream : application/octet-stream   
+ogg : application/ogg   
+pdf : application/pdf  
+xhtml+xml : application/xhtml+xml
+x-shockwave-flash : application/x-shockwave-flash    
+json : application/json  
+ld+json : application/ld+json  
+xml : application/xml   
+zip : application/zip  
+x-www-form-urlencoded : application/x-www-form-urlencoded  
 
-audio : mpeg
-audio : x-wav
-audio : x-ms-wma
-audio : vnd.rn-realaudio
+#AUDIO
+mpeg : audio/mpeg   
+x-ms-wma : audio/x-ms-wma   
+vnd.rn-realaudio : audio/vnd.rn-realaudio   
+x-wav : audio/x-wav
 
-video : quicktime
-video : webm
-video : mpeg
-video : mp4
-video : x-flv
-video : x-msvideo
-video : x-ms-wmv
-
+#VIDEO
+mpeg : video/mpeg    
+mp4: video/mp4    
+quicktime : video/quicktime    
+x-ms-wmv : video/x-ms-wmv    
+x-msvideo : video/x-msvideo    
+x-flv : video/x-flv   
+webm : video/webm 
