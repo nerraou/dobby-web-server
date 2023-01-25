@@ -18,6 +18,7 @@
 #include "FileStat.hpp"
 #include "httpStatus.hpp"
 #include "HttpParser.hpp"
+#include "ContentType.hpp"
 
 #define CRLF "\r\n"
 
@@ -36,6 +37,7 @@ private:
     time_t _requestLastRead;
     HttpParser _httpParser;
 
+    std::string getFileContentType(const std::string &path);
 public:
     HttpRequestHandler(int connectionRef);
 
