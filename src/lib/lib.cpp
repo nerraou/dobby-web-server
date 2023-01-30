@@ -102,8 +102,16 @@ namespace lib
         }
         return normalizedPath.str();
     }
+
     bool isFileExist(const std::string &path)
     {
         return (::access(path.c_str(), F_OK) == 0);
+    }
+
+    bool endsWith(const std::string &str, const std::string &ending)
+    {
+        if (ending.length() > str.length())
+            return (false);
+        return str.compare(str.length() - ending.length(), ending.length(), ending) == 0;
     }
 }
