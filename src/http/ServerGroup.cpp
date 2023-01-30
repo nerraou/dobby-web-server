@@ -38,13 +38,16 @@ void ServerGroup::addVirtualServer(const ConfigServer &configServer)
 int ServerGroup::acceptConnection(void)
 {
     int acceptedConnection;
+    std::string remoteAddress;
+    sockaddr_in remoteSin;
+    socklen_t addressSize = sizeof(sockaddr_in);
 
     this->_socket.listen(100);
-    acceptedConnection = this->_socket.accept();
+    acceptedConnection = this->_socket.accept(remoteSin, addressSize);
     if (acceptedConnection != -1)
     {
         this->_connections.insert(acceptedConnection);
-        this->_requests.insert(std::make_pair(acceptedConnection, HttpRequestHandler(acceptedConnection)));
+        this->_requests.insert(std::make_pair(acceptedConnection, new HttpRequestHandler(acceptedConnection, remoteSin)));
     }
     return (acceptedConnection);
 }
@@ -53,6 +56,7 @@ void ServerGroup::closeConnection(int &fd)
 {
     ::close(fd);
     this->_connections.erase(fd);
+    delete this->_requests.at(fd);
     this->_requests.erase(fd);
     fd = -1;
 }
@@ -68,6 +72,7 @@ void ServerGroup::start(std::vector<PollFd> &connections)
     PollFd *connection;
     HttpRequestHandler *requestHandler = NULL;
     time_t nowTimestamp = ::time(NULL);
+    bool canWrite;
     int connectionFd;
     int serverIndex;
 
@@ -80,11 +85,27 @@ void ServerGroup::start(std::vector<PollFd> &connections)
             connectionFd = connection->fd;
             if (this->hasConnection(connectionFd) == false)
                 continue;
-            requestHandler = &this->_requests.at(connectionFd);
+
+            requestHandler = this->_requests.at(connectionFd);
+
+            if (requestHandler->isDone())
+            {
+                requestHandler->logAccess();
+                this->closeConnection(connection->fd);
+                return;
+            }
+
             const HttpParser &httpParser = requestHandler->getHttpParser();
 
             this->handleTimeout(nowTimestamp, requestHandler->getRequestLastRead(), requestHandler->getRequestTimeout());
-            if (connection->revents & POLLOUT && requestHandler->getHttpParser().isRequestReady())
+
+            canWrite = requestHandler->getHttpParser().isRequestReady() ||
+                       requestHandler->getHttpParser().isReadingRequestBody() ||
+                       requestHandler->isWritingResponseBody();
+
+            if (connection->revents & POLLIN)
+                requestHandler->read();
+            if (canWrite && connection->revents & POLLOUT)
             {
                 serverIndex = 0;
                 if (httpParser.hasHeader("host"))
@@ -93,24 +114,17 @@ void ServerGroup::start(std::vector<PollFd> &connections)
                 if (serverIndex == -1)
                     serverIndex = 0;
 
-                this->_virtualServers.at(serverIndex)->start(*requestHandler, this->_socket.getRemoteAddress());
+                this->_virtualServers.at(serverIndex)->start(*requestHandler);
             }
-            else if (connection->revents & POLLIN)
-                requestHandler->read();
         }
-    }
-    catch (const HttpRequestTimeoutException &e)
-    {
-        const std::string &path = this->_virtualServers[serverIndex]->getRoot() + "/" + lib::toString(e.getHttpStatus()) + ".html";
-
-        off_t responseContentLength = requestHandler->serveStatic(path, e.getHttpStatus(), e.what());
-
-        requestHandler->logAccess(e.getHttpStatus(), responseContentLength, this->_socket.getRemoteAddress());
-        this->closeConnection(connection->fd);
     }
     catch (const AHttpRequestException &e)
     {
-        this->closeConnection(connection->fd);
+        const std::string &path = this->_virtualServers[serverIndex]->getRoot() + "/" + lib::toString(e.getHttpStatus()) + ".html";
+
+        requestHandler->setIsWritingResponseBodyStatus();
+        requestHandler->setResponseHttpStatus(e.getHttpStatus());
+        requestHandler->serveStatic(path, e.getHttpStatus(), e.what());
     }
 }
 

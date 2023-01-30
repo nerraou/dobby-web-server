@@ -22,11 +22,15 @@ void ConfigServer::setAutoIndex(bool autoIndex)
 {
     this->_autoIndex = autoIndex;
 }
+
+std::size_t ConfigServer::getServerNamesCount(void) const
+{
+    return this->_serverNames.size();
+}
+
 const std::string &ConfigServer::getServerName(size_t index)
 {
-    if (index >= this->_serverNames.size())
-        throw std::out_of_range("out of range");
-    return this->_serverNames[index];
+    return this->_serverNames.at(index);
 }
 
 bool ConfigServer::isServerNameExist(const std::string &host) const
@@ -76,6 +80,16 @@ void ConfigServer::setRoot(const std::string &root)
     this->_root = root;
 }
 
+const std::string &ConfigServer::getPHPCGIPath(void) const
+{
+    return this->_phpCGIPath;
+}
+
+void ConfigServer::setPHPCGIPath(const std::string &path)
+{
+    this->_phpCGIPath = path;
+}
+
 const std::vector<std::string> &ConfigServer::getIndexes() const
 {
     return this->_indexes;
@@ -122,6 +136,7 @@ void ConfigServer::inherit(const ConfigHttp &configHttp)
     this->setClientMaxBodySize(configHttp.getClientMaxBodySize());
     this->_indexes = configHttp.getIndexes();
     this->_errorPages = configHttp.getErrorPages();
+    this->_phpCGIPath = configHttp.getPHPCGIPath();
 }
 
 void ConfigServer::display(bool displayLocation) const

@@ -28,16 +28,14 @@ private:
     std::string _httpVersion;
     Url _requestTarget;
     std::size_t _contentLength;
+    std::size_t _receivedBodySize;
     RequestStatus _status;
 
     void
     setMethod(const std::string &method);
     void setHttpVersion(const std::string &httpVersion);
     bool isHeaderFieldName(const std::string &name);
-    std::size_t getContentLength() const;
-    bool isRequestMethodHasBody(void) const;
     bool isReadingRequestLine(void) const;
-    bool isReadingRequestBody(void) const;
     bool isReadingRequestHeaders(void) const;
     void setReadingRequestLineStatus(void);
     void setReadingRequestBodyStatus(void);
@@ -61,6 +59,11 @@ public:
     const ArrayBuffer &getBody(void) const;
 
     bool isRequestReady(void) const;
+    bool isReadingRequestBody(void) const;
+    bool isRequestMethodHasBody(void) const;
+    std::size_t getContentLength() const;
+    std::size_t getReceivedBodySize(void) const;
+    void clearBody(void);
 
     ~HttpParser();
 

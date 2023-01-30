@@ -3,6 +3,7 @@
 HttpParser::HttpParser()
 {
     this->setReadingRequestLineStatus();
+    this->_receivedBodySize = 0;
 }
 
 void HttpParser::append(const ArrayBuffer::const_iterator &begin, const ArrayBuffer::const_iterator &end)
@@ -212,6 +213,15 @@ ArrayBuffer::iterator HttpParser::findCRLFPosition(ArrayBuffer::iterator &begin)
     return (end);
 }
 
+std::size_t HttpParser::getReceivedBodySize(void) const
+{
+    return this->_receivedBodySize;
+}
+void HttpParser::clearBody(void)
+{
+    this->_body.clear();
+}
+
 void HttpParser::process(void)
 {
     ArrayBuffer::iterator begin;
@@ -224,8 +234,7 @@ void HttpParser::process(void)
     {
         this->_body.insert(this->_body.end(), this->_buffer.begin(), this->_buffer.end());
         this->_buffer.clear();
-
-        if (this->_body.size() >= this->getContentLength())
+        if (this->getReceivedBodySize() == this->getContentLength())
             this->setRequestReadyStatus();
     }
 
@@ -247,6 +256,8 @@ void HttpParser::process(void)
         else if (crlfPosition == begin)
         {
             this->_body.insert(this->_body.end(), crlfPosition + CRLF_LEN, this->_buffer.end());
+            this->_receivedBodySize += this->_body.size();
+            this->_buffer.clear();
             this->setReadingRequestBodyStatus();
             lastCRLFPosition = crlfPosition + CRLF_LEN;
             break;
@@ -260,7 +271,8 @@ void HttpParser::process(void)
         crlfPosition = this->findCRLFPosition(begin);
     }
 
-    this->_buffer.erase(this->_buffer.begin(), lastCRLFPosition);
+    if (!this->_buffer.empty())
+        this->_buffer.erase(this->_buffer.begin(), lastCRLFPosition);
 
     if (this->isReadingRequestBody() && !this->isRequestMethodHasBody())
         this->setRequestReadyStatus();
@@ -269,7 +281,7 @@ void HttpParser::process(void)
         if (!this->hasHeader("content-length"))
             throw HttpBadRequestException();
 
-        if (this->_body.size() >= this->getContentLength())
+        if (this->getReceivedBodySize() == this->getContentLength())
             this->setRequestReadyStatus();
     }
 }

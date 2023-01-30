@@ -3,11 +3,19 @@
 /**
  * public
  */
-HttpRequestHandler::HttpRequestHandler(int connectionRef)
+
+HttpRequestHandler::HttpRequestHandler(int connectionRef, const sockaddr_in &remoteSin)
 {
     this->_connectionRef = connectionRef;
-    this->_requestReadTimeout = 5;
+    this->_requestReadTimeout = 60;
     this->_requestLastRead = ::time(NULL);
+    this->setIsIdleStatus();
+    this->_responseContentLength = 0;
+    this->_requestBodyOffset = 0;
+    this->_cgiWriteEnd = -1;
+
+    this->_remoteSin = remoteSin;
+    this->setRemoteAddressIp();
 }
 
 int HttpRequestHandler::getConnectionRef(void) const
@@ -30,6 +38,75 @@ const HttpParser &HttpRequestHandler::getHttpParser(void) const
     return this->_httpParser;
 }
 
+bool HttpRequestHandler::isIdleStatus(void) const
+{
+    return this->_status == IsIdle;
+}
+
+void HttpRequestHandler::setIsIdleStatus(void)
+{
+    this->_status = IsIdle;
+}
+
+void HttpRequestHandler::setIsDoneStatus(void)
+{
+    this->_status = IsDone;
+}
+
+bool HttpRequestHandler::isDone(void) const
+{
+    return this->_status == IsDone;
+}
+
+void HttpRequestHandler::setIsWritingRequestBodyStatus(void)
+{
+    this->_status = IsWritingRequestBody;
+}
+
+bool HttpRequestHandler::isWritingRequestBody(void) const
+{
+    return this->_status == IsWritingRequestBody;
+}
+
+void HttpRequestHandler::setIsWritingResponseBodyStatus(void)
+{
+    this->_status = IsWritingResponseBody;
+}
+
+bool HttpRequestHandler::isWritingResponseBody(void) const
+{
+    return this->_status == IsWritingResponseBody;
+}
+
+void HttpRequestHandler::setResponseContentLength(off_t contentLength)
+{
+    this->_responseContentLength = contentLength;
+}
+
+off_t HttpRequestHandler::getResponseContentLength(void) const
+{
+    return this->_responseContentLength;
+}
+
+void HttpRequestHandler::setResponseHttpStatus(int httpStatus)
+{
+    this->_responseHttpStatus = httpStatus;
+}
+
+int HttpRequestHandler::getResponseHttpStatus(void) const
+{
+    return this->_responseHttpStatus;
+}
+
+void HttpRequestHandler::setRemoteAddressIp(void)
+{
+    char str[INET_ADDRSTRLEN];
+
+    (void)::inet_ntop(AF_INET, &this->_remoteSin.sin_addr, str, INET_ADDRSTRLEN);
+
+    this->_remoteAddressIp.assign(str);
+}
+
 void HttpRequestHandler::read(void)
 {
     ssize_t receivedBytes;
@@ -38,25 +115,66 @@ void HttpRequestHandler::read(void)
     if (this->_httpParser.isRequestReady())
         return;
 
-    this->_requestLastRead = ::time(NULL);
-
-    buffer.reserve(1024);
+    buffer.reserve(4096);
 
     receivedBytes = ::recv(this->_connectionRef, &buffer[0], buffer.capacity(), 0);
 
     if (receivedBytes <= 0)
         return;
 
+    this->_requestLastRead = ::time(NULL);
+
     this->_httpParser.append(buffer.begin(), buffer.begin() + receivedBytes);
     this->_httpParser.process();
 }
 
-off_t HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, const std::string &statusMessage)
+void HttpRequestHandler::resumeWritingRequestBody(void)
+{
+    const ArrayBuffer &body = this->_httpParser.getBody();
+    ssize_t writtentSize;
+
+    if (this->_httpParser.getBody().size() != 0)
+    {
+        writtentSize = ::write(this->_cgiWriteEnd, &body[0], body.size());
+        this->_requestBodyOffset += body.size();
+        this->_httpParser.clearBody();
+
+        if (writtentSize <= 0 || this->_requestBodyOffset == this->_httpParser.getContentLength())
+        {
+            ::close(this->_cgiWriteEnd);
+            this->_cgiWriteEnd = -1;
+            this->setIsDoneStatus();
+        }
+    }
+}
+
+void HttpRequestHandler::resumeWritingResponseBody(void)
+{
+    char readBuffer[4096];
+
+    std::istream &i = this->_staticFile.read(readBuffer, 4096);
+    if (i.gcount() == 0)
+    {
+        this->setIsDoneStatus();
+        return;
+    }
+
+    if (::send(this->getConnectionRef(), readBuffer, i.gcount(), 0) <= 0)
+    {
+        this->setIsDoneStatus();
+    }
+}
+
+void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, const std::string &statusMessage)
 {
     try
     {
         std::stringstream headers;
         const FileStat &stat = FileStat::open(path);
+
+        this->_responseContentLength = stat.getSize();
+
+        this->setResponseContentLength(stat.getSize());
 
         headers << "HTTP/1.1 " << httpStatus << " " << statusMessage << CRLF;
         headers << "Content-Length: " << stat.getSize() << CRLF;
@@ -64,11 +182,10 @@ off_t HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, c
         headers << CRLF;
 
         const std::string &headersString = headers.str();
-        (void)::send(this->_connectionRef, headersString.c_str(), headersString.length(), 0);
+        if (::send(this->_connectionRef, headersString.c_str(), headersString.length(), 0) <= 0)
+            throw HttpInternalServerErrorException();
 
         this->sendFile(path);
-
-        return stat.getSize();
     }
     catch (const std::exception &e)
     {
@@ -76,7 +193,7 @@ off_t HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, c
     }
 }
 
-off_t HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std::string> indexs, bool autoIndex)
+void HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std::string> indexs, bool autoIndex)
 {
     std::stringstream headers;
     FileStat stat;
@@ -99,15 +216,16 @@ off_t HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<st
         if (i == indexs.size())
         {
             if (autoIndex == true)
-                return this->directoryListing(path);
+                this->setResponseContentLength(this->directoryListing(path));
             else
                 throw HttpForbiddenException();
         }
-        return this->serveStatic(indexPath, HTTP_OK, HTTP_OK_MESSAGE);
+        else
+            this->serveStatic(indexPath, HTTP_OK, HTTP_OK_MESSAGE);
     }
-    catch (const std::exception &e)
+    catch (const FileStat::FileStatException &e)
     {
-        throw HttpForbiddenException();
+        throw HttpInternalServerErrorException();
     }
 }
 
@@ -142,27 +260,91 @@ off_t HttpRequestHandler::directoryListing(const std::string &dirPath)
     headers << CRLF;
 
     const std::string &response = headers.str() + stringBody;
-    (void)::send(this->_connectionRef, response.c_str(), response.length(), 0);
+    if (::send(this->_connectionRef, response.c_str(), response.length(), 0) <= 0)
+        this->setIsDoneStatus();
     return stringBody.length();
 }
 
-void HttpRequestHandler::sendFile(const std::string &path) const
+void HttpRequestHandler::sendFile(const std::string &path)
 {
-    std::ifstream file;
-    char readBuffer[32];
+    char readBuffer[512];
 
-    file.open(path.c_str());
+    this->_staticFile.open(path.c_str());
 
-    while (true)
+    std::istream &i = this->_staticFile.read(readBuffer, 512);
+    if (i.gcount() == 0)
     {
-        std::istream &i = file.read(readBuffer, 32);
-        if (i.gcount() == 0)
-            break;
-        (void)::send(this->_connectionRef, readBuffer, i.gcount(), 0);
+        this->setIsDoneStatus();
+        return;
     }
+
+    if (::send(this->getConnectionRef(), readBuffer, i.gcount(), 0) <= 0)
+        this->setIsDoneStatus();
 }
 
-void HttpRequestHandler::logAccess(int httpStatus, std::size_t contentLength, const std::string &remoteAddress) const
+void HttpRequestHandler::setCGIEnv(const std::string &path, const HttpParser &httpParser) const
+{
+    const Url &requestTarget = httpParser.getRequestTarget();
+    std::string requestUri = requestTarget.path;
+
+    if (!requestTarget.queryString.empty())
+        requestUri += std::string("?") + requestTarget.queryString;
+
+    ::setenv("QUERY_STRING", requestTarget.queryString.c_str(), 1);
+    ::setenv("REQUEST_METHOD", httpParser.getMethod().c_str(), 1);
+    ::setenv("PATH_INFO", path.c_str(), 1);
+    ::setenv("SCRIPT_FILENAME", path.c_str(), 1);
+    ::setenv("SCRIPT_NAME", requestTarget.path.c_str(), 1);
+    ::setenv("REQUEST_URI", requestUri.c_str(), 1);
+    ::setenv("DOCUMENT_URI", requestTarget.path.c_str(), 1);
+    ::setenv("REDIRECT_STATUS", "200", 1);
+    ::setenv("REMOTE_ADDR", this->_remoteAddressIp.c_str(), 1);
+    ::setenv("REMOTE_PORT", lib::toString(this->_remoteSin.sin_port).c_str(), 1);
+
+    if (httpParser.hasHeader("content-type"))
+        ::setenv("CONTENT_TYPE", httpParser.getHeader("content-type").c_str(), 1);
+    if (httpParser.hasHeader("content-length"))
+        ::setenv("CONTENT_LENGTH", httpParser.getHeader("content-length").c_str(), 1);
+}
+
+void HttpRequestHandler::runCGI(const std::string &path, const std::string &cgiBinPath)
+{
+    extern char **environ;
+    const HttpParser &httpParser = this->getHttpParser();
+
+    int fds[2];
+    char *argv[] = {
+        (char *)cgiBinPath.c_str(),
+        NULL,
+    };
+    (void)argv;
+    (void)(environ);
+
+    if (::pipe(fds) == -1)
+        throw HttpInternalServerErrorException();
+
+    this->_cgiWriteEnd = fds[1];
+
+    if (::fork() == 0)
+    {
+        ::dup2(fds[0], 0);
+        ::close(fds[0]);
+        ::close(fds[1]);
+
+        this->setCGIEnv(path, httpParser);
+
+        ::dup2(this->getConnectionRef(), 1);
+
+        if (::send(1, "HTTP/1.1 200 OK" CRLF, 17, 0) <= 0)
+            exit(1);
+
+        ::execve(cgiBinPath.c_str(), argv, environ);
+        ::exit(1);
+    }
+    ::close(fds[0]);
+}
+
+void HttpRequestHandler::logAccess(void) const
 {
     char dateString[27];
 
@@ -170,16 +352,16 @@ void HttpRequestHandler::logAccess(int httpStatus, std::size_t contentLength, co
 
     lib::formatTime(dateString, 27, "%d/%b/%Y:%X %z", nowTimestamp);
 
-    std::cout << remoteAddress << " - ["
+    std::cout << this->_remoteAddressIp << " - ["
               << dateString
               << "] \""
               << this->_httpParser.getMethod()
               << " "
               << this->_httpParser.getRequestTarget().origin
               << "\" "
-              << httpStatus
+              << this->getResponseHttpStatus()
               << " "
-              << contentLength << std::endl;
+              << this->getResponseContentLength() << std::endl;
 }
 
 HttpRequestHandler::~HttpRequestHandler()

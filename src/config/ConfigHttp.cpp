@@ -19,6 +19,16 @@ void ConfigHttp::setRoot(const std::string &root)
     this->_root = root;
 }
 
+const std::string &ConfigHttp::getPHPCGIPath(void) const
+{
+    return this->_phpCGIPath;
+}
+
+void ConfigHttp::setPHPCGIPath(const std::string &path)
+{
+    this->_phpCGIPath = path;
+}
+
 const std::vector<std::string> &ConfigHttp::getIndexes() const
 {
     return this->_indexes;

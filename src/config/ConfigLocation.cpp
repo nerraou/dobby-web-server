@@ -14,6 +14,16 @@ void ConfigLocation::setRoot(const std::string &root)
     this->_root = root;
 }
 
+const std::string &ConfigLocation::getPHPCGIPath(void) const
+{
+    return this->_phpCGIPath;
+}
+
+void ConfigLocation::setPHPCGIPath(const std::string &path)
+{
+    this->_phpCGIPath = path;
+}
+
 const std::string &ConfigLocation::getIndex(size_t index) const
 {
     if (index >= this->_indexes.size())
@@ -86,6 +96,7 @@ void ConfigLocation::inherit(const ConfigServer &configServer)
     this->setAutoIndex(configServer.getAutoIndex());
     this->setClientMaxBodySize(configServer.getClientMaxBodySize());
     this->_indexes = configServer.getIndexes();
+    this->_phpCGIPath = configServer.getPHPCGIPath();
 }
 
 void ConfigLocation::display() const

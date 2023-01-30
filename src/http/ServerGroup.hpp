@@ -13,7 +13,7 @@ private:
     ServerSocket _socket;
     std::set<int> _connections;
     std::vector<Server *> _virtualServers;
-    std::map<int, HttpRequestHandler> _requests;
+    std::map<int, HttpRequestHandler *> _requests;
 
     bool hasConnection(int fd);
     int hasServerHost(const std::string &host) const;
