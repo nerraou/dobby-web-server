@@ -14,6 +14,7 @@ namespace lib
     std::size_t formatTime(char *buffer, std::size_t bufferSize, const std::string &format, const time_t timestamp);
     std::string normalizePath(const std::string &path);
     bool isFileExist(const std::string &path);
+    bool endsWith(const std::string &str, const std::string &ending);
 
     template <typename T>
     std::string toString(T value)

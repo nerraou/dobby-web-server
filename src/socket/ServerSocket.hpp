@@ -11,16 +11,11 @@
 #include <cstring>
 #include <cerrno>
 
-
 class ServerSocket
 {
 private:
-    std::string _remoteAddress;
     int _port;
     int _socketRef;
-    struct sockaddr_in _address;
-
-    void setRemoteAddress(void);
 
 public:
     ServerSocket();
@@ -33,8 +28,7 @@ public:
     void create(void);
     void bind(short port);
     void listen(int backlog);
-    int accept(void);
-    const std::string &getRemoteAddress(void) const;
+    int accept(sockaddr_in &remoteSin, socklen_t &addressSize);
 
     class ServerSocketException : public std::exception
     {

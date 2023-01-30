@@ -18,6 +18,7 @@ private:
     int _port;
     std::vector<std::string> _serverNames;
     std::string _root;
+    std::string _phpCGIPath;
     bool _autoIndex;
     std::map<int, std::string> _errorPages;
     std::vector<std::string> _indexes;
@@ -31,10 +32,13 @@ public:
     const bool &getAutoIndex() const;
     void setAutoIndex(bool);
     const std::string &getServerName(size_t index);
+    std::size_t getServerNamesCount(void) const;
     bool isServerNameExist(const std::string &host) const;
     void addServerNames(std::vector<std::string> serverNames);
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
+    const std::string &getPHPCGIPath(void) const;
+    void setPHPCGIPath(const std::string &path);
     const std::vector<std::string> &getIndexes() const;
     const std::string &getIndex(size_t index) const;
     void addIndex(std::vector<std::string> index);

@@ -3,7 +3,6 @@
 ServerSocket::ServerSocket(void)
 {
     this->_socketRef = -1;
-    ::memset(&this->_address, 0, sizeof(struct sockaddr));
 }
 
 ServerSocket::~ServerSocket()
@@ -33,13 +32,15 @@ void ServerSocket::create(void)
 void ServerSocket::bind(short port)
 {
     socklen_t addressSize = sizeof(struct sockaddr_in);
+    sockaddr_in addressSin;
 
-    this->_address.sin_family = AF_INET;
-    this->_address.sin_addr.s_addr = INADDR_ANY;
-    this->_address.sin_port = htons(port);
+    addressSin.sin_family = AF_INET;
+    addressSin.sin_addr.s_addr = INADDR_ANY;
+    addressSin.sin_port = htons(port);
+
     this->_port = port;
 
-    if (::bind(this->_socketRef, (struct sockaddr *)&this->_address, addressSize) < 0)
+    if (::bind(this->_socketRef, (sockaddr *)&addressSin, addressSize) < 0)
         throw ServerSocket::ServerSocketBindException(strerror(errno));
 }
 
@@ -49,30 +50,13 @@ void ServerSocket::listen(int backlog)
         throw ServerSocket::ServerSocketListenException(strerror(errno));
 }
 
-int ServerSocket::accept(void)
+int ServerSocket::accept(sockaddr_in &remoteSin, socklen_t &addressSize)
 {
-    socklen_t addressSize = sizeof(struct sockaddr_in);
     int acceptedSocketRef;
 
-    acceptedSocketRef = ::accept(this->_socketRef, (struct sockaddr *)&this->_address, &addressSize);
-    if (acceptedSocketRef != -1)
-        this->setRemoteAddress();
+    acceptedSocketRef = ::accept(this->_socketRef, (sockaddr *)&remoteSin, &addressSize);
 
     return (acceptedSocketRef);
-}
-
-const std::string &ServerSocket::getRemoteAddress(void) const
-{
-    return this->_remoteAddress;
-}
-
-void ServerSocket::setRemoteAddress(void)
-{
-    char str[INET_ADDRSTRLEN];
-
-    (void)::inet_ntop(AF_INET, &this->_address.sin_addr, str, INET_ADDRSTRLEN);
-
-    this->_remoteAddress.assign(str);
 }
 
 /**

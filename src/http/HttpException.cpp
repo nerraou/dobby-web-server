@@ -70,3 +70,13 @@ HttpForbiddenException::HttpForbiddenException(void) throw()
 HttpForbiddenException::~HttpForbiddenException() throw()
 {
 }
+
+HttpInternalServerErrorException::HttpInternalServerErrorException(void) throw()
+{
+    this->_httpStatus = HTTP_INTERNAL_SERVER_ERROR;
+    this->_message = HTTP_INTERNAL_SERVER_ERROR_MESSAGE;
+}
+
+HttpInternalServerErrorException::~HttpInternalServerErrorException() throw()
+{
+}

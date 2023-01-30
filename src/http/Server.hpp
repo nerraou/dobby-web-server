@@ -24,7 +24,9 @@ public:
     Server(const ConfigServer &config);
     const std::string &getRoot() const;
     bool isServerNameExist(const std::string &host) const;
+    void start(HttpRequestHandler &HttpRequestHandler);
+    bool resumeWriting(HttpRequestHandler &requestHandler);
+    void setEnvVars(void);
+    bool handleCGI(HttpRequestHandler &requestHandler, const std::string &path);
     ~Server();
-
-    void start(HttpRequestHandler &HttpRequestHandler, const std::string &remoteAddress);
 };

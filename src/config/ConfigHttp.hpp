@@ -14,6 +14,7 @@ class ConfigHttp
 {
 private:
     std::string _root;
+    std::string _phpCGIPath;
     std::vector<std::string> _indexes;
     size_t _clientMaxBodySize;
     bool _autoIndex;
@@ -25,6 +26,8 @@ public:
     void addServerContext(ConfigServer &server);
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
+    const std::string &getPHPCGIPath(void) const;
+    void setPHPCGIPath(const std::string &path);
     const std::vector<std::string> &getIndexes() const;
     const std::string &getIndex(size_t index) const;
     void addIndex(std::vector<std::string> index);

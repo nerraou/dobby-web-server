@@ -6,6 +6,21 @@
 #include "ConfigServer.hpp"
 #include "Http.hpp"
 #include "ParseConfig.hpp"
+#include <csignal>
+
+static void sig_child_handler(int sig)
+{
+    (void)sig;
+}
+
+static void initEnvVars(void)
+{
+    ::setenv("GATEWAY_INTERFACE", "CGI/1.1", 1);
+    ::setenv("SERVER_SOFTWARE", "dobby", 1);
+    ::setenv("SERVER_PROTOCOL", "HTTP/1.1", 1);
+    ::unsetenv("CONTENT_LENGTH");
+    ::unsetenv("CONTENT_TYPE");
+}
 #include "ContentType.hpp"
 
 #define CONTENT_TYPE_PATH "./src/contentType/contentType.txt"
@@ -13,6 +28,11 @@
 int main(int ac, char *av[])
 {
     ConfigHttp httpConfig;
+
+    std::signal(SIGCHLD, sig_child_handler);
+    std::signal(SIGPIPE, SIG_IGN);
+
+    initEnvVars();
 
     try
     {
@@ -29,7 +49,11 @@ int main(int ac, char *av[])
     }
     catch (const std::exception &e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << e.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << strerror(errno) << std::endl;
     }
     return (0);
 }

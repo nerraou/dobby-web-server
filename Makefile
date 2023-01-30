@@ -5,7 +5,7 @@ CC = c++
 INCLUDE_ARGS=\
 	-I src/lib/ -I src/parseConfig/ -I src/config/ \
 	-I src/ -I src/url/ -I src/fileStat/ -I src/httpStatus/ \
-	-I src/serverGroup/ -I src/http/ -I src/socket -I src/typedefs/ \
+	-I src/http/ -I src/socket -I src/typedefs/ \
 	-I src/contentType/
 
 OBJECT_FILES=$(SOURCE_FILES:.cpp=.o)
@@ -24,7 +24,7 @@ SOURCE_FILES=\
 	\
 	src/fileStat/FileStat.cpp\
 	\
-	src/serverGroup/ServerGroup.cpp\
+	src/http/ServerGroup.cpp\
 	\
 	src/http/Http.cpp\
 	src/http/Server.cpp\
@@ -54,7 +54,7 @@ HPP_FILES=\
 	\
 	src/httpStatus/httpStatus.hpp\
 	\
-	src/serverGroup/ServerGroup.hpp\
+	src/http/ServerGroup.hpp\
 	\
 	src/http/Server.hpp\
 	src/http/Http.hpp\
