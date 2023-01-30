@@ -4,6 +4,18 @@
  * public
  */
 
+std::string HttpRequestHandler::getFileContentType(const std::string &path)
+{
+    std::size_t found;
+    std::string key;
+
+    found = path.find_last_of(".");
+    key = path.substr(found + 1);
+    if (ContentType::contentTypes.find(key) == ContentType::contentTypes.end())
+        return std::string("");
+    return ContentType::contentTypes.at(key);
+}
+
 HttpRequestHandler::HttpRequestHandler(int connectionRef, const sockaddr_in &remoteSin)
 {
     this->_connectionRef = connectionRef;
@@ -175,10 +187,13 @@ void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, co
         this->_responseContentLength = stat.getSize();
 
         this->setResponseContentLength(stat.getSize());
+        std::string contentType;
 
+        contentType = this->getFileContentType(path);
         headers << "HTTP/1.1 " << httpStatus << " " << statusMessage << CRLF;
         headers << "Content-Length: " << stat.getSize() << CRLF;
-        // headers << "Content-Type: " << this->getFileContentType(path) << CRLF;
+        if (contentType.empty() == false)
+            headers << "Content-Type: " << contentType << CRLF;
         headers << CRLF;
 
         const std::string &headersString = headers.str();

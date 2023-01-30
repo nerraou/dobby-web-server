@@ -21,6 +21,7 @@
 #include "FileStat.hpp"
 #include "httpStatus.hpp"
 #include "HttpParser.hpp"
+#include "ContentType.hpp"
 
 #define CRLF "\r\n"
 
@@ -56,6 +57,7 @@ private:
 
     void setRemoteAddressIp(void);
 
+    std::string getFileContentType(const std::string &path);
 public:
     HttpRequestHandler(int connectionRef, const sockaddr_in &remoteSin);
 

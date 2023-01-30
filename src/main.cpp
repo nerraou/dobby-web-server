@@ -1,4 +1,6 @@
 #include <iostream>
+#include <vector>
+
 #include "Server.hpp"
 #include "ConfigHttp.hpp"
 #include "ConfigServer.hpp"
@@ -19,6 +21,9 @@ static void initEnvVars(void)
     ::unsetenv("CONTENT_LENGTH");
     ::unsetenv("CONTENT_TYPE");
 }
+#include "ContentType.hpp"
+
+#define CONTENT_TYPE_PATH "./src/contentType/contentType.txt"
 
 int main(int ac, char *av[])
 {
@@ -36,7 +41,7 @@ int main(int ac, char *av[])
             std::cerr << "usage: ./dobby config_file_path" << std::endl;
             return 1;
         }
-
+        ContentType::loadContentTypes(CONTENT_TYPE_PATH);
         httpConfig = ParseConfig::parse(av[1]);
 
         Http http(httpConfig);

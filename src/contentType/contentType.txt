@@ -1,0 +1,47 @@
+#TEXT
+css : text/css    
+csv : text/csv    
+html : text/html 
+plain : text/plain    
+xml : text/xml
+
+#IMAGE
+gif : image/gif   
+jpeg : image/jpeg   
+png : image/png   
+tiff : image/tiff    
+vnd.microsoft.icon: image/vnd.microsoft.icon    
+x-icon : image/x-icon   
+vnd.djvu : image/vnd.djvu   
+svg+xml: image/svg+xml 
+
+#APPLICATION
+java-archive : application/java-archive
+EDI-X12 : application/EDI-X12   
+EDIFACT : application/EDIFACT   
+javascript : application/javascript   
+octet-stream : application/octet-stream   
+ogg : application/ogg   
+pdf : application/pdf  
+xhtml+xml : application/xhtml+xml
+x-shockwave-flash : application/x-shockwave-flash    
+json : application/json  
+ld+json : application/ld+json  
+xml : application/xml   
+zip : application/zip  
+x-www-form-urlencoded : application/x-www-form-urlencoded  
+
+#AUDIO
+mpeg : audio/mpeg   
+x-ms-wma : audio/x-ms-wma   
+vnd.rn-realaudio : audio/vnd.rn-realaudio   
+x-wav : audio/x-wav
+
+#VIDEO
+mpeg : video/mpeg    
+mp4: video/mp4    
+quicktime : video/quicktime    
+x-ms-wmv : video/x-ms-wmv    
+x-msvideo : video/x-msvideo    
+x-flv : video/x-flv   
+webm : video/webm 
