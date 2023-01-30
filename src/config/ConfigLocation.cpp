@@ -36,6 +36,11 @@ void ConfigLocation::addIndex(std::vector<std::string> index)
     this->_indexes = index;
 }
 
+const std::vector<std::string> &ConfigLocation::getIndexes() const
+{
+    return this->_indexes;
+}
+
 const size_t &ConfigLocation::getClientMaxBodySize() const
 {
     return this->_clientMaxBodySize;
@@ -56,11 +61,16 @@ void ConfigLocation::setAutoIndex(bool autoIndex)
     this->_autoIndex = autoIndex;
 }
 
-const std::string &ConfigLocation::getAllowedHttpMethods(int index)
+const std::string &ConfigLocation::getAllowedHttpMethod(int index) const
 {
     if (index < 0 || (size_t)index >= this->_indexes.size())
         throw std::out_of_range("out of range");
     return this->_allowedHttpMethods[index];
+}
+
+const std::vector<std::string> &ConfigLocation::getAllowedHttpMethods() const
+{
+    return this->_allowedHttpMethods;
 }
 
 void ConfigLocation::addAllowedHttpMethods(std::vector<std::string> method)
@@ -81,6 +91,11 @@ void ConfigLocation::setRewrite(const std::string &rewrite)
 void ConfigLocation::setPath(const std::string &path)
 {
     this->_path = path;
+}
+
+std::string ConfigLocation::getPath() const
+{
+    return this->_path;
 }
 
 bool ConfigLocation::isGood() const

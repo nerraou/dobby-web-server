@@ -14,6 +14,16 @@ Server::~Server()
 {
 }
 
+int Server::findLocationPathMatch(const std::string &path) const
+{
+    return this->_config.findLocationPathMatch(path);
+}
+
+const ConfigLocation &Server::getConfigLocation(int index) const
+{
+    return this->_config.getConfigLocation(index);
+}
+
 bool Server::isServerNameExist(const std::string &host) const
 {
     return this->_config.isServerNameExist(host);
@@ -75,10 +85,32 @@ void Server::start(HttpRequestHandler &requestHandler)
     if (this->resumeWriting(requestHandler))
         return;
 
+    ConfigLocation locationContext;
     try
     {
-        const std::string &path = this->_config.getRoot() + requestHandler.getHttpParser().getRequestTarget().path;
+        int locationIndex;
+        std::vector<std::string> indexes;
+        bool autoIndex;
+        std::string root;
+
+        locationIndex = this->findLocationPathMatch(requestHandler.getHttpParser().getRequestTarget().path);
+        if (locationIndex != -1)
+        {
+            locationContext = this->getConfigLocation(locationIndex);
+            indexes = locationContext.getIndexes();
+            autoIndex = locationContext.getAutoIndex();
+            root = locationContext.getRoot();
+        }
+        else
+        {
+            indexes = this->_config.getIndexes();
+            autoIndex = this->_config.getAutoIndex();
+            root = this->_config.getRoot();
+        }
+        const std::string &path = root + requestHandler.getHttpParser().getRequestTarget().path;
         bool hasTrainlingSlash;
+
+        std::cerr << "path: " << path << std::endl;
 
         if (this->handleCGI(requestHandler, path))
             return;
@@ -89,9 +121,14 @@ void Server::start(HttpRequestHandler &requestHandler)
         requestHandler.setIsWritingResponseBodyStatus();
 
         if (hasTrainlingSlash)
-            requestHandler.serveIndexFile(path, this->_config.getIndexes(), this->_config.getAutoIndex());
+        {
+            std::cerr << "Not here \n";
+            requestHandler.serveIndexFile(path, indexes, autoIndex);
+        }
         else
+        {
             requestHandler.serveStatic(path, HTTP_OK, HTTP_OK_MESSAGE);
+        }
     }
     catch (const AHttpRequestException &e)
     {

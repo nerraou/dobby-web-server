@@ -1,5 +1,5 @@
 NAME=dobby
-CC_FLAGS = -Wall -Wextra -Werror -std=c++98
+CC_FLAGS = -g -Wall -Wextra -Werror -std=c++98
 CC = c++
 
 INCLUDE_ARGS=\

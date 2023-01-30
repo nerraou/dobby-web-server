@@ -30,7 +30,7 @@ private:
 public:
     FileStat();
     FileStat(const std::string &path);
-    bool isFolder();
+    bool isFolder() const;
     off_t getSize() const;
     static FileStat open(const std::string &path);
 

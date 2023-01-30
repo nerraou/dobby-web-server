@@ -184,6 +184,9 @@ void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, co
         std::stringstream headers;
         const FileStat &stat = FileStat::open(path);
 
+        if (stat.isFolder())
+            throw HttpForbiddenException();
+
         this->_responseContentLength = stat.getSize();
 
         this->setResponseContentLength(stat.getSize());
@@ -202,7 +205,7 @@ void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, co
 
         this->sendFile(path);
     }
-    catch (const std::exception &e)
+    catch (const FileStat::FileStatException &e)
     {
         throw HttpNotFoundException();
     }
@@ -254,6 +257,8 @@ off_t HttpRequestHandler::directoryListing(const std::string &dirPath)
 
     body << "<html><head><title>Directory listing for</title></head><body><ul>";
     fileNumber = scandir(dirPath.c_str(), &entity, NULL, alphasort);
+    if (fileNumber == -1)
+        throw HttpForbiddenException();
     for (int i = 0; i < fileNumber; i++)
     {
         if (entity[i]->d_type == DT_DIR)

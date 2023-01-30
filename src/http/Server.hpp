@@ -19,6 +19,8 @@ private:
     std::set<int> _connections;
     std::map<int, HttpRequestHandler> _requests;
     ConfigServer _config;
+    int findLocationPathMatch(const std::string &path) const;
+    const ConfigLocation &getConfigLocation(int index) const;
 
 public:
     Server(const ConfigServer &config);
