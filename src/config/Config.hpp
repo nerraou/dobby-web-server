@@ -37,6 +37,8 @@ public:
     int getPort();
     size_t getClientMaxBodySize();
     bool getAutoIndex();
+    const std::vector<std::string> &getIndexes() const;
+    const std::vector<std::string> &getServerNames() const;
 
     ~Config();
 };

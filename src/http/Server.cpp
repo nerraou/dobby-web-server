@@ -85,32 +85,18 @@ void Server::start(HttpRequestHandler &requestHandler)
     if (this->resumeWriting(requestHandler))
         return;
 
-    ConfigLocation locationContext;
+    Config config;
     try
     {
         int locationIndex;
-        std::vector<std::string> indexes;
-        bool autoIndex;
-        std::string root;
 
         locationIndex = this->findLocationPathMatch(requestHandler.getHttpParser().getRequestTarget().path);
         if (locationIndex != -1)
-        {
-            locationContext = this->getConfigLocation(locationIndex);
-            indexes = locationContext.getIndexes();
-            autoIndex = locationContext.getAutoIndex();
-            root = locationContext.getRoot();
-        }
+            config = this->getConfigLocation(locationIndex);
         else
-        {
-            indexes = this->_config.getIndexes();
-            autoIndex = this->_config.getAutoIndex();
-            root = this->_config.getRoot();
-        }
-        const std::string &path = root + requestHandler.getHttpParser().getRequestTarget().path;
+            config = this->_config;
+        const std::string &path = config.getRoot() + requestHandler.getHttpParser().getRequestTarget().path;
         bool hasTrainlingSlash;
-
-        std::cerr << "path: " << path << std::endl;
 
         if (this->handleCGI(requestHandler, path))
             return;
@@ -123,7 +109,7 @@ void Server::start(HttpRequestHandler &requestHandler)
         if (hasTrainlingSlash)
         {
             std::cerr << "Not here \n";
-            requestHandler.serveIndexFile(path, indexes, autoIndex);
+            requestHandler.serveIndexFile(path, config.getIndexes(), config.getAutoIndex());
         }
         else
         {

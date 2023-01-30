@@ -59,7 +59,7 @@ const std::string &Config::getType() const
 
 int Config::getPort()
 {
-    this->_port;
+    return this->_port;
 }
 
 size_t Config::getClientMaxBodySize()
@@ -70,6 +70,16 @@ size_t Config::getClientMaxBodySize()
 bool Config::getAutoIndex()
 {
     return this->_autoIndex;
+}
+
+const std::vector<std::string> &Config::getIndexes() const
+{
+    return this->_indexes;
+}
+
+const std::vector<std::string> &Config::getServerNames() const
+{
+  return this->_serverNames;
 }
 
 Config::~Config()

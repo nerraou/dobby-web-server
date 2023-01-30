@@ -11,6 +11,7 @@
 #include "ConfigServer.hpp"
 #include "HttpRequestHandler.hpp"
 #include "typedefs.hpp"
+#include "Config.hpp"
 
 class Server
 {
