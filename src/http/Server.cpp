@@ -105,16 +105,11 @@ void Server::start(HttpRequestHandler &requestHandler)
 
         requestHandler.setResponseHttpStatus(HTTP_OK);
         requestHandler.setIsWritingResponseBodyStatus();
-
+        
         if (hasTrainlingSlash)
-        {
-            std::cerr << "Not here \n";
             requestHandler.serveIndexFile(path, config.getIndexes(), config.getAutoIndex());
-        }
         else
-        {
             requestHandler.serveStatic(path, HTTP_OK, HTTP_OK_MESSAGE);
-        }
     }
     catch (const AHttpRequestException &e)
     {
