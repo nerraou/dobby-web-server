@@ -14,6 +14,16 @@ Server::~Server()
 {
 }
 
+int Server::findLocationPathMatch(const std::string &path) const
+{
+    return this->_config.findLocationPathMatch(path);
+}
+
+const ConfigLocation &Server::getConfigLocation(int index) const
+{
+    return this->_config.getConfigLocation(index);
+}
+
 bool Server::isServerNameExist(const std::string &host) const
 {
     return this->_config.isServerNameExist(host);
@@ -75,9 +85,17 @@ void Server::start(HttpRequestHandler &requestHandler)
     if (this->resumeWriting(requestHandler))
         return;
 
+    Config config;
     try
     {
-        const std::string &path = this->_config.getRoot() + requestHandler.getHttpParser().getRequestTarget().path;
+        int locationIndex;
+
+        locationIndex = this->findLocationPathMatch(requestHandler.getHttpParser().getRequestTarget().path);
+        if (locationIndex != -1)
+            config = this->getConfigLocation(locationIndex);
+        else
+            config = this->_config;
+        const std::string &path = config.getRoot() + requestHandler.getHttpParser().getRequestTarget().path;
         bool hasTrainlingSlash;
 
         if (this->handleCGI(requestHandler, path))
@@ -87,9 +105,9 @@ void Server::start(HttpRequestHandler &requestHandler)
 
         requestHandler.setResponseHttpStatus(HTTP_OK);
         requestHandler.setIsWritingResponseBodyStatus();
-
+        
         if (hasTrainlingSlash)
-            requestHandler.serveIndexFile(path, this->_config.getIndexes(), this->_config.getAutoIndex());
+            requestHandler.serveIndexFile(path, config.getIndexes(), config.getAutoIndex());
         else
             requestHandler.serveStatic(path, HTTP_OK, HTTP_OK_MESSAGE);
     }

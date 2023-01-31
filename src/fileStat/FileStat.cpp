@@ -25,7 +25,7 @@ FileStat::FileStat(const std::string &path)
     this->callStat();
 }
 
-bool FileStat::isFolder()
+bool FileStat::isFolder() const
 {
     return (S_ISDIR(this->_mode));
 }

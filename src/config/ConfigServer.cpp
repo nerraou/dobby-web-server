@@ -28,6 +28,11 @@ std::size_t ConfigServer::getServerNamesCount(void) const
     return this->_serverNames.size();
 }
 
+const std::vector<std::string> ConfigServer::getServerNames() const
+{
+    return this->_serverNames;
+}
+
 const std::string &ConfigServer::getServerName(size_t index)
 {
     return this->_serverNames.at(index);
@@ -122,6 +127,21 @@ void ConfigServer::addLocationContext(ConfigLocation &location)
     this->_locationsContext.push_back(location);
 }
 
+int ConfigServer::findLocationPathMatch(const std::string &path) const
+{
+    for (size_t i = 0; i < this->_locationsContext.size(); i++)
+    {
+        if (lib::startsWith(path, this->_locationsContext.at(i).getPath()))
+            return i;
+    }
+    return -1;
+}
+
+const ConfigLocation &ConfigServer::getConfigLocation(int index) const
+{
+    return (this->_locationsContext.at(index));
+}
+
 bool ConfigServer::isGood() const
 {
     if (this->_port == 0)
@@ -172,6 +192,11 @@ void ConfigServer::display(bool displayLocation) const
             std::cout << std::endl;
         }
     }
+}
+
+void ConfigServer::sortLocationByPath()
+{
+    std::sort(this->_locationsContext.begin(), this->_locationsContext.end());
 }
 
 ConfigServer::~ConfigServer()

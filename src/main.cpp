@@ -1,12 +1,15 @@
 #include <iostream>
 #include <vector>
+#include <csignal>
 
 #include "Server.hpp"
 #include "ConfigHttp.hpp"
 #include "ConfigServer.hpp"
 #include "Http.hpp"
 #include "ParseConfig.hpp"
-#include <csignal>
+#include "ContentType.hpp"
+
+#define CONTENT_TYPE_PATH "./src/contentType/contentType.txt"
 
 static void sig_child_handler(int sig)
 {
@@ -21,9 +24,7 @@ static void initEnvVars(void)
     ::unsetenv("CONTENT_LENGTH");
     ::unsetenv("CONTENT_TYPE");
 }
-#include "ContentType.hpp"
 
-#define CONTENT_TYPE_PATH "./src/contentType/contentType.txt"
 
 int main(int ac, char *av[])
 {

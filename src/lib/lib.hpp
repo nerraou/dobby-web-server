@@ -15,6 +15,7 @@ namespace lib
     std::string normalizePath(const std::string &path);
     bool isFileExist(const std::string &path);
     bool endsWith(const std::string &str, const std::string &ending);
+    bool startsWith(const std::string &str, const std::string &prefix);
 
     template <typename T>
     std::string toString(T value)

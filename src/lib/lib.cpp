@@ -114,4 +114,13 @@ namespace lib
             return (false);
         return str.compare(str.length() - ending.length(), ending.length(), ending) == 0;
     }
+
+    bool startsWith(const std::string &str, const std::string &prefix)
+    {
+        if (str.size() < prefix.size())
+            return false;
+        if (str.compare(0, prefix.size(), prefix) != 0)
+            return false;
+        return true;
+    }
 }

@@ -220,9 +220,9 @@ ConfigHttp ParseConfig::parse(std::string configPath)
                 isNewServerContext = true;
                 if (serverContext.isGood() == true)
                 {
+                    // change context to the parent ; context = http
                     context = "http";
                     httpContext.addServerContext(serverContext);
-                    // change context to the parent ; context = http
                 }
                 else
                     throw ParseConfigException("bad server context");
@@ -243,10 +243,11 @@ ConfigHttp ParseConfig::parse(std::string configPath)
                 isNewLocationContext = true;
                 if (locationContext.isGood() == true)
                 {
-                    context = "server";
-                    serverContext.addLocationContext(locationContext);
                     // call isGood location and add the location to server context
                     // change context to the parent ; context = server
+                    context = "server";
+                    serverContext.addLocationContext(locationContext);
+                    serverContext.sortLocationByPath();
                 }
                 else
                     throw ParseConfigException("bad location context");

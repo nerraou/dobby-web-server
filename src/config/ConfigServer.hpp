@@ -4,10 +4,12 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <algorithm>
 #include <cstdlib>
 
 #include "ConfigLocation.hpp"
 #include "ConfigHttp.hpp"
+#include "lib.hpp"
 
 class ConfigHttp;
 class ConfigLocation;
@@ -33,6 +35,7 @@ public:
     void setAutoIndex(bool);
     const std::string &getServerName(size_t index);
     std::size_t getServerNamesCount(void) const;
+    const std::vector<std::string> getServerNames() const;
     bool isServerNameExist(const std::string &host) const;
     void addServerNames(std::vector<std::string> serverNames);
     const std::string &getRoot() const;
@@ -49,8 +52,11 @@ public:
     void addErrorPage(int status, const std::string &path);
     const std::map<int, std::string> &getErrorPages() const;
     void addLocationContext(ConfigLocation &location);
+    int findLocationPathMatch(const std::string &path) const;
+    const ConfigLocation &getConfigLocation(int index) const;
     bool isGood() const;
     void inherit(const ConfigHttp &configHttp);
     void display(bool displayLocation) const;
+    void sortLocationByPath();
     ~ConfigServer();
 };
