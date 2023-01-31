@@ -3,6 +3,7 @@
 #include <istream>
 #include <vector>
 #include <iostream>
+#include <map>
 #include "ConfigServer.hpp"
 
 class ConfigServer;
@@ -17,6 +18,7 @@ private:
     size_t _clientMaxBodySize;
     bool _autoIndex;
     std::vector<std::string> _allowedHttpMethods;
+    std::map<int, std::string> _errorPages;
     std::string _rewrite;
 
 public:
@@ -31,6 +33,10 @@ public:
     void addIndex(std::vector<std::string> index);
     const std::vector<std::string> &getIndexes() const;
     const size_t &getClientMaxBodySize() const;
+    void setErrorPagesFromList(const std::vector<std::string> &statuses, const std::string &path);
+    void setErrorPages(const std::map<int, std::string> &errorPages);
+    void addErrorPage(int status, const std::string &path);
+    const std::map<int, std::string> &getErrorPages() const;
     void setClientMaxBodySize(size_t size);
     const bool &getAutoIndex() const;
     void setAutoIndex(bool);
