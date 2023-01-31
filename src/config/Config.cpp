@@ -29,6 +29,7 @@ Config &Config::operator=(ConfigLocation const &other)
     this->_autoIndex = other.getAutoIndex();
     this->_allowedHttpMethods = other.getAllowedHttpMethods();
     this->_rewrite = other.getRewrite();
+    this->_errorPages = other.getErrorPages();
     return (*this);
 }
 
@@ -79,7 +80,7 @@ const std::vector<std::string> &Config::getIndexes() const
 
 const std::vector<std::string> &Config::getServerNames() const
 {
-  return this->_serverNames;
+    return this->_serverNames;
 }
 
 Config::~Config()
