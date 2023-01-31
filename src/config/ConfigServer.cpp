@@ -194,6 +194,11 @@ void ConfigServer::display(bool displayLocation) const
     }
 }
 
+void ConfigServer::sortLocationByPath()
+{
+    std::sort(this->_locationsContext.begin(), this->_locationsContext.end());
+}
+
 ConfigServer::~ConfigServer()
 {
 }

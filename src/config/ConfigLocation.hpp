@@ -21,6 +21,8 @@ private:
 
 public:
     ConfigLocation();
+
+    bool operator<(ConfigLocation const &other) const;
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
     const std::string &getPHPCGIPath(void) const;

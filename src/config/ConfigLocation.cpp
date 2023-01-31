@@ -4,6 +4,11 @@ ConfigLocation::ConfigLocation()
 {
 }
 
+bool ConfigLocation::operator<(ConfigLocation const &other) const
+{
+    return other.getPath().compare(this->getPath()) < 0;
+}
+
 const std::string &ConfigLocation::getRoot() const
 {
     return this->_root;

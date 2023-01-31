@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <algorithm>
 #include <cstdlib>
 
 #include "ConfigLocation.hpp"
@@ -56,5 +57,6 @@ public:
     bool isGood() const;
     void inherit(const ConfigHttp &configHttp);
     void display(bool displayLocation) const;
+    void sortLocationByPath();
     ~ConfigServer();
 };
