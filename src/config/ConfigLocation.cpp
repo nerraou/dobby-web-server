@@ -51,6 +51,33 @@ const size_t &ConfigLocation::getClientMaxBodySize() const
     return this->_clientMaxBodySize;
 }
 
+void ConfigLocation::setErrorPagesFromList(const std::vector<std::string> &statuses, const std::string &path)
+{
+    int status;
+
+    for (size_t i = 0; i < statuses.size(); i++)
+    {
+        status = ::atoi(statuses.at(i).c_str());
+        this->_errorPages[status] = path;
+    }
+}
+
+void ConfigLocation::setErrorPages(const std::map<int, std::string> &errorPages)
+{
+    this->_errorPages = errorPages;
+}
+
+void ConfigLocation::addErrorPage(int status, const std::string &path)
+{
+    if (this->_errorPages.count(status) == 0)
+        this->_errorPages[status] = path;
+}
+
+const std::map<int, std::string> &ConfigLocation::getErrorPages() const
+{
+    return this->_errorPages;
+}
+
 void ConfigLocation::setClientMaxBodySize(size_t size)
 {
     this->_clientMaxBodySize = size;

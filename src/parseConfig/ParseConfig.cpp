@@ -97,6 +97,8 @@ void ParseConfig::parseServerContext(const std::string &line, ConfigServer &serv
 void ParseConfig::parseLocationContext(const std::string &line, ConfigLocation &locationContext)
 {
     size_t index;
+    std::vector<std::string> parsedErrorPages;
+    std::string errorPagePath;
 
     index = 0;
     index = line.find_first_of(" \t");
@@ -131,6 +133,14 @@ void ParseConfig::parseLocationContext(const std::string &line, ConfigLocation &
     else if (line.find("php_cgi_path ") == 0)
     {
         locationContext.setPHPCGIPath(ParseConfig::parseCGIDirective(line.substr(index)));
+    }
+    else if (line.find("error_page ") == 0)
+    {
+        parsedErrorPages = ParseConfig::parseErrorPage(line.substr(index));
+        errorPagePath = parsedErrorPages.back();
+        parsedErrorPages.pop_back();
+
+        locationContext.setErrorPagesFromList(parsedErrorPages, errorPagePath);
     }
     else
         throw ParseConfigException(std::string("unknown location directive: ").append(line));

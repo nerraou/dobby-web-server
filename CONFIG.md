@@ -28,6 +28,7 @@
   6. rewrite
   7. path
   8. php_cgi_path
+  9. error_page
 
 | Attribute                                                                            | Type          | Required in context | Default      | Inherited | Description                                                                                                                                             |
 | ------------------------------------------------------------------------------------ | ------------- | ------------------- | ------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -84,6 +85,7 @@ http {
       client_max_body_size 10M
       accepted_http_methods GET PUT POST DELETE PATCH
       rewrite /new/images/route
+      error_page 404 404.html
     }
   }
 }
