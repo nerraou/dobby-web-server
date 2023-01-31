@@ -57,17 +57,17 @@ const std::string &Config::getType() const
     return this->_type;
 }
 
-int Config::getPort()
+int Config::getPort() const
 {
     return this->_port;
 }
 
-size_t Config::getClientMaxBodySize()
+size_t Config::getClientMaxBodySize() const
 {
     return this->_clientMaxBodySize;
 }
 
-bool Config::getAutoIndex()
+bool Config::getAutoIndex() const
 {
     return this->_autoIndex;
 }

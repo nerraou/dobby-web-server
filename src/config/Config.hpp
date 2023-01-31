@@ -34,9 +34,9 @@ public:
     const std::string &getRewrite() const;
     const std::string &getRoot() const;
     const std::string &getPhpCGIPath() const;
-    int getPort();
-    size_t getClientMaxBodySize();
-    bool getAutoIndex();
+    int getPort() const;
+    size_t getClientMaxBodySize() const;
+    bool getAutoIndex() const;
     const std::vector<std::string> &getIndexes() const;
     const std::vector<std::string> &getServerNames() const;
 
