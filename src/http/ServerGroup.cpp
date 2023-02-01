@@ -25,6 +25,7 @@ ServerGroup::ServerGroup(int serverGroupPort)
 {
     this->_socket.create();
     this->_socket.bind(serverGroupPort);
+    this->_socket.listen(1000);
 }
 
 void ServerGroup::addVirtualServer(const ConfigServer &configServer)
@@ -42,7 +43,6 @@ int ServerGroup::acceptConnection(void)
     sockaddr_in remoteSin;
     socklen_t addressSize = sizeof(sockaddr_in);
 
-    this->_socket.listen(100);
     acceptedConnection = this->_socket.accept(remoteSin, addressSize);
     if (acceptedConnection != -1)
     {
