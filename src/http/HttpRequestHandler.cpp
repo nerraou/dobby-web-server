@@ -19,7 +19,7 @@ std::string HttpRequestHandler::getFileContentType(const std::string &path)
 HttpRequestHandler::HttpRequestHandler(int connectionRef, const sockaddr_in &remoteSin)
 {
     this->_connectionRef = connectionRef;
-    this->_requestReadTimeout = 60;
+    this->_requestReadTimeout = 5;
     this->_requestLastRead = ::time(NULL);
     this->setIsIdleStatus();
     this->_responseContentLength = 0;
@@ -122,21 +122,20 @@ void HttpRequestHandler::setRemoteAddressIp(void)
 void HttpRequestHandler::read(void)
 {
     ssize_t receivedBytes;
-    ArrayBuffer buffer;
+    char buffer[4096];
+    const int bufferMaxSize = 4096;
 
     if (this->_httpParser.isRequestReady())
         return;
 
-    buffer.reserve(4096);
-
-    receivedBytes = ::recv(this->_connectionRef, &buffer[0], buffer.capacity(), 0);
+    receivedBytes = ::recv(this->_connectionRef, buffer, bufferMaxSize, 0);
 
     if (receivedBytes <= 0)
         return;
 
     this->_requestLastRead = ::time(NULL);
 
-    this->_httpParser.append(buffer.begin(), buffer.begin() + receivedBytes);
+    this->_httpParser.append(buffer, receivedBytes);
     this->_httpParser.process();
 }
 
@@ -200,8 +199,14 @@ void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, co
         headers << CRLF;
 
         const std::string &headersString = headers.str();
+        errno = 0;
         if (::send(this->_connectionRef, headersString.c_str(), headersString.length(), 0) <= 0)
-            throw HttpInternalServerErrorException();
+        {
+            std::cerr << "request handler send(): " << strerror(errno) << std::endl;
+            this->setIsDoneStatus();
+            return;
+            // throw HttpInternalServerErrorException();
+        }
 
         this->sendFile(path);
     }

@@ -90,6 +90,7 @@ void ServerGroup::start(std::vector<PollFd> &connections)
 
             if (requestHandler->isDone())
             {
+                std::cerr << "connection count: " << this->_connections.size() << std::endl;
                 requestHandler->logAccess();
                 this->closeConnection(connection->fd);
                 return;
@@ -98,15 +99,20 @@ void ServerGroup::start(std::vector<PollFd> &connections)
             const HttpParser &httpParser = requestHandler->getHttpParser();
 
             this->handleTimeout(nowTimestamp, requestHandler->getRequestLastRead(), requestHandler->getRequestTimeout());
-
             canWrite = requestHandler->getHttpParser().isRequestReady() ||
                        requestHandler->getHttpParser().isReadingRequestBody() ||
                        requestHandler->isWritingResponseBody();
+            std::cerr << "is ready: " << requestHandler->getHttpParser().isRequestReady() << std::endl;
+            std::cerr << "has POLLOUT: " << (connection->revents & POLLOUT) << std::endl;
 
             if (connection->revents & POLLIN)
+            {
+                std::cerr << "reading..." << std::endl;
                 requestHandler->read();
+            }
             if (canWrite && connection->revents & POLLOUT)
             {
+                std::cerr << "writing..." << std::endl;
                 serverIndex = 0;
                 if (httpParser.hasHeader("host"))
                     serverIndex = this->hasServerHost(httpParser.getHeader("host"));
@@ -130,4 +136,13 @@ void ServerGroup::start(std::vector<PollFd> &connections)
 
 ServerGroup::~ServerGroup()
 {
+    for (size_t i = 0; i < this->_virtualServers.size(); i++)
+    {
+        delete this->_virtualServers[i];
+    }
+
+    for (size_t i = 0; i < this->_requests.size(); i++)
+    {
+        delete this->_requests[i];
+    }
 }

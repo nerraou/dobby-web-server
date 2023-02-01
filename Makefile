@@ -1,5 +1,5 @@
 NAME=dobby
-CC_FLAGS = -g -Wall -Wextra -Werror -std=c++98
+CC_FLAGS = -g -Wall -Wextra -Werror -std=c++98 -fsanitize=address
 CC = c++
 
 INCLUDE_ARGS=\
@@ -71,7 +71,7 @@ HPP_FILES=\
 all: $(NAME)
 
 $(NAME): $(OBJECT_FILES)
-	$(CC) -o $@ $^
+	$(CC) $(CC_FLAGS) -o $@ $^
 
 %.o: %.cpp $(HPP_FILES)
 	$(CC) $(CC_FLAGS) $(INCLUDE_ARGS) -c $< -o $@

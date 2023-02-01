@@ -6,6 +6,11 @@ HttpParser::HttpParser()
     this->_receivedBodySize = 0;
 }
 
+void HttpParser::append(const char *buffer, int size)
+{
+    this->_buffer.insert(this->_buffer.end(), buffer, buffer + size);
+}
+
 void HttpParser::append(const ArrayBuffer::const_iterator &begin, const ArrayBuffer::const_iterator &end)
 {
     this->_buffer.insert(this->_buffer.end(), begin, end);
