@@ -19,7 +19,7 @@ private:
     static std::vector<std::string> parseErrorPage(const std::string &line);
     static std::vector<std::string> parseServerName(const std::string &line);
     static std::vector<std::string> parseAcceptedHttpMethods(const std::string &line);
-    static std::string parseRewrite(const std::string &line);
+    static std::vector<std::string> parseRewrite(const std::string &line);
     static std::string parsePath(const std::string &line);
     static int parseListen(const std::string &line);
     static void parseHttpContext(const std::string &line, ConfigHttp &httpContext);

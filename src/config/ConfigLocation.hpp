@@ -4,7 +4,10 @@
 #include <vector>
 #include <iostream>
 #include <map>
+
 #include "ConfigServer.hpp"
+#include "rewrite.hpp"
+#include "ConfigException.hpp"
 
 class ConfigServer;
 
@@ -19,7 +22,7 @@ private:
     bool _autoIndex;
     std::vector<std::string> _allowedHttpMethods;
     std::map<int, std::string> _errorPages;
-    std::string _rewrite;
+    t_rewrite _rewrite;
 
 public:
     ConfigLocation();
@@ -43,8 +46,8 @@ public:
     const std::string &getAllowedHttpMethod(int index) const;
     const std::vector<std::string> &getAllowedHttpMethods() const;
     void addAllowedHttpMethods(std::vector<std::string> method);
-    const std::string &getRewrite() const;
-    void setRewrite(const std::string &rewrite);
+    const t_rewrite &getRewrite() const;
+    void setRewrite(std::vector<std::string> rewrite);
     void setPath(const std::string &path);
     std::string getPath() const;
     bool isGood() const;

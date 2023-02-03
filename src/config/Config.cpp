@@ -33,7 +33,7 @@ Config &Config::operator=(ConfigLocation const &other)
     return (*this);
 }
 
-const std::string &Config::getRewrite() const
+const t_rewrite &Config::getRewrite() const
 {
     return this->_rewrite;
 }

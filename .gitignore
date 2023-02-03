@@ -35,3 +35,6 @@ temp/
 
 # vscode
 .vscode/
+
+#valgrind
+dobby.dSYM/
