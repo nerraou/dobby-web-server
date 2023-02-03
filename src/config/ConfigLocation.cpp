@@ -110,17 +110,11 @@ void ConfigLocation::addAllowedHttpMethods(std::vector<std::string> method)
     this->_allowedHttpMethods = method;
 }
 
-const t_rewrite &ConfigLocation::getRewrite() const
+const Rewrite &ConfigLocation::getRewrite() const
 {
     return this->_rewrite;
 }
 
-bool ConfigLocation::hasRewrite() const
-{
-    if (this->_rewrite.status != -1)
-        return true;
-    return false;
-}
 
 void ConfigLocation::setRewrite(std::vector<std::string> rewrite)
 {

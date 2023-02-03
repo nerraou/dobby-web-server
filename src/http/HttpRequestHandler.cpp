@@ -276,7 +276,6 @@ off_t HttpRequestHandler::directoryListing(const std::string &dirPath)
     stringBody = body.str();
     headers << "HTTP/1.1 " << HTTP_OK << " " << HTTP_OK_MESSAGE << CRLF;
     headers << "Content-Length: " << stringBody.length() << CRLF;
-    // headers << "Content-Type: " << this->getFileContentType(path) << CRLF;
     headers << CRLF;
 
     const std::string &response = headers.str() + stringBody;
@@ -382,6 +381,26 @@ void HttpRequestHandler::logAccess(void) const
               << this->getResponseHttpStatus()
               << " "
               << this->getResponseContentLength() << std::endl;
+}
+
+void HttpRequestHandler::rewrite(const Config &config)
+{
+    std::stringstream headers;
+    std::string rewriteType;
+    int status;
+
+    status = config.getRewrite().status;
+    if (status == 307)
+        rewriteType = "Temporary Redirect";
+    else if (status == 308)
+        rewriteType = "Permanent Redirect";
+
+    headers << "HTTP/1.1 " << status << " " << rewriteType << CRLF;
+    headers << "Location: " << config.getRewrite().url << CRLF;
+    headers << CRLF;
+std::cout << "send headers\n";
+    if (::send(this->_connectionRef, headers.str().c_str(), headers.str().size() , 0) <= 0)
+        this->setIsDoneStatus();
 }
 
 HttpRequestHandler::~HttpRequestHandler()

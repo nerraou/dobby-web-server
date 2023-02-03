@@ -17,6 +17,7 @@ SOURCE_FILES=\
 	src/config/ConfigServer.cpp\
 	src/config/ConfigException.cpp\
 	src/config/Config.cpp\
+	src/config/Rewrite.cpp\
 	\
 	src/lib/lib.cpp\
 	\
@@ -47,7 +48,7 @@ HPP_FILES=\
 	src/config/ConfigServer.hpp\
 	src/config/ConfigException.hpp\
 	src/config/Config.hpp\
-	src/config/rewrite.hpp\
+	src/config/Rewrite.hpp\
 	\
 	src/lib/lib.hpp\
 	\

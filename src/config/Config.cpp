@@ -33,7 +33,7 @@ Config &Config::operator=(ConfigLocation const &other)
     return (*this);
 }
 
-const t_rewrite &Config::getRewrite() const
+const Rewrite &Config::getRewrite() const
 {
     return this->_rewrite;
 }
@@ -71,6 +71,13 @@ size_t Config::getClientMaxBodySize() const
 bool Config::getAutoIndex() const
 {
     return this->_autoIndex;
+}
+
+bool Config::hasRewrite() const
+{
+    if (this->_rewrite.status != -1)
+        return true;
+    return false;
 }
 
 const std::vector<std::string> &Config::getIndexes() const

@@ -6,7 +6,7 @@
 #include <map>
 
 #include "ConfigServer.hpp"
-#include "rewrite.hpp"
+#include "Rewrite.hpp"
 #include "ConfigException.hpp"
 
 class ConfigServer;
@@ -22,7 +22,7 @@ private:
     bool _autoIndex;
     std::vector<std::string> _allowedHttpMethods;
     std::map<int, std::string> _errorPages;
-    t_rewrite _rewrite;
+    Rewrite _rewrite;
 
 public:
     ConfigLocation();
@@ -46,8 +46,7 @@ public:
     const std::string &getAllowedHttpMethod(int index) const;
     const std::vector<std::string> &getAllowedHttpMethods() const;
     void addAllowedHttpMethods(std::vector<std::string> method);
-    const t_rewrite &getRewrite() const;
-    bool hasRewrite() const;
+    const Rewrite &getRewrite() const;
     void setRewrite(std::vector<std::string> rewrite);
     void setPath(const std::string &path);
     std::string getPath() const;

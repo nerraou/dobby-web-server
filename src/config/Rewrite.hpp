@@ -2,9 +2,9 @@
 
 #include <string>
 
-typedef struct  s_rewrite
+struct  Rewrite
 {
-    s_rewrite();
+    Rewrite();
     std::string url;
     int status;
-}               t_rewrite;
+};
