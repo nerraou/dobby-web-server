@@ -115,6 +115,13 @@ const t_rewrite &ConfigLocation::getRewrite() const
     return this->_rewrite;
 }
 
+bool ConfigLocation::hasRewrite() const
+{
+    if (this->_rewrite.status != -1)
+        return true;
+    return false;
+}
+
 void ConfigLocation::setRewrite(std::vector<std::string> rewrite)
 {
     this->_rewrite.url = rewrite.at(0);

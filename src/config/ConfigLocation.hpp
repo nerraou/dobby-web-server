@@ -47,6 +47,7 @@ public:
     const std::vector<std::string> &getAllowedHttpMethods() const;
     void addAllowedHttpMethods(std::vector<std::string> method);
     const t_rewrite &getRewrite() const;
+    bool hasRewrite() const;
     void setRewrite(std::vector<std::string> rewrite);
     void setPath(const std::string &path);
     std::string getPath() const;
