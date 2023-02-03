@@ -398,9 +398,9 @@ void HttpRequestHandler::rewrite(const Config &config)
     headers << "HTTP/1.1 " << status << " " << rewriteType << CRLF;
     headers << "Location: " << config.getRewrite().url << CRLF;
     headers << CRLF;
-std::cout << "send headers\n";
-    if (::send(this->_connectionRef, headers.str().c_str(), headers.str().size() , 0) <= 0)
-        this->setIsDoneStatus();
+    std::cout << "send headers\n";
+    (::send(this->_connectionRef, headers.str().c_str(), headers.str().size(), 0));
+    this->setIsDoneStatus();
 }
 
 HttpRequestHandler::~HttpRequestHandler()
