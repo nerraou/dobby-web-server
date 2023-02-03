@@ -105,7 +105,7 @@ void Server::start(HttpRequestHandler &requestHandler)
 
         requestHandler.setResponseHttpStatus(HTTP_OK);
         requestHandler.setIsWritingResponseBodyStatus();
-        
+
         if (hasTrainlingSlash)
             requestHandler.serveIndexFile(path, config.getIndexes(), config.getAutoIndex());
         else

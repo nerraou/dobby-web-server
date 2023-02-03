@@ -50,6 +50,7 @@ private:
     time_t _requestLastRead;
     HttpParser _httpParser;
     std::ifstream _staticFile;
+    off_t _responseBytesSent;
     off_t _responseContentLength;
     std::size_t _requestBodyOffset;
     sockaddr_in _remoteSin;
@@ -58,6 +59,7 @@ private:
     void setRemoteAddressIp(void);
 
     std::string getFileContentType(const std::string &path);
+
 public:
     HttpRequestHandler(int connectionRef, const sockaddr_in &remoteSin);
 
@@ -76,6 +78,8 @@ public:
     void setIsWritingResponseBodyStatus(void);
 
     bool isWritingResponseBody(void) const;
+
+    bool isTimeout(void) const;
 
     int getConnectionRef(void) const;
 

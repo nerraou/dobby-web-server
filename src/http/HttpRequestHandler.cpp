@@ -22,7 +22,9 @@ HttpRequestHandler::HttpRequestHandler(int connectionRef, const sockaddr_in &rem
     this->_requestReadTimeout = 5;
     this->_requestLastRead = ::time(NULL);
     this->setIsIdleStatus();
+    this->_responseHttpStatus = -1;
     this->_responseContentLength = 0;
+    this->_responseBytesSent = 0;
     this->_requestBodyOffset = 0;
     this->_cgiWriteEnd = -1;
 
@@ -88,6 +90,11 @@ void HttpRequestHandler::setIsWritingResponseBodyStatus(void)
 bool HttpRequestHandler::isWritingResponseBody(void) const
 {
     return this->_status == IsWritingResponseBody;
+}
+
+bool HttpRequestHandler::isTimeout(void) const
+{
+    return this->getResponseHttpStatus() == HTTP_REQUEST_TIMEOUT;
 }
 
 void HttpRequestHandler::setResponseContentLength(off_t contentLength)
@@ -170,7 +177,14 @@ void HttpRequestHandler::resumeWritingResponseBody(void)
         return;
     }
 
+    this->_responseBytesSent += i.gcount();
+
     if (::send(this->getConnectionRef(), readBuffer, i.gcount(), 0) <= 0)
+    {
+        this->setIsDoneStatus();
+    }
+
+    if (this->_responseBytesSent == this->getResponseContentLength())
     {
         this->setIsDoneStatus();
     }
@@ -199,13 +213,10 @@ void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, co
         headers << CRLF;
 
         const std::string &headersString = headers.str();
-        errno = 0;
         if (::send(this->_connectionRef, headersString.c_str(), headersString.length(), 0) <= 0)
         {
-            std::cerr << "request handler send(): " << strerror(errno) << std::endl;
             this->setIsDoneStatus();
             return;
-            // throw HttpInternalServerErrorException();
         }
 
         this->sendFile(path);
@@ -239,7 +250,10 @@ void HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std
         if (i == indexs.size())
         {
             if (autoIndex == true)
+            {
                 this->setResponseContentLength(this->directoryListing(path));
+                this->setIsDoneStatus();
+            }
             else
                 throw HttpForbiddenException();
         }
@@ -281,12 +295,11 @@ off_t HttpRequestHandler::directoryListing(const std::string &dirPath)
     stringBody = body.str();
     headers << "HTTP/1.1 " << HTTP_OK << " " << HTTP_OK_MESSAGE << CRLF;
     headers << "Content-Length: " << stringBody.length() << CRLF;
-    // headers << "Content-Type: " << this->getFileContentType(path) << CRLF;
+    headers << "Content-Type: text/html" << CRLF;
     headers << CRLF;
 
     const std::string &response = headers.str() + stringBody;
-    if (::send(this->_connectionRef, response.c_str(), response.length(), 0) <= 0)
-        this->setIsDoneStatus();
+    ::send(this->_connectionRef, response.c_str(), response.length(), 0);
     return stringBody.length();
 }
 
@@ -297,13 +310,14 @@ void HttpRequestHandler::sendFile(const std::string &path)
     this->_staticFile.open(path.c_str());
 
     std::istream &i = this->_staticFile.read(readBuffer, 512);
-    if (i.gcount() == 0)
+    if (i.gcount() > 0)
     {
-        this->setIsDoneStatus();
-        return;
+        this->_responseBytesSent += i.gcount();
+        if (::send(this->getConnectionRef(), readBuffer, i.gcount(), 0) <= 0)
+            this->setIsDoneStatus();
     }
 
-    if (::send(this->getConnectionRef(), readBuffer, i.gcount(), 0) <= 0)
+    if (i.gcount() == 0 || this->_responseBytesSent == this->getResponseContentLength())
         this->setIsDoneStatus();
 }
 
