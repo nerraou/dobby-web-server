@@ -399,7 +399,7 @@ void HttpRequestHandler::rewrite(const Rewrite &rewrite)
     headers << "Location: " << rewrite.url << CRLF;
     headers << CRLF;
 
-    const std::string headersContent = headers.str();
+    const std::string &headersContent = headers.str();
     ::send(this->_connectionRef, headersContent.c_str(), headersContent.size(), 0);
     this->setIsDoneStatus();
 }

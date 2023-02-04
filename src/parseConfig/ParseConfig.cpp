@@ -393,7 +393,7 @@ std::vector<std::string> ParseConfig::parseErrorPage(const std::string &line)
         throw(ParseConfig::ParseConfigException("Error Bad Error page"));
     errorPages = lib::split(trimLine);
     if (errorPages.size() < 2)
-     throw(ParseConfig::ParseConfigException("Error Bad Error page"));
+        throw(ParseConfig::ParseConfigException("Error Bad Error page"));
     return errorPages;
 }
 
