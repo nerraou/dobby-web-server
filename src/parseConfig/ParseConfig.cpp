@@ -221,6 +221,7 @@ ConfigHttp ParseConfig::parse(std::string configPath)
         {
             if (isNewServerContext)
             {
+                serverContext.init();
                 serverContext.inherit(httpContext);
                 isNewServerContext = false;
             }
@@ -244,6 +245,7 @@ ConfigHttp ParseConfig::parse(std::string configPath)
         {
             if (isNewLocationContext)
             {
+                locationContext.init();
                 locationContext.inherit(serverContext);
                 isNewLocationContext = false;
             }

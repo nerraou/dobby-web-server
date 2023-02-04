@@ -94,7 +94,7 @@ void Server::start(HttpRequestHandler &requestHandler)
         if (locationIndex != -1)
         {
             config = this->getConfigLocation(locationIndex);
-            if (config.hasRewrite()) 
+            if (config.hasRewrite())
                 return requestHandler.rewrite(config.getRewrite());
         }
         else
@@ -109,7 +109,7 @@ void Server::start(HttpRequestHandler &requestHandler)
 
         requestHandler.setResponseHttpStatus(HTTP_OK);
         requestHandler.setIsWritingResponseBodyStatus();
-        
+
         if (hasTrainlingSlash)
         {
             requestHandler.serveIndexFile(path, config.getIndexes(), config.getAutoIndex());

@@ -9,6 +9,20 @@ bool ConfigLocation::operator<(ConfigLocation const &other) const
     return other.getPath().compare(this->getPath()) < 0;
 }
 
+void ConfigLocation::init()
+{
+   this->_root.clear();
+   this->_path.clear();
+   this->_phpCGIPath.clear();
+   this->_rewrite.url.clear();
+   this->_rewrite.status = -1;
+   this->_clientMaxBodySize = 0;
+   this->_autoIndex = true;
+   this->_indexes.clear();
+   this->_allowedHttpMethods.clear();
+   this->_errorPages.clear();
+}
+
 const std::string &ConfigLocation::getRoot() const
 {
     return this->_root;
@@ -115,8 +129,7 @@ const Rewrite &ConfigLocation::getRewrite() const
     return this->_rewrite;
 }
 
-
-void ConfigLocation::setRewrite(std::vector<std::string> rewrite)
+void ConfigLocation::setRewrite(const std::vector<std::string> &rewrite)
 {
     this->_rewrite.url = rewrite.at(0);
     if (rewrite.at(1) == "redirect")
