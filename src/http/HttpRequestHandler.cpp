@@ -19,7 +19,7 @@ std::string HttpRequestHandler::getFileContentType(const std::string &path)
 HttpRequestHandler::HttpRequestHandler(int connectionRef, const sockaddr_in &remoteSin)
 {
     this->_connectionRef = connectionRef;
-    this->_requestReadTimeout = 5;
+    this->_requestReadTimeout = 60;
     this->_requestLastRead = ::time(NULL);
     this->setIsIdleStatus();
     this->_responseHttpStatus = -1;
@@ -168,26 +168,38 @@ void HttpRequestHandler::resumeWritingRequestBody(void)
 
 void HttpRequestHandler::resumeWritingResponseBody(void)
 {
-    char readBuffer[4096];
+    char readBuffer[4096] = {0};
+    std::streamsize size;
+    ssize_t sentBytes;
 
-    std::istream &i = this->_staticFile.read(readBuffer, 4096);
-    if (i.gcount() == 0)
+    if (this->_restSendBuffer.empty())
     {
-        this->setIsDoneStatus();
-        return;
+
+        std::istream &i = this->_staticFile.read(readBuffer, 4096);
+        size = i.gcount();
+
+        if (size == 0)
+        {
+            this->setIsDoneStatus();
+            return;
+        }
+
+        sentBytes = ::send(this->getConnectionRef(), readBuffer, size, 0);
+
+        if (sentBytes >= 0 && sentBytes < size)
+            this->_restSendBuffer.insert(this->_restSendBuffer.end(), readBuffer + sentBytes, readBuffer + size);
+    }
+    else
+    {
+        sentBytes = ::send(this->getConnectionRef(), &this->_restSendBuffer[0], this->_restSendBuffer.size(), 0);
+        if (sentBytes >= 0)
+            this->_restSendBuffer.erase(this->_restSendBuffer.begin(), this->_restSendBuffer.begin() + sentBytes);
     }
 
-    this->_responseBytesSent += i.gcount();
+    this->_responseBytesSent += sentBytes;
 
-    if (::send(this->getConnectionRef(), readBuffer, i.gcount(), 0) <= 0)
-    {
+    if (sentBytes < 0 || this->_responseBytesSent == this->getResponseContentLength())
         this->setIsDoneStatus();
-    }
-
-    if (this->_responseBytesSent == this->getResponseContentLength())
-    {
-        this->setIsDoneStatus();
-    }
 }
 
 void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, const std::string &statusMessage)
@@ -305,19 +317,29 @@ off_t HttpRequestHandler::directoryListing(const std::string &dirPath)
 
 void HttpRequestHandler::sendFile(const std::string &path)
 {
-    char readBuffer[512];
+    char readBuffer[4096];
+    ssize_t sentBytes;
+    std::streamsize size;
 
     this->_staticFile.open(path.c_str());
 
-    std::istream &i = this->_staticFile.read(readBuffer, 512);
-    if (i.gcount() > 0)
+    std::istream &i = this->_staticFile.read(readBuffer, 4096);
+    size = i.gcount();
+    if (size > 0)
     {
-        this->_responseBytesSent += i.gcount();
-        if (::send(this->getConnectionRef(), readBuffer, i.gcount(), 0) <= 0)
+        sentBytes = ::send(this->getConnectionRef(), readBuffer, size, 0);
+
+        if (sentBytes <= 0)
             this->setIsDoneStatus();
+        else
+        {
+            if (sentBytes < size)
+                this->_restSendBuffer.insert(this->_restSendBuffer.begin(), readBuffer + sentBytes, readBuffer + size);
+            this->_responseBytesSent = sentBytes;
+        }
     }
 
-    if (i.gcount() == 0 || this->_responseBytesSent == this->getResponseContentLength())
+    if (size == 0 || this->_responseBytesSent == this->getResponseContentLength())
         this->setIsDoneStatus();
 }
 

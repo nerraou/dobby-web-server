@@ -50,6 +50,7 @@ private:
     time_t _requestLastRead;
     HttpParser _httpParser;
     std::ifstream _staticFile;
+    ArrayBuffer _restSendBuffer;
     off_t _responseBytesSent;
     off_t _responseContentLength;
     std::size_t _requestBodyOffset;
