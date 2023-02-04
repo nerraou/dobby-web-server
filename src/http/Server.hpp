@@ -19,13 +19,15 @@ private:
     ServerSocket _socket;
     std::set<int> _connections;
     std::map<int, HttpRequestHandler> _requests;
-    ConfigServer _config;
+    ConfigServer _configServer;
+    Config _config;
     int findLocationPathMatch(const std::string &path) const;
     const ConfigLocation &getConfigLocation(int index) const;
 
 public:
     Server(const ConfigServer &config);
     const std::string &getRoot() const;
+    std ::string getErrorPagePath(int status);
     bool isServerNameExist(const std::string &host) const;
     void start(HttpRequestHandler &HttpRequestHandler);
     bool resumeWriting(HttpRequestHandler &requestHandler);
