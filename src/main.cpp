@@ -34,26 +34,26 @@ int main(int ac, char *av[])
 
     initEnvVars();
 
-    // try
-    // {
-    if (ac != 2)
+    try
     {
-        std::cerr << "usage: ./dobby config_file_path" << std::endl;
-        return 1;
-    }
-    ContentType::loadContentTypes(CONTENT_TYPE_PATH);
-    httpConfig = ParseConfig::parse(av[1]);
+        if (ac != 2)
+        {
+            std::cerr << "usage: ./dobby config_file_path" << std::endl;
+            return 1;
+        }
+        ContentType::loadContentTypes(CONTENT_TYPE_PATH);
+        httpConfig = ParseConfig::parse(av[1]);
 
-    Http http(httpConfig);
-    http.start();
-    // }
-    // catch (const std::exception &e)
-    // {
-    //     std::cerr << e.what() << std::endl;
-    // }
-    // catch (...)
-    // {
-    //     std::cerr << strerror(errno) << std::endl;
-    // }
+        Http http(httpConfig);
+        http.start();
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << strerror(errno) << std::endl;
+    }
     return (0);
 }
