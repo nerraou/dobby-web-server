@@ -4,6 +4,18 @@ ConfigServer::ConfigServer() : _port(0)
 {
 }
 
+void ConfigServer::init()
+{
+    this->_port = 0;
+    this->_root.clear();
+    this->_phpCGIPath.clear();
+    this->_autoIndex = false;
+    this->_errorPages.clear();
+    this->_indexes.clear();
+    this->_clientMaxBodySize = 0;
+    this->_locationsContext.clear();
+}
+
 int ConfigServer::getPort() const
 {
     return this->_port;

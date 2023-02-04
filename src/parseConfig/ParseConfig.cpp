@@ -221,6 +221,7 @@ ConfigHttp ParseConfig::parse(std::string configPath)
         {
             if (isNewServerContext)
             {
+                serverContext.init();
                 serverContext.inherit(httpContext);
                 isNewServerContext = false;
             }
@@ -244,6 +245,7 @@ ConfigHttp ParseConfig::parse(std::string configPath)
         {
             if (isNewLocationContext)
             {
+                locationContext.init();
                 locationContext.inherit(serverContext);
                 isNewLocationContext = false;
             }
@@ -376,7 +378,7 @@ std::vector<std::string> ParseConfig::parseIndex(const std::string &line)
     std::string trimLine;
 
     trimLine = lib::trim(line);
-    if (trimLine.length() == 0)
+    if (trimLine.empty())
         throw(ParseConfig::ParseConfigException("Error Bad Index"));
     return lib::split(trimLine);
 }
@@ -384,11 +386,15 @@ std::vector<std::string> ParseConfig::parseIndex(const std::string &line)
 std::vector<std::string> ParseConfig::parseErrorPage(const std::string &line)
 {
     std::string trimLine;
+    std::vector<std::string> errorPages;
 
     trimLine = lib::trim(line);
     if (trimLine.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad Error page"));
-    return lib::split(trimLine);
+    errorPages = lib::split(trimLine);
+    if (errorPages.size() < 2)
+        throw(ParseConfig::ParseConfigException("Error Bad Error page"));
+    return errorPages;
 }
 
 std::vector<std::string> ParseConfig::parseServerName(const std::string &line)
@@ -396,7 +402,7 @@ std::vector<std::string> ParseConfig::parseServerName(const std::string &line)
     std::string trimLine;
 
     trimLine = lib::trim(line);
-    if (trimLine.length() == 0)
+    if (trimLine.empty())
         throw(ParseConfig::ParseConfigException("Error Bad Server name"));
     return lib::split(trimLine);
 }
@@ -406,19 +412,23 @@ std::vector<std::string> ParseConfig::parseAcceptedHttpMethods(const std::string
     std::string trimLine;
 
     trimLine = lib::trim(line);
-    if (trimLine.length() == 0)
+    if (trimLine.empty())
         throw(ParseConfig::ParseConfigException("Error Bad Http methods"));
     return lib::split(trimLine);
 }
 
-std::string ParseConfig::parseRewrite(const std::string &line)
+std::vector<std::string> ParseConfig::parseRewrite(const std::string &line)
 {
     std::string trimLine;
+    std::vector<std::string> rewrite;
 
     trimLine = lib::trim(line);
-    if (trimLine.length() == 0)
+    if (trimLine.empty())
         throw(ParseConfig::ParseConfigException("Error Bad Rewrite"));
-    return trimLine;
+    rewrite = lib::split(trimLine);
+    if (rewrite.size() != 2)
+        throw(ParseConfig::ParseConfigException("Error Bad Rewrite"));
+    return rewrite;
 }
 
 std::string ParseConfig::parsePath(const std::string &line)
@@ -426,7 +436,7 @@ std::string ParseConfig::parsePath(const std::string &line)
     std::string trimLine;
 
     trimLine = lib::trim(line);
-    if (trimLine.length() == 0)
+    if (trimLine.empty())
         throw(ParseConfig::ParseConfigException("Error Bad Path"));
     return trimLine;
 }

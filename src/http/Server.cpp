@@ -92,7 +92,11 @@ void Server::start(HttpRequestHandler &requestHandler)
 
         locationIndex = this->findLocationPathMatch(requestHandler.getHttpParser().getRequestTarget().path);
         if (locationIndex != -1)
+        {
             config = this->getConfigLocation(locationIndex);
+            if (config.hasRewrite())
+                return requestHandler.rewrite(config.getRewrite());
+        }
         else
             config = this->_config;
         const std::string &path = config.getRoot() + requestHandler.getHttpParser().getRequestTarget().path;
@@ -107,7 +111,9 @@ void Server::start(HttpRequestHandler &requestHandler)
         requestHandler.setIsWritingResponseBodyStatus();
 
         if (hasTrainlingSlash)
+        {
             requestHandler.serveIndexFile(path, config.getIndexes(), config.getAutoIndex());
+        }
         else
             requestHandler.serveStatic(path, HTTP_OK, HTTP_OK_MESSAGE);
     }
