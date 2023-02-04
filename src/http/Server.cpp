@@ -95,8 +95,7 @@ void Server::start(HttpRequestHandler &requestHandler)
         {
             config = this->getConfigLocation(locationIndex);
             if (config.hasRewrite()) 
-                return requestHandler.rewrite(config);
-            //std::cout << "location status : " << config.getRewrite().status << std::endl;
+                return requestHandler.rewrite(config.getRewrite());
         }
         else
             config = this->_config;

@@ -383,23 +383,24 @@ void HttpRequestHandler::logAccess(void) const
               << this->getResponseContentLength() << std::endl;
 }
 
-void HttpRequestHandler::rewrite(const Config &config)
+void HttpRequestHandler::rewrite(const Rewrite &rewrite)
 {
     std::stringstream headers;
     std::string rewriteType;
     int status;
 
-    status = config.getRewrite().status;
+    status = rewrite.status;
     if (status == 307)
         rewriteType = "Temporary Redirect";
     else if (status == 308)
         rewriteType = "Permanent Redirect";
 
     headers << "HTTP/1.1 " << status << " " << rewriteType << CRLF;
-    headers << "Location: " << config.getRewrite().url << CRLF;
+    headers << "Location: " << rewrite.url << CRLF;
     headers << CRLF;
-    std::cout << "send headers\n";
-    (::send(this->_connectionRef, headers.str().c_str(), headers.str().size(), 0));
+
+    const std::string headersContent = headers.str();
+    ::send(this->_connectionRef, headersContent.c_str(), headersContent.size(), 0);
     this->setIsDoneStatus();
 }
 
