@@ -21,7 +21,7 @@ private:
     size_t _clientMaxBodySize;
     bool _autoIndex;
     std::vector<std::string> _allowedHttpMethods;
-    std::string _rewrite;
+    Rewrite _rewrite;
     std::string _path;
 
 public:
@@ -31,12 +31,13 @@ public:
 
     const std::string &getType() const;
     const std::string &getPath() const;
-    const std::string &getRewrite() const;
+    const Rewrite &getRewrite() const;
     const std::string &getRoot() const;
     const std::string &getPhpCGIPath() const;
     int getPort() const;
     size_t getClientMaxBodySize() const;
     bool getAutoIndex() const;
+    bool hasRewrite() const;
     const std::vector<std::string> &getIndexes() const;
     const std::vector<std::string> &getServerNames() const;
 

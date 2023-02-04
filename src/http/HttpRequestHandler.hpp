@@ -22,6 +22,9 @@
 #include "httpStatus.hpp"
 #include "HttpParser.hpp"
 #include "ContentType.hpp"
+#include "Config.hpp"
+#include "Rewrite.hpp"
+
 
 #define CRLF "\r\n"
 
@@ -114,6 +117,8 @@ public:
 
     //
     void logAccess(void) const;
+
+    void rewrite(const Rewrite &rewrite);
 
     ~HttpRequestHandler();
 };

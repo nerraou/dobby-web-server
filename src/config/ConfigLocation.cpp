@@ -9,6 +9,20 @@ bool ConfigLocation::operator<(ConfigLocation const &other) const
     return other.getPath().compare(this->getPath()) < 0;
 }
 
+void ConfigLocation::init()
+{
+   this->_root.clear();
+   this->_path.clear();
+   this->_phpCGIPath.clear();
+   this->_rewrite.url.clear();
+   this->_rewrite.status = -1;
+   this->_clientMaxBodySize = 0;
+   this->_autoIndex = true;
+   this->_indexes.clear();
+   this->_allowedHttpMethods.clear();
+   this->_errorPages.clear();
+}
+
 const std::string &ConfigLocation::getRoot() const
 {
     return this->_root;
@@ -110,14 +124,20 @@ void ConfigLocation::addAllowedHttpMethods(std::vector<std::string> method)
     this->_allowedHttpMethods = method;
 }
 
-const std::string &ConfigLocation::getRewrite() const
+const Rewrite &ConfigLocation::getRewrite() const
 {
     return this->_rewrite;
 }
 
-void ConfigLocation::setRewrite(const std::string &rewrite)
+void ConfigLocation::setRewrite(const std::vector<std::string> &rewrite)
 {
-    this->_rewrite = rewrite;
+    this->_rewrite.url = rewrite.at(0);
+    if (rewrite.at(1) == "redirect")
+        this->_rewrite.status = 307;
+    else if (rewrite.at(1) == "permanent")
+        this->_rewrite.status = 308;
+    else
+        throw ConfigException("Rewrite Flag invalid, try redirect/permanent.");
 }
 
 void ConfigLocation::setPath(const std::string &path)
@@ -161,7 +181,8 @@ void ConfigLocation::display() const
     {
         std::cout << "  -" << this->_allowedHttpMethods[i] << std::endl;
     }
-    std::cout << "Rewrite " << this->_rewrite << std::endl;
+    std::cout << "Rewrite status " << this->_rewrite.status << std::endl;
+    std::cout << "Rewrite url " << this->_rewrite.url << std::endl;
     std::cout << "Path " << this->_path << std::endl;
 }
 
