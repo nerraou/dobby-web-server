@@ -7,6 +7,9 @@
 
 #include "ConfigServer.hpp"
 #include "ConfigLocation.hpp"
+#include "httpStatus.hpp"
+
+#define ROOT_DEFAULT_ERROR_PAGES "./assets/deafult-error-pages/"
 
 class Config
 {
@@ -14,6 +17,7 @@ private:
     int _port;
     std::vector<std::string> _serverNames;
     std::map<int, std::string> _errorPages;
+    std::map<int, std::string> _defaultErrorPages;
     std::string _type;
     std::string _root;
     std::string _phpCGIPath;
@@ -24,10 +28,16 @@ private:
     Rewrite _rewrite;
     std::string _path;
 
+private:
+    bool hasErrorPage(int status) const;
+    void initDefaultErrorPages();
+
 public:
     Config();
     Config &operator=(ConfigServer const &other);
     Config &operator=(ConfigLocation const &other);
+
+    std::string getErrorPagePath(int status);
 
     const std::string &getType() const;
     const std::string &getPath() const;

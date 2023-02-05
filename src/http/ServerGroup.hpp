@@ -23,10 +23,11 @@ private:
 public:
     ServerGroup();
     ServerGroup(int serverGroupPort);
+
     void addVirtualServer(const ConfigServer &configServer);
     int acceptConnection(void);
     void closeConnection(int &fd);
-
+    int getServerIndex(const HttpParser &httpParser) const;
     void start(std::vector<PollFd> &connections);
     void handleTimeout(int nowTimestamp, int requestLastRead, int requestTimeout);
 

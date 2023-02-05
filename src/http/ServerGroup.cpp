@@ -61,6 +61,18 @@ void ServerGroup::closeConnection(int &fd)
     fd = -1;
 }
 
+int ServerGroup::getServerIndex(const HttpParser &httpParser) const
+{
+    int serverIndex;
+
+    serverIndex = 0;
+    if (httpParser.hasHeader("host"))
+        serverIndex = this->hasServerHost(httpParser.getHeader("host"));
+    if (serverIndex == -1)
+        serverIndex = 0;
+    return serverIndex;
+}
+
 void ServerGroup::handleTimeout(int nowTimestamp, int requestLastRead, int requestTimeout)
 {
     if (nowTimestamp - requestLastRead >= requestTimeout)
@@ -97,6 +109,9 @@ void ServerGroup::start(std::vector<PollFd> &connections)
 
             const HttpParser &httpParser = requestHandler->getHttpParser();
 
+            serverIndex = this->getServerIndex(httpParser);
+            this->_virtualServers[serverIndex]->initConfig();
+
             if (!requestHandler->isTimeout())
                 this->handleTimeout(nowTimestamp, requestHandler->getRequestLastRead(), requestHandler->getRequestTimeout());
 
@@ -108,28 +123,19 @@ void ServerGroup::start(std::vector<PollFd> &connections)
                        requestHandler->isWritingResponseBody();
 
             if (canWrite && connection->revents & POLLOUT)
-            {
-                serverIndex = 0;
-                if (httpParser.hasHeader("host"))
-                    serverIndex = this->hasServerHost(httpParser.getHeader("host"));
-
-                if (serverIndex == -1)
-                    serverIndex = 0;
-
                 this->_virtualServers.at(serverIndex)->start(*requestHandler);
-            }
         }
     }
     catch (const AHttpRequestException &e)
     {
-        const std::string &path = this->_virtualServers[serverIndex]->getRoot() + "/" + lib::toString(e.getHttpStatus()) + ".html";
-
-        requestHandler->setResponseHttpStatus(e.getHttpStatus());
+        const int status = e.getHttpStatus();
+        const std::string &path = this->_virtualServers[serverIndex]->getErrorPagePath(status);
+        requestHandler->setResponseHttpStatus(status);
 
         if (connection->revents & POLLOUT)
         {
             requestHandler->setIsWritingResponseBodyStatus();
-            requestHandler->serveStatic(path, e.getHttpStatus(), e.what());
+            requestHandler->serveStatic(path, status, e.what());
         }
         else
             requestHandler->setIsDoneStatus();
