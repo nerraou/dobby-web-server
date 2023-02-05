@@ -277,7 +277,7 @@ std::string ParseConfig::parseRoot(const std::string &line)
     std::string root;
 
     root = lib::trim(line);
-    if (root.length() == 0)
+    if (root.empty() || root.find(" ") != std::string::npos)
         throw(ParseConfig::ParseConfigException("Error Bad root!"));
     return (root);
 }
@@ -368,10 +368,10 @@ bool ParseConfig::parseAutoIndex(const std::string &line)
 
     trimLine = lib::trim(line);
 
-    if (std::strcmp(trimLine.c_str(), "on") == 0)
+    if (trimLine.compare("on") == 0)
         return (true);
-    else if (std::strcmp(trimLine.c_str(), "off") == 0)
-        return false;
+    else if (trimLine.compare("off") == 0)
+        return (false);
     else
         throw(ParseConfig::ParseConfigException("Error Bad AutoIndex"));
 }
@@ -453,7 +453,7 @@ std::string ParseConfig::parsePath(const std::string &line)
     std::string trimLine;
 
     trimLine = lib::trim(line);
-    if (trimLine.empty())
+    if (trimLine.empty() || trimLine.find(" ") != std::string::npos)
         throw(ParseConfig::ParseConfigException("Error Bad Path"));
     return trimLine;
 }
