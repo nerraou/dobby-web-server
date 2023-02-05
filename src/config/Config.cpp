@@ -2,6 +2,7 @@
 
 Config::Config()
 {
+    this->initDefaultErrorPages();
 }
 
 Config &Config::operator=(ConfigServer const &other)
@@ -82,9 +83,7 @@ std::string Config::getErrorPagePath(int status)
         path = this->_root + "/" + this->_errorPages.at(status);
         return (path);
     }
-    this->initDefaultErrorPages();
-    path = this->_defaultErrorPages.at(status);
-
+    path = ROOT_DEFAULT_ERROR_PAGES + this->_defaultErrorPages.at(status);
     return path;
 }
 

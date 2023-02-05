@@ -390,10 +390,10 @@ void HttpRequestHandler::rewrite(const Rewrite &rewrite)
     int status;
 
     status = rewrite.status;
-    if (status == 307)
-        rewriteType = "Temporary Redirect";
-    else if (status == 308)
-        rewriteType = "Permanent Redirect";
+    if (status == HTTP_TEMPORARY_REDIRECT)
+        rewriteType = HTTP_TEMPORARY_REDIRECT_MESSAGE;
+    else if (status == HTTP_PERMANENT_REDIRECT)
+        rewriteType = HTTP_PERMANENT_REDIRECT_MESSAGE;
 
     headers << "HTTP/1.1 " << status << " " << rewriteType << CRLF;
     headers << "Location: " << rewrite.url << CRLF;

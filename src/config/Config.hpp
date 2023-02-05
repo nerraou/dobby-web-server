@@ -9,6 +9,8 @@
 #include "ConfigLocation.hpp"
 #include "httpStatus.hpp"
 
+#define ROOT_DEFAULT_ERROR_PAGES "./assets/deafult-error-pages/"
+
 class Config
 {
 private:

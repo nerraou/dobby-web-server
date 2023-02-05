@@ -85,6 +85,11 @@ bool Server::handleCGI(HttpRequestHandler &requestHandler, const std::string &pa
     return false;
 }
 
+void Server::initConfig()
+{
+    this->_config = this->_configServer;
+}
+
 void Server::start(HttpRequestHandler &requestHandler)
 {
 

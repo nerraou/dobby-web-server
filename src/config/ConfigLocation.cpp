@@ -11,16 +11,16 @@ bool ConfigLocation::operator<(ConfigLocation const &other) const
 
 void ConfigLocation::init()
 {
-   this->_root.clear();
-   this->_path.clear();
-   this->_phpCGIPath.clear();
-   this->_rewrite.url.clear();
-   this->_rewrite.status = -1;
-   this->_clientMaxBodySize = 0;
-   this->_autoIndex = true;
-   this->_indexes.clear();
-   this->_allowedHttpMethods.clear();
-   this->_errorPages.clear();
+    this->_root.clear();
+    this->_path.clear();
+    this->_phpCGIPath.clear();
+    this->_rewrite.url.clear();
+    this->_rewrite.status = -1;
+    this->_clientMaxBodySize = 0;
+    this->_autoIndex = true;
+    this->_indexes.clear();
+    this->_allowedHttpMethods.clear();
+    this->_errorPages.clear();
 }
 
 const std::string &ConfigLocation::getRoot() const
@@ -133,9 +133,9 @@ void ConfigLocation::setRewrite(const std::vector<std::string> &rewrite)
 {
     this->_rewrite.url = rewrite.at(0);
     if (rewrite.at(1) == "redirect")
-        this->_rewrite.status = 307;
+        this->_rewrite.status = HTTP_TEMPORARY_REDIRECT;
     else if (rewrite.at(1) == "permanent")
-        this->_rewrite.status = 308;
+        this->_rewrite.status = HTTP_PERMANENT_REDIRECT;
     else
         throw ConfigException("Rewrite Flag invalid, try redirect/permanent.");
 }
