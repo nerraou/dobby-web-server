@@ -49,7 +49,6 @@ public:
 
     HttpParser();
     void append(const char *buffer, int size);
-    void append(const ArrayBuffer::const_iterator &begin, const ArrayBuffer::const_iterator &end);
     void process(void);
     const std::string &getMethod(void) const;
     const std::string &getHttpVersion(void) const;
