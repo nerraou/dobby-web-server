@@ -105,6 +105,7 @@ void ServerGroup::start(std::vector<PollFd> &connections)
 
             canWrite = requestHandler->getHttpParser().isRequestReady() ||
                        requestHandler->getHttpParser().isReadingRequestBody() ||
+                       requestHandler->getHttpParser().isReadingChunkedRequestBody() ||
                        requestHandler->isWritingResponseBody();
 
             if (canWrite && connection->revents & POLLOUT)

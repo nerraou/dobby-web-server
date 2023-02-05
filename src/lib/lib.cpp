@@ -123,4 +123,11 @@ namespace lib
             return false;
         return true;
     }
+
+    int replaceDashWithUnderscore(int c)
+    {
+        if (c == '-')
+            return '_';
+        return c;
+    }
 }

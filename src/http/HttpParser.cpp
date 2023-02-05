@@ -4,6 +4,9 @@ HttpParser::HttpParser()
 {
     this->setReadingRequestLineStatus();
     this->_receivedBodySize = 0;
+    this->_contentLength = -1;
+    this->_chunkSize = -1;
+    this->_isLastChunkSize = 0;
 }
 
 void HttpParser::append(const char *buffer, int size)
@@ -72,6 +75,8 @@ void HttpParser::parseRequestHeader(const ArrayBuffer::const_iterator &beginIt, 
 
     if (fieldName.compare("content-length") == 0)
         this->_contentLength = std::atol(this->_headers.at(fieldName).c_str());
+    else if (fieldName.compare("transfer-encoding") == 0 && fieldValue.compare("chunked") != 0)
+        throw HttpBadRequestException();
 }
 
 void HttpParser::setMethod(const std::string &method)
@@ -163,6 +168,11 @@ bool HttpParser::isReadingRequestBody(void) const
     return this->_status == ReadingRequestBody;
 }
 
+bool HttpParser::isReadingChunkedRequestBody(void) const
+{
+    return this->_status == ReadingChunkedRequestBody;
+}
+
 bool HttpParser::isReadingRequestLine(void) const
 {
     return this->_status == ReadingRequestLine;
@@ -198,6 +208,11 @@ void HttpParser::setRequestReadyStatus(void)
     this->_status = RequestReady;
 }
 
+void HttpParser::setReadingChunkedRequestBodyStatus(void)
+{
+    this->_status = ReadingChunkedRequestBody;
+}
+
 ArrayBuffer::iterator HttpParser::findCRLFPosition(ArrayBuffer::iterator &begin)
 {
     ArrayBuffer::iterator crlfPosition;
@@ -217,9 +232,65 @@ std::size_t HttpParser::getReceivedBodySize(void) const
 {
     return this->_receivedBodySize;
 }
+
 void HttpParser::clearBody(void)
 {
     this->_body.clear();
+}
+
+void HttpParser::unchunkBody(void)
+{
+    ArrayBuffer::iterator begin;
+    ArrayBuffer::iterator crlfPosition;
+    long availableChunkSize;
+
+    while (true)
+    {
+        begin = this->_buffer.begin();
+
+        if (this->_chunkSize == 0)
+        {
+            if (this->_buffer.size() < 2)
+                break;
+            if (*begin != '\r' || *(begin + 1) != '\n')
+                throw HttpBadRequestException();
+
+            this->_buffer.erase(begin, begin + CRLF_LEN);
+
+            this->_chunkSize = -1;
+        }
+        else if (this->_isLastChunkSize)
+        {
+            if (!this->_buffer.empty())
+                throw HttpBadRequestException();
+            this->setRequestReadyStatus();
+            break;
+        }
+        else if (this->_chunkSize == -1)
+        {
+            crlfPosition = this->findCRLFPosition(begin);
+
+            if (crlfPosition == this->_buffer.end())
+                break;
+            this->_chunkSize = std::strtol(std::string(begin, crlfPosition).c_str(), NULL, 16);
+            this->_buffer.erase(begin, crlfPosition + CRLF_LEN);
+
+            this->_isLastChunkSize = this->_chunkSize == 0;
+        }
+        else
+        {
+            if (this->_buffer.empty())
+                break;
+            availableChunkSize = this->_buffer.size();
+            if (availableChunkSize > this->_chunkSize)
+                availableChunkSize = this->_chunkSize;
+
+            this->_body.insert(this->_body.end(), begin, begin + availableChunkSize);
+            this->_buffer.erase(begin, begin + availableChunkSize);
+
+            this->_chunkSize -= availableChunkSize;
+        }
+    }
 }
 
 void HttpParser::process(void)
@@ -230,12 +301,16 @@ void HttpParser::process(void)
 
     if (this->isRequestReady())
         return;
+    if (this->isReadingChunkedRequestBody())
+        return this->unchunkBody();
     if (this->isReadingRequestBody())
     {
         this->_body.insert(this->_body.end(), this->_buffer.begin(), this->_buffer.end());
         this->_buffer.clear();
+
         if (this->getReceivedBodySize() == this->getContentLength())
             this->setRequestReadyStatus();
+        return;
     }
 
     begin = this->_buffer.begin();
@@ -255,12 +330,26 @@ void HttpParser::process(void)
         }
         else if (crlfPosition == begin)
         {
-            this->_body.insert(this->_body.end(), crlfPosition + CRLF_LEN, this->_buffer.end());
             this->_receivedBodySize += this->_body.size();
-            this->_buffer.clear();
-            this->setReadingRequestBodyStatus();
+            if (this->hasHeader("transfer-encoding"))
+                this->setReadingChunkedRequestBodyStatus();
+            else
+                this->setReadingRequestBodyStatus();
+
             lastCRLFPosition = crlfPosition + CRLF_LEN;
-            break;
+
+            if (this->isReadingChunkedRequestBody())
+            {
+                this->_buffer.erase(this->_buffer.begin(), lastCRLFPosition);
+                this->unchunkBody();
+                return;
+            }
+            else
+            {
+                this->_body.insert(this->_body.end(), crlfPosition + CRLF_LEN, this->_buffer.end());
+                this->_buffer.clear();
+                break;
+            }
         }
         else if (this->isReadingRequestHeaders())
         {
@@ -278,9 +367,6 @@ void HttpParser::process(void)
         this->setRequestReadyStatus();
     else if (this->isReadingRequestBody())
     {
-        if (!this->hasHeader("content-length"))
-            throw HttpBadRequestException();
-
         if (this->getReceivedBodySize() == this->getContentLength())
             this->setRequestReadyStatus();
     }

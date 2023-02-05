@@ -16,6 +16,7 @@ namespace lib
     bool isFileExist(const std::string &path);
     bool endsWith(const std::string &str, const std::string &ending);
     bool startsWith(const std::string &str, const std::string &prefix);
+    int replaceDashWithUnderscore(int c);
 
     template <typename T>
     std::string toString(T value)
