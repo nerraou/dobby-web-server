@@ -22,7 +22,9 @@ HttpRequestHandler::HttpRequestHandler(int connectionRef, const sockaddr_in &rem
     this->_requestReadTimeout = 60;
     this->_requestLastRead = ::time(NULL);
     this->setIsIdleStatus();
+    this->_responseHttpStatus = -1;
     this->_responseContentLength = 0;
+    this->_responseBytesSent = 0;
     this->_requestBodyOffset = 0;
     this->_cgiWriteEnd = -1;
 
@@ -90,6 +92,11 @@ bool HttpRequestHandler::isWritingResponseBody(void) const
     return this->_status == IsWritingResponseBody;
 }
 
+bool HttpRequestHandler::isTimeout(void) const
+{
+    return this->getResponseHttpStatus() == HTTP_REQUEST_TIMEOUT;
+}
+
 void HttpRequestHandler::setResponseContentLength(off_t contentLength)
 {
     this->_responseContentLength = contentLength;
@@ -122,21 +129,20 @@ void HttpRequestHandler::setRemoteAddressIp(void)
 void HttpRequestHandler::read(void)
 {
     ssize_t receivedBytes;
-    ArrayBuffer buffer;
+    char buffer[4096];
+    const int bufferMaxSize = 4096;
 
     if (this->_httpParser.isRequestReady())
         return;
 
-    buffer.reserve(4096);
-
-    receivedBytes = ::recv(this->_connectionRef, &buffer[0], buffer.capacity(), 0);
+    receivedBytes = ::recv(this->_connectionRef, buffer, bufferMaxSize, 0);
 
     if (receivedBytes <= 0)
         return;
 
     this->_requestLastRead = ::time(NULL);
 
-    this->_httpParser.append(buffer.begin(), buffer.begin() + receivedBytes);
+    this->_httpParser.append(buffer, receivedBytes);
     this->_httpParser.process();
 }
 
@@ -162,19 +168,38 @@ void HttpRequestHandler::resumeWritingRequestBody(void)
 
 void HttpRequestHandler::resumeWritingResponseBody(void)
 {
-    char readBuffer[4096];
+    char readBuffer[4096] = {0};
+    std::streamsize size;
+    ssize_t sentBytes;
 
-    std::istream &i = this->_staticFile.read(readBuffer, 4096);
-    if (i.gcount() == 0)
+    if (this->_restSendBuffer.empty())
     {
-        this->setIsDoneStatus();
-        return;
+
+        std::istream &i = this->_staticFile.read(readBuffer, 4096);
+        size = i.gcount();
+
+        if (size == 0)
+        {
+            this->setIsDoneStatus();
+            return;
+        }
+
+        sentBytes = ::send(this->getConnectionRef(), readBuffer, size, 0);
+
+        if (sentBytes >= 0 && sentBytes < size)
+            this->_restSendBuffer.insert(this->_restSendBuffer.end(), readBuffer + sentBytes, readBuffer + size);
+    }
+    else
+    {
+        sentBytes = ::send(this->getConnectionRef(), &this->_restSendBuffer[0], this->_restSendBuffer.size(), 0);
+        if (sentBytes >= 0)
+            this->_restSendBuffer.erase(this->_restSendBuffer.begin(), this->_restSendBuffer.begin() + sentBytes);
     }
 
-    if (::send(this->getConnectionRef(), readBuffer, i.gcount(), 0) <= 0)
-    {
+    this->_responseBytesSent += sentBytes;
+
+    if (sentBytes < 0 || this->_responseBytesSent == this->getResponseContentLength())
         this->setIsDoneStatus();
-    }
 }
 
 void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, const std::string &statusMessage)
@@ -201,7 +226,10 @@ void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, co
 
         const std::string &headersString = headers.str();
         if (::send(this->_connectionRef, headersString.c_str(), headersString.length(), 0) <= 0)
-            throw HttpInternalServerErrorException();
+        {
+            this->setIsDoneStatus();
+            return;
+        }
 
         this->sendFile(path);
     }
@@ -234,7 +262,10 @@ void HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std
         if (i == indexs.size())
         {
             if (autoIndex == true)
+            {
                 this->setResponseContentLength(this->directoryListing(path));
+                this->setIsDoneStatus();
+            }
             else
                 throw HttpForbiddenException();
         }
@@ -276,28 +307,39 @@ off_t HttpRequestHandler::directoryListing(const std::string &dirPath)
     stringBody = body.str();
     headers << "HTTP/1.1 " << HTTP_OK << " " << HTTP_OK_MESSAGE << CRLF;
     headers << "Content-Length: " << stringBody.length() << CRLF;
+    headers << "Content-Type: text/html" << CRLF;
     headers << CRLF;
 
     const std::string &response = headers.str() + stringBody;
-    if (::send(this->_connectionRef, response.c_str(), response.length(), 0) <= 0)
-        this->setIsDoneStatus();
+    ::send(this->_connectionRef, response.c_str(), response.length(), 0);
     return stringBody.length();
 }
 
 void HttpRequestHandler::sendFile(const std::string &path)
 {
-    char readBuffer[512];
+    char readBuffer[4096];
+    ssize_t sentBytes;
+    std::streamsize size;
 
     this->_staticFile.open(path.c_str());
 
-    std::istream &i = this->_staticFile.read(readBuffer, 512);
-    if (i.gcount() == 0)
+    std::istream &i = this->_staticFile.read(readBuffer, 4096);
+    size = i.gcount();
+    if (size > 0)
     {
-        this->setIsDoneStatus();
-        return;
+        sentBytes = ::send(this->getConnectionRef(), readBuffer, size, 0);
+
+        if (sentBytes <= 0)
+            this->setIsDoneStatus();
+        else
+        {
+            if (sentBytes < size)
+                this->_restSendBuffer.insert(this->_restSendBuffer.begin(), readBuffer + sentBytes, readBuffer + size);
+            this->_responseBytesSent = sentBytes;
+        }
     }
 
-    if (::send(this->getConnectionRef(), readBuffer, i.gcount(), 0) <= 0)
+    if (size == 0 || this->_responseBytesSent == this->getResponseContentLength())
         this->setIsDoneStatus();
 }
 

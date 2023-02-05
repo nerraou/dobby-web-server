@@ -6,6 +6,7 @@
 
 #include "Server.hpp"
 #include "ConfigServer.hpp"
+#include "ServerSocket.hpp"
 #include "HttpRequestHandler.hpp"
 
 class ServerGroup

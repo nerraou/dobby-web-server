@@ -25,7 +25,6 @@ static void initEnvVars(void)
     ::unsetenv("CONTENT_TYPE");
 }
 
-
 int main(int ac, char *av[])
 {
     ConfigHttp httpConfig;
