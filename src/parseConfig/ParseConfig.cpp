@@ -285,9 +285,9 @@ std::string ParseConfig::parseRoot(const std::string &line)
 size_t ParseConfig::convertToUnit(int size, const char unit)
 {
     if (unit == 'm')
-        return size * 1000000;
+        return size * 1048576;
     else
-        return size * 1000;
+        return size * 1024;
 }
 
 size_t ParseConfig::checkConvertUnit(int size, const char *str)
