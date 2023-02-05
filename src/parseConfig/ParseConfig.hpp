@@ -12,8 +12,8 @@ class ParseConfig
 private:
     static std::string parseRoot(const std::string &line);
     static size_t parseClientMaxBodySize(const std::string &line);
-    static size_t checkConvertUnit(int size, const char *str);
-    static size_t convertToUnit(int size, const char unit);
+    static size_t checkConvertUnit(long size, const char *str);
+    static size_t convertToUnit(long size, const char unit);
     static bool parseAutoIndex(const std::string &line);
     static std::vector<std::string> parseIndex(const std::string &line);
     static std::vector<std::string> parseErrorPage(const std::string &line);

@@ -282,15 +282,20 @@ std::string ParseConfig::parseRoot(const std::string &line)
     return (root);
 }
 
-size_t ParseConfig::convertToUnit(int size, const char unit)
+size_t ParseConfig::convertToUnit(long size, const char unit)
 {
     if (unit == 'm')
+    {
+        if (lib::isMulOverflow(size, 1048576))
+            throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
         return size * 1048576;
-    else
-        return size * 1024;
+    }
+    else if (lib::isMulOverflow(size, 1024))
+        throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
+    return size * 1024;
 }
 
-size_t ParseConfig::checkConvertUnit(int size, const char *str)
+size_t ParseConfig::checkConvertUnit(long size, const char *str)
 {
     int len;
     int unit;
@@ -311,16 +316,19 @@ size_t ParseConfig::checkConvertUnit(int size, const char *str)
 size_t ParseConfig::parseClientMaxBodySize(const std::string &line)
 {
     size_t size;
-    int num;
+    long num;
     char *pEnd;
     std::string trimLine;
 
     trimLine = lib::trim(line);
     if (trimLine.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
-    num = (int)std::strtol(trimLine.c_str(), &pEnd, 10);
+    num = std::strtol(trimLine.c_str(), &pEnd, 10);
     if (num <= 0)
+    {
+        std::cout << "size: " << num << "\n";
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
+    }
     size = ParseConfig::checkConvertUnit(num, pEnd);
     if (size == 0)
         throw(ParseConfig::ParseConfigException("Error Bad max body size unit!"));
