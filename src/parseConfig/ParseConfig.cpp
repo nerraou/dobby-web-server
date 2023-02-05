@@ -307,9 +307,7 @@ size_t ParseConfig::checkConvertUnit(long size, const char *str)
         return (0);
     unit = tolower(str[0]);
     if ((char)unit == 'm' || (char)unit == 'k')
-    {
         return convertToUnit(size, unit);
-    }
     return (0);
 }
 
@@ -325,10 +323,7 @@ size_t ParseConfig::parseClientMaxBodySize(const std::string &line)
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
     num = std::strtol(trimLine.c_str(), &pEnd, 10);
     if (num <= 0)
-    {
-        std::cout << "size: " << num << "\n";
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
-    }
     size = ParseConfig::checkConvertUnit(num, pEnd);
     if (size == 0)
         throw(ParseConfig::ParseConfigException("Error Bad max body size unit!"));
@@ -402,7 +397,21 @@ std::vector<std::string> ParseConfig::parseErrorPage(const std::string &line)
     errorPages = lib::split(trimLine);
     if (errorPages.size() < 2)
         throw(ParseConfig::ParseConfigException("Error Bad Error page"));
+    ParseConfig::checkErrorPageSatus(errorPages);
     return errorPages;
+}
+
+void ParseConfig::checkErrorPageSatus(const std::vector<std::string> &errorPages)
+{
+    int status;
+    char *pEnd = NULL;
+
+    for (size_t i = 0; i < errorPages.size() - 1; i++)
+    {
+        status = (int)std::strtol(errorPages.at(i).c_str(), &pEnd, 10);
+        if (status < 300 || status > 599 || *pEnd != '\0')
+            throw(ParseConfig::ParseConfigException("Error Bad Error page status!"));
+    }
 }
 
 std::vector<std::string> ParseConfig::parseServerName(const std::string &line)

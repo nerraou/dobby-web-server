@@ -17,6 +17,7 @@ private:
     static bool parseAutoIndex(const std::string &line);
     static std::vector<std::string> parseIndex(const std::string &line);
     static std::vector<std::string> parseErrorPage(const std::string &line);
+    static void checkErrorPageSatus(const std::vector<std::string> &errorPages);
     static std::vector<std::string> parseServerName(const std::string &line);
     static std::vector<std::string> parseAcceptedHttpMethods(const std::string &line);
     static std::vector<std::string> parseRewrite(const std::string &line);
