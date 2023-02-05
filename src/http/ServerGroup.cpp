@@ -25,6 +25,7 @@ ServerGroup::ServerGroup(int serverGroupPort)
 {
     this->_socket.create();
     this->_socket.bind(serverGroupPort);
+    this->_socket.listen(1000);
 }
 
 void ServerGroup::addVirtualServer(const ConfigServer &configServer)
@@ -42,7 +43,6 @@ int ServerGroup::acceptConnection(void)
     sockaddr_in remoteSin;
     socklen_t addressSize = sizeof(sockaddr_in);
 
-    this->_socket.listen(100);
     acceptedConnection = this->_socket.accept(remoteSin, addressSize);
     if (acceptedConnection != -1)
     {
@@ -104,7 +104,7 @@ void ServerGroup::start(std::vector<PollFd> &connections)
             {
                 requestHandler->logAccess();
                 this->closeConnection(connection->fd);
-                return;
+                continue;
             }
 
             const HttpParser &httpParser = requestHandler->getHttpParser();
@@ -112,14 +112,16 @@ void ServerGroup::start(std::vector<PollFd> &connections)
             serverIndex = this->getServerIndex(httpParser);
             this->_virtualServers[serverIndex]->initConfig();
 
-            this->handleTimeout(nowTimestamp, requestHandler->getRequestLastRead(), requestHandler->getRequestTimeout());
+            if (!requestHandler->isTimeout())
+                this->handleTimeout(nowTimestamp, requestHandler->getRequestLastRead(), requestHandler->getRequestTimeout());
+
+            if (connection->revents & POLLIN)
+                requestHandler->read();
 
             canWrite = requestHandler->getHttpParser().isRequestReady() ||
                        requestHandler->getHttpParser().isReadingRequestBody() ||
                        requestHandler->isWritingResponseBody();
 
-            if (connection->revents & POLLIN)
-                requestHandler->read();
             if (canWrite && connection->revents & POLLOUT)
                 this->_virtualServers.at(serverIndex)->start(*requestHandler);
         }
@@ -128,12 +130,27 @@ void ServerGroup::start(std::vector<PollFd> &connections)
     {
         const int status = e.getHttpStatus();
         const std::string &path = this->_virtualServers[serverIndex]->getErrorPagePath(status);
-        requestHandler->setIsWritingResponseBodyStatus();
         requestHandler->setResponseHttpStatus(status);
-        requestHandler->serveStatic(path, status, e.what());
+
+        if (connection->revents & POLLOUT)
+        {
+            requestHandler->setIsWritingResponseBodyStatus();
+            requestHandler->serveStatic(path, status, e.what());
+        }
+        else
+            requestHandler->setIsDoneStatus();
     }
 }
 
 ServerGroup::~ServerGroup()
 {
+    for (size_t i = 0; i < this->_virtualServers.size(); i++)
+    {
+        delete this->_virtualServers[i];
+    }
+
+    for (size_t i = 0; i < this->_requests.size(); i++)
+    {
+        delete this->_requests[i];
+    }
 }

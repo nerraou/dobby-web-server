@@ -6,9 +6,9 @@ HttpParser::HttpParser()
     this->_receivedBodySize = 0;
 }
 
-void HttpParser::append(const ArrayBuffer::const_iterator &begin, const ArrayBuffer::const_iterator &end)
+void HttpParser::append(const char *buffer, int size)
 {
-    this->_buffer.insert(this->_buffer.end(), begin, end);
+    this->_buffer.insert(this->_buffer.end(), buffer, buffer + size);
 }
 
 void HttpParser::parseRequestLine(const ArrayBuffer::const_iterator &beginIt, const ArrayBuffer::const_iterator &endIt)
