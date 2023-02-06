@@ -2,7 +2,7 @@
 
 ConfigHttp::ConfigHttp()
 {
-    this->_clientMaxBodySize = 1048576;
+    this->_clientMaxBodySize = MB;
     this->_autoIndex = false;
 }
 

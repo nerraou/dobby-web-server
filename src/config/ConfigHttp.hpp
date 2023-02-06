@@ -7,7 +7,7 @@
 #include <cstdlib>
 
 #include "ConfigServer.hpp"
-
+#include "typedefs.hpp"
 class ConfigServer;
 
 class ConfigHttp

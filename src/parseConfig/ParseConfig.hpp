@@ -10,8 +10,7 @@
 #include "FileStat.hpp"
 
 #define MAX_FILE_CONFIG_SIZE 256000
-#define KB 1024
-#define MB 1048576
+
 class ParseConfig
 {
 private:
