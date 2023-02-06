@@ -286,13 +286,13 @@ size_t ParseConfig::convertToUnit(long size, const char unit)
 {
     if (unit == 'm')
     {
-        if (lib::isMulOverflow(size, 1048576))
+        if (lib::isMulOverflow(size, MB))
             throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
-        return size * 1048576;
+        return size * MB;
     }
-    else if (lib::isMulOverflow(size, 1024))
+    else if (lib::isMulOverflow(size, KB))
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
-    return size * 1024;
+    return size * KB;
 }
 
 size_t ParseConfig::checkConvertUnit(long size, const char *str)
@@ -350,9 +350,13 @@ std::vector<std::string> ParseConfig::loadConfigFile(std::string configPath)
     std::ifstream file(configPath.c_str());
     std::string line;
     std::vector<std::string> configVector;
+    FileStat fileStat(configPath);
 
     if (file.is_open() == false)
-        throw(ParseConfig::FileException());
+        throw(ParseConfig::FileException("Error while trying to open the file."));
+    if (fileStat.getSize() >= MAX_FILE_CONFIG_SIZE)
+        throw(ParseConfig::FileException("Error file too large!"));
+
     while (std::getline(file, line))
     {
         line = lib::trim(line);
@@ -472,9 +476,14 @@ ParseConfig::ParseConfigException::~ParseConfigException() throw()
 {
 }
 
+ParseConfig::FileException::FileException(const std::string &message)
+{
+    this->_message = message;
+}
+
 const char *ParseConfig::FileException::what() const throw()
 {
-    return ("Error while trying to open the file.");
+    return this->_message.c_str();
 }
 
 ParseConfig::FileException::~FileException() throw()

@@ -4,9 +4,14 @@
 #include <cstring>
 #include <fstream>
 #include <cstdlib>
+
 #include "lib.hpp"
 #include "ConfigHttp.hpp"
+#include "FileStat.hpp"
 
+#define MAX_FILE_CONFIG_SIZE 256000
+#define KB 1024
+#define MB 1048576
 class ParseConfig
 {
 private:
@@ -34,7 +39,11 @@ public:
     ParseConfig();
     class FileException : public std::exception
     {
+    private:
+        std::string _message;
+
     public:
+        FileException(const std::string &message);
         virtual const char *what() const throw();
         virtual ~FileException() throw();
     };
