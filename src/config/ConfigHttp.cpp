@@ -2,6 +2,8 @@
 
 ConfigHttp::ConfigHttp()
 {
+    this->_clientMaxBodySize = MB;
+    this->_autoIndex = false;
 }
 
 void ConfigHttp::addServerContext(ConfigServer &server)

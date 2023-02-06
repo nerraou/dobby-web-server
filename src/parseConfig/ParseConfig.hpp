@@ -4,19 +4,24 @@
 #include <cstring>
 #include <fstream>
 #include <cstdlib>
+
 #include "lib.hpp"
 #include "ConfigHttp.hpp"
+#include "FileStat.hpp"
+
+#define MAX_FILE_CONFIG_SIZE 256000
 
 class ParseConfig
 {
 private:
     static std::string parseRoot(const std::string &line);
     static size_t parseClientMaxBodySize(const std::string &line);
-    static size_t checkConvertUnit(int size, const char *str);
-    static size_t convertToUnit(int size, const char unit);
+    static size_t checkConvertUnit(long size, const char *str);
+    static size_t convertToUnit(long size, const char unit);
     static bool parseAutoIndex(const std::string &line);
     static std::vector<std::string> parseIndex(const std::string &line);
     static std::vector<std::string> parseErrorPage(const std::string &line);
+    static void checkErrorPageSatus(const std::vector<std::string> &errorPages);
     static std::vector<std::string> parseServerName(const std::string &line);
     static std::vector<std::string> parseAcceptedHttpMethods(const std::string &line);
     static std::vector<std::string> parseRewrite(const std::string &line);
@@ -33,7 +38,11 @@ public:
     ParseConfig();
     class FileException : public std::exception
     {
+    private:
+        std::string _message;
+
     public:
+        FileException(const std::string &message);
         virtual const char *what() const throw();
         virtual ~FileException() throw();
     };
