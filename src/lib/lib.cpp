@@ -133,4 +133,34 @@ namespace lib
         else
             return true;
     }
+    int rm(const char *path)
+    {
+        DIR *dir;
+        struct dirent *entry;
+        int result;
+
+        dir = opendir(path);
+        if (dir == NULL)
+            return -1;
+
+        result = 0;
+        while (result == 0 && (entry = readdir(dir)) != NULL)
+        {
+            if (::strcmp(entry->d_name, ".") == 0 || ::strcmp(entry->d_name, "..") == 0)
+                continue;
+            result = -1;
+            const std::string &localPath = std::string(path) + '/' + std::string(entry->d_name);
+
+            if (entry->d_type == DT_DIR)
+                result = rm(localPath.c_str());
+            else
+                result = std::remove(localPath.c_str());
+        }
+        closedir(dir);
+
+        if (result == 0)
+            result = std::remove(path);
+        return result;
+    }
+
 }
