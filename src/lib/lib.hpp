@@ -6,6 +6,8 @@
 #include <list>
 #include <unistd.h>
 #include <dirent.h>
+#include <cstring>
+#include <cstdio>
 
 namespace lib
 {
@@ -18,7 +20,7 @@ namespace lib
     bool endsWith(const std::string &str, const std::string &ending);
     bool startsWith(const std::string &str, const std::string &prefix);
     bool isMulOverflow(long long A, long long B);
-    int rm(const char *path);
+    int removeDirectory(const char *path);
 
     template <typename T>
     std::string toString(T value)

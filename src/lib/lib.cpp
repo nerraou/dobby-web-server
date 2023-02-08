@@ -133,7 +133,7 @@ namespace lib
         else
             return true;
     }
-    int rm(const char *path)
+    int removeDirectory(const char *path)
     {
         DIR *dir;
         struct dirent *entry;
