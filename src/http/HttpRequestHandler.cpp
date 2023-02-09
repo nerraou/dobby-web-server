@@ -251,6 +251,7 @@ void HttpRequestHandler::executeDelete(const std::string &path)
             headers << CRLF;
             const std::string &headersString = headers.str();
             ::send(this->_connectionRef, headersString.c_str(), headersString.length(), 0);
+            this->setResponseHttpStatus(HTTP_NO_CONTENT);
             this->setIsDoneStatus();
         }
         else

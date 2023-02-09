@@ -42,6 +42,12 @@ public:
     HttpForbiddenException(void) throw();
     virtual ~HttpForbiddenException() throw();
 };
+class HttpMethodNotAllowedException : public AHttpRequestException
+{
+public:
+    HttpMethodNotAllowedException(void) throw();
+    virtual ~HttpMethodNotAllowedException() throw();
+};
 
 class HttpInternalServerErrorException : public AHttpRequestException
 {

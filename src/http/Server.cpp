@@ -98,10 +98,9 @@ void Server::executeMethods(HttpRequestHandler &requestHandler, const std::strin
         return;
     else
     {
-        // check for allowed method and decide how to handle it
         const std::string method = requestHandler.getHttpParser().getMethod();
         if (this->_config.hasMethod(method) == false)
-            throw HttpForbiddenException();
+            throw HttpMethodNotAllowedException();
         if (method == HTTP_GET)
             requestHandler.executeGet(path, HTTP_OK, HTTP_OK_MESSAGE);
         else if (method == HTTP_DELETE)
@@ -139,6 +138,7 @@ void Server::start(HttpRequestHandler &requestHandler)
     }
     catch (const AHttpRequestException &e)
     {
+
         const int status = e.getHttpStatus();
 
         requestHandler.setIsWritingResponseBodyStatus();
