@@ -17,6 +17,7 @@ namespace lib
     bool endsWith(const std::string &str, const std::string &ending);
     bool startsWith(const std::string &str, const std::string &prefix);
     int replaceDashWithUnderscore(int c);
+    bool isMulOverflow(long long A, long long B);
 
     template <typename T>
     std::string toString(T value)

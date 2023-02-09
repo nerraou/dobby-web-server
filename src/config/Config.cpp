@@ -2,6 +2,7 @@
 
 Config::Config()
 {
+    this->initDefaultErrorPages();
 }
 
 Config &Config::operator=(ConfigServer const &other)
@@ -33,6 +34,17 @@ Config &Config::operator=(ConfigLocation const &other)
     return (*this);
 }
 
+void Config::initDefaultErrorPages()
+{
+    this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_BAD_REQUEST, "default-400.html"));
+    this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_FORBIDDEN, "default-403.html"));
+    this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_NOT_FOUND, "default-404.html"));
+    this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_REQUEST_TIMEOUT, "default-408.html"));
+    this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_PAYLOAD_TOO_LARGE, "default-413.html"));
+    this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_INTERNAL_SERVER_ERROR, "default-500.html"));
+    this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_VERSION_NOT_SUPPORTED, "default-505.html"));
+}
+
 const Rewrite &Config::getRewrite() const
 {
     return this->_rewrite;
@@ -51,6 +63,28 @@ const std::string &Config::getPhpCGIPath() const
 const std::string &Config::getPath() const
 {
     return this->_path;
+}
+
+bool Config::hasErrorPage(int status) const
+{
+    if (this->_errorPages.count(status) == 0)
+        return false;
+    if (lib::isFileExist(this->_root + "/" + this->_errorPages.at(status)) == false)
+        return false;
+    return true;
+}
+
+std::string Config::getErrorPagePath(int status)
+{
+    std::string path;
+
+    if (this->hasErrorPage(status) == true)
+    {
+        path = this->_root + "/" + this->_errorPages.at(status);
+        return (path);
+    }
+    path = ROOT_DEFAULT_ERROR_PAGES + this->_defaultErrorPages.at(status);
+    return path;
 }
 
 const std::string &Config::getType() const

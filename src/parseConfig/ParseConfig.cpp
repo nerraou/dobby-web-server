@@ -277,20 +277,25 @@ std::string ParseConfig::parseRoot(const std::string &line)
     std::string root;
 
     root = lib::trim(line);
-    if (root.length() == 0)
+    if (root.empty() || root.find(" ") != std::string::npos)
         throw(ParseConfig::ParseConfigException("Error Bad root!"));
     return (root);
 }
 
-size_t ParseConfig::convertToUnit(int size, const char unit)
+size_t ParseConfig::convertToUnit(long size, const char unit)
 {
     if (unit == 'm')
-        return size * 1000000;
-    else
-        return size * 1000;
+    {
+        if (lib::isMulOverflow(size, MB))
+            throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
+        return size * MB;
+    }
+    else if (lib::isMulOverflow(size, KB))
+        throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
+    return size * KB;
 }
 
-size_t ParseConfig::checkConvertUnit(int size, const char *str)
+size_t ParseConfig::checkConvertUnit(long size, const char *str)
 {
     int len;
     int unit;
@@ -302,23 +307,21 @@ size_t ParseConfig::checkConvertUnit(int size, const char *str)
         return (0);
     unit = tolower(str[0]);
     if ((char)unit == 'm' || (char)unit == 'k')
-    {
         return convertToUnit(size, unit);
-    }
     return (0);
 }
 
 size_t ParseConfig::parseClientMaxBodySize(const std::string &line)
 {
     size_t size;
-    int num;
+    long num;
     char *pEnd;
     std::string trimLine;
 
     trimLine = lib::trim(line);
     if (trimLine.length() == 0)
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
-    num = (int)std::strtol(trimLine.c_str(), &pEnd, 10);
+    num = std::strtol(trimLine.c_str(), &pEnd, 10);
     if (num <= 0)
         throw(ParseConfig::ParseConfigException("Error Bad max body size!"));
     size = ParseConfig::checkConvertUnit(num, pEnd);
@@ -347,9 +350,13 @@ std::vector<std::string> ParseConfig::loadConfigFile(std::string configPath)
     std::ifstream file(configPath.c_str());
     std::string line;
     std::vector<std::string> configVector;
+    FileStat fileStat(configPath);
 
     if (file.is_open() == false)
-        throw(ParseConfig::FileException());
+        throw(ParseConfig::FileException("Error while trying to open the file."));
+    if (fileStat.getSize() >= MAX_FILE_CONFIG_SIZE)
+        throw(ParseConfig::FileException("Error file too large!"));
+
     while (std::getline(file, line))
     {
         line = lib::trim(line);
@@ -365,10 +372,10 @@ bool ParseConfig::parseAutoIndex(const std::string &line)
 
     trimLine = lib::trim(line);
 
-    if (std::strcmp(trimLine.c_str(), "on") == 0)
+    if (trimLine.compare("on") == 0)
         return (true);
-    else if (std::strcmp(trimLine.c_str(), "off") == 0)
-        return false;
+    else if (trimLine.compare("off") == 0)
+        return (false);
     else
         throw(ParseConfig::ParseConfigException("Error Bad AutoIndex"));
 }
@@ -394,7 +401,21 @@ std::vector<std::string> ParseConfig::parseErrorPage(const std::string &line)
     errorPages = lib::split(trimLine);
     if (errorPages.size() < 2)
         throw(ParseConfig::ParseConfigException("Error Bad Error page"));
+    ParseConfig::checkErrorPageSatus(errorPages);
     return errorPages;
+}
+
+void ParseConfig::checkErrorPageSatus(const std::vector<std::string> &errorPages)
+{
+    int status;
+    char *pEnd = NULL;
+
+    for (size_t i = 0; i < errorPages.size() - 1; i++)
+    {
+        status = (int)std::strtol(errorPages.at(i).c_str(), &pEnd, 10);
+        if (status < 300 || status > 599 || *pEnd != '\0')
+            throw(ParseConfig::ParseConfigException("Error Bad Error page status!"));
+    }
 }
 
 std::vector<std::string> ParseConfig::parseServerName(const std::string &line)
@@ -436,7 +457,7 @@ std::string ParseConfig::parsePath(const std::string &line)
     std::string trimLine;
 
     trimLine = lib::trim(line);
-    if (trimLine.empty())
+    if (trimLine.empty() || trimLine.find(" ") != std::string::npos)
         throw(ParseConfig::ParseConfigException("Error Bad Path"));
     return trimLine;
 }
@@ -455,9 +476,14 @@ ParseConfig::ParseConfigException::~ParseConfigException() throw()
 {
 }
 
+ParseConfig::FileException::FileException(const std::string &message)
+{
+    this->_message = message;
+}
+
 const char *ParseConfig::FileException::what() const throw()
 {
-    return ("Error while trying to open the file.");
+    return this->_message.c_str();
 }
 
 ParseConfig::FileException::~FileException() throw()

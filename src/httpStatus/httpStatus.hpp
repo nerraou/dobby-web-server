@@ -9,6 +9,12 @@
 
 // 3xx redirection
 
+#define HTTP_TEMPORARY_REDIRECT 307
+#define HTTP_TEMPORARY_REDIRECT_MESSAGE "Temporary Redirect"
+
+#define HTTP_PERMANENT_REDIRECT 308
+#define HTTP_PERMANENT_REDIRECT_MESSAGE "Permanent Redirect"
+
 // 4xx client errors
 
 #define HTTP_BAD_REQUEST 400
