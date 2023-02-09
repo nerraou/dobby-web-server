@@ -6,7 +6,7 @@ HttpParser::HttpParser()
     this->_receivedBodySize = 0;
     this->_contentLength = -1;
     this->_chunkSize = -1;
-    this->_isLastChunkSize = 0;
+    this->_isLastChunkSize = false;
 }
 
 void HttpParser::append(const char *buffer, int size)
