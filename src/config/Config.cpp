@@ -39,6 +39,7 @@ void Config::initDefaultErrorPages()
     this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_BAD_REQUEST, "default-400.html"));
     this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_FORBIDDEN, "default-403.html"));
     this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_NOT_FOUND, "default-404.html"));
+    this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_METHOD_NOT_ALLOWED, "default-405.html"));
     this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_REQUEST_TIMEOUT, "default-408.html"));
     this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_PAYLOAD_TOO_LARGE, "default-413.html"));
     this->_defaultErrorPages.insert(std::pair<int, std::string>(HTTP_INTERNAL_SERVER_ERROR, "default-500.html"));
@@ -122,6 +123,20 @@ const std::vector<std::string> &Config::getIndexes() const
 const std::vector<std::string> &Config::getServerNames() const
 {
     return this->_serverNames;
+}
+
+bool Config::hasMethod(const std::string &method)
+{
+    if (this->_allowedHttpMethods.size() == 0)
+    {
+
+        return true;
+    }
+    std::vector<std::string>::iterator it = std::find(this->_allowedHttpMethods.begin(), this->_allowedHttpMethods.end(), method);
+
+    if (it != this->_allowedHttpMethods.end())
+        return true;
+    return false;
 }
 
 Config::~Config()

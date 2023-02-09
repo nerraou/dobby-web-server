@@ -131,13 +131,9 @@ void ServerGroup::start(std::vector<PollFd> &connections)
     {
         const int status = e.getHttpStatus();
         const std::string &path = this->_virtualServers[serverIndex]->getErrorPagePath(status);
-        requestHandler->setResponseHttpStatus(status);
 
         if (connection->revents & POLLOUT)
-        {
-            requestHandler->setIsWritingResponseBodyStatus();
-            requestHandler->serveStatic(path, status, e.what());
-        }
+            requestHandler->executeGet(path, status, e.what());
         else
             requestHandler->setIsDoneStatus();
     }

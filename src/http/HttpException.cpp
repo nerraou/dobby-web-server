@@ -80,3 +80,13 @@ HttpInternalServerErrorException::HttpInternalServerErrorException(void) throw()
 HttpInternalServerErrorException::~HttpInternalServerErrorException() throw()
 {
 }
+
+HttpMethodNotAllowedException::HttpMethodNotAllowedException(void) throw()
+{
+    this->_httpStatus = HTTP_METHOD_NOT_ALLOWED;
+    this->_message = HTTP_METHOD_NOT_ALLOWED_MESSAGE;
+}
+
+HttpMethodNotAllowedException::~HttpMethodNotAllowedException() throw()
+{
+}

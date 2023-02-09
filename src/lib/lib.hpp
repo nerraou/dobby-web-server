@@ -5,6 +5,9 @@
 #include <vector>
 #include <list>
 #include <unistd.h>
+#include <dirent.h>
+#include <cstring>
+#include <cstdio>
 
 namespace lib
 {
@@ -18,6 +21,7 @@ namespace lib
     bool startsWith(const std::string &str, const std::string &prefix);
     int replaceDashWithUnderscore(int c);
     bool isMulOverflow(long long A, long long B);
+    int removeDirectory(const char *path);
 
     template <typename T>
     std::string toString(T value)

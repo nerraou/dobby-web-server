@@ -27,7 +27,6 @@ HttpRequestHandler::HttpRequestHandler(int connectionRef, const sockaddr_in &rem
     this->_responseBytesSent = 0;
     this->_requestBodyOffset = 0;
     this->_cgiWriteEnd = -1;
-
     this->_remoteSin = remoteSin;
     this->setRemoteAddressIp();
 }
@@ -212,7 +211,7 @@ void HttpRequestHandler::resumeWritingResponseBody(void)
         this->setIsDoneStatus();
 }
 
-void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, const std::string &statusMessage)
+void HttpRequestHandler::executeGet(const std::string &path, int httpStatus, const std::string &statusMessage)
 {
     try
     {
@@ -223,7 +222,8 @@ void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, co
             throw HttpForbiddenException();
 
         this->_responseContentLength = stat.getSize();
-
+        this->setResponseHttpStatus(httpStatus);
+        this->setIsWritingResponseBodyStatus();
         this->setResponseContentLength(stat.getSize());
         std::string contentType;
 
@@ -247,6 +247,46 @@ void HttpRequestHandler::serveStatic(const std::string &path, int httpStatus, co
     {
         throw HttpNotFoundException();
     }
+}
+
+void HttpRequestHandler::executeDelete(const std::string &path)
+{
+    try
+    {
+        std::stringstream headers;
+
+        if (this->hasDeleted(path) == true)
+        {
+            headers << "HTTP/1.1 " << HTTP_NO_CONTENT << " " << HTTP_NO_CONTENT_MESSAGE << CRLF;
+            headers << CRLF;
+            const std::string &headersString = headers.str();
+            ::send(this->_connectionRef, headersString.c_str(), headersString.length(), 0);
+            this->setResponseHttpStatus(HTTP_NO_CONTENT);
+            this->setIsDoneStatus();
+        }
+        else
+            throw HttpForbiddenException();
+    }
+    catch (const FileStat::FileStatException &e)
+    {
+        throw HttpNotFoundException();
+    }
+}
+
+bool HttpRequestHandler::hasDeleted(const std::string &path)
+{
+    const FileStat &stat = FileStat::open(path);
+    int result;
+
+    if (lib::isFileExist(path) == false)
+        throw HttpNotFoundException();
+    if (stat.isFolder() == false)
+        result = std::remove(path.c_str());
+    else
+        result = lib::removeDirectory(path.c_str());
+    if (result == 0)
+        return true;
+    return false;
 }
 
 void HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std::string> indexs, bool autoIndex)
@@ -273,6 +313,8 @@ void HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std
         {
             if (autoIndex == true)
             {
+                this->setResponseHttpStatus(HTTP_OK);
+                this->setIsWritingResponseBodyStatus();
                 this->setResponseContentLength(this->directoryListing(path));
                 this->setIsDoneStatus();
             }
@@ -280,7 +322,7 @@ void HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std
                 throw HttpForbiddenException();
         }
         else
-            this->serveStatic(indexPath, HTTP_OK, HTTP_OK_MESSAGE);
+            this->executeGet(indexPath, HTTP_OK, HTTP_OK_MESSAGE);
     }
     catch (const FileStat::FileStatException &e)
     {
