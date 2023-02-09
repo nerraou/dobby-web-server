@@ -17,7 +17,8 @@ public:
         ReadingRequestLine = 0,
         ReadingRequestHeaders = 1,
         ReadingRequestBody = 2,
-        RequestReady = 3
+        ReadingChunkedRequestBody = 3,
+        RequestReady = 4
     };
 
 private:
@@ -29,6 +30,8 @@ private:
     Url _requestTarget;
     std::size_t _contentLength;
     std::size_t _receivedBodySize;
+    long _chunkSize;
+    bool _isLastChunkSize;
     RequestStatus _status;
 
     void
@@ -41,6 +44,8 @@ private:
     void setReadingRequestBodyStatus(void);
     void setReadingRequestHeadersStatus(void);
     void setRequestReadyStatus(void);
+    void setReadingChunkedRequestBodyStatus(void);
+    void unchunkBody(void);
     ArrayBuffer::iterator findCRLFPosition(ArrayBuffer::iterator &begin);
 
 public:
@@ -60,6 +65,7 @@ public:
 
     bool isRequestReady(void) const;
     bool isReadingRequestBody(void) const;
+    bool isReadingChunkedRequestBody(void) const;
     bool isRequestMethodHasBody(void) const;
     std::size_t getContentLength() const;
     std::size_t getReceivedBodySize(void) const;

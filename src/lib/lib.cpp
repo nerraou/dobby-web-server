@@ -123,6 +123,14 @@ namespace lib
             return false;
         return true;
     }
+
+    int replaceDashWithUnderscore(int c)
+    {
+        if (c == '-')
+            return '_';
+        return c;
+    }
+
     bool isMulOverflow(long long A, long long B)
     {
         if (A == 0 || B == 0)

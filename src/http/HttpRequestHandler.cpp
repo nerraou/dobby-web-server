@@ -157,7 +157,17 @@ void HttpRequestHandler::resumeWritingRequestBody(void)
         this->_requestBodyOffset += body.size();
         this->_httpParser.clearBody();
 
-        if (writtentSize <= 0 || this->_requestBodyOffset == this->_httpParser.getContentLength())
+        if (writtentSize < 0 || this->_requestBodyOffset == this->_httpParser.getContentLength())
+        {
+            ::close(this->_cgiWriteEnd);
+            this->_cgiWriteEnd = -1;
+            this->setIsDoneStatus();
+        }
+    }
+
+    if (this->_httpParser.hasHeader("transfer-encoding"))
+    {
+        if (this->_httpParser.isRequestReady())
         {
             ::close(this->_cgiWriteEnd);
             this->_cgiWriteEnd = -1;
@@ -347,6 +357,8 @@ void HttpRequestHandler::setCGIEnv(const std::string &path, const HttpParser &ht
 {
     const Url &requestTarget = httpParser.getRequestTarget();
     std::string requestUri = requestTarget.path;
+    StringStringMap::const_iterator it = this->_httpParser.getHeaders().begin();
+    std::string headerName;
 
     if (!requestTarget.queryString.empty())
         requestUri += std::string("?") + requestTarget.queryString;
@@ -362,10 +374,20 @@ void HttpRequestHandler::setCGIEnv(const std::string &path, const HttpParser &ht
     ::setenv("REMOTE_ADDR", this->_remoteAddressIp.c_str(), 1);
     ::setenv("REMOTE_PORT", lib::toString(this->_remoteSin.sin_port).c_str(), 1);
 
+    if (httpParser.hasHeader("transfer-encoding"))
+        ::setenv("CONTENT_LENGTH", "-1", 1);
+    else if (httpParser.hasHeader("content-length"))
+        ::setenv("CONTENT_LENGTH", httpParser.getHeader("content-length").c_str(), 1);
+
     if (httpParser.hasHeader("content-type"))
         ::setenv("CONTENT_TYPE", httpParser.getHeader("content-type").c_str(), 1);
-    if (httpParser.hasHeader("content-length"))
-        ::setenv("CONTENT_LENGTH", httpParser.getHeader("content-length").c_str(), 1);
+
+    for (; it != this->_httpParser._headers.end(); ++it)
+    {
+        headerName = "HTTP_" + it->first;
+        lib::transform(headerName.begin(), headerName.end(), lib::replaceDashWithUnderscore);
+        ::setenv(headerName.c_str(), it->second.c_str(), 1);
+    }
 }
 
 void HttpRequestHandler::runCGI(const std::string &path, const std::string &cgiBinPath)
@@ -375,7 +397,8 @@ void HttpRequestHandler::runCGI(const std::string &path, const std::string &cgiB
 
     int fds[2];
     char *argv[] = {
-        (char *)cgiBinPath.c_str(),
+        const_cast<char *>(cgiBinPath.c_str()),
+        const_cast<char *>(path.c_str()),
         NULL,
     };
     (void)argv;
