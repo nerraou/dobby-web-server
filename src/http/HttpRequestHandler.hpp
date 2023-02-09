@@ -25,7 +25,6 @@
 #include "Config.hpp"
 #include "Rewrite.hpp"
 
-
 #define CRLF "\r\n"
 
 #define HTTP_GET "GET"
@@ -110,7 +109,11 @@ public:
     /**
      * serve static files using this->_requestTarget
      */
-    void serveStatic(const std::string &root, int httpStatus, const std::string &statusMessage);
+    void executeGet(const std::string &root, int httpStatus, const std::string &statusMessage);
+
+    void executeDelete(const std::string &root);
+    bool hasDeleted(const std::string &root);
+
     void serveIndexFile(const std::string &root, std::vector<std::string> indexs, bool autoIndex);
 
     off_t directoryListing(const std::string &dirPath);

@@ -29,6 +29,7 @@ public:
     bool resumeWriting(HttpRequestHandler &requestHandler);
     void setEnvVars(void);
     bool handleCGI(HttpRequestHandler &requestHandler, const std::string &path);
+    void executeMethods(HttpRequestHandler &requestHandler, const std::string &path);
     void initConfig();
     ~Server();
 };

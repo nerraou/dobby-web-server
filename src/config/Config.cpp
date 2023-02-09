@@ -124,6 +124,15 @@ const std::vector<std::string> &Config::getServerNames() const
     return this->_serverNames;
 }
 
+bool Config::hasMethod(const std::string &method)
+{
+    std::vector<std::string>::iterator it = std::find(this->_allowedHttpMethods.begin(), this->_allowedHttpMethods.end(), method);
+
+    if (this->_allowedHttpMethods.size() == 0 || it != this->_allowedHttpMethods.end())
+        return true;
+    return false;
+}
+
 Config::~Config()
 {
 }

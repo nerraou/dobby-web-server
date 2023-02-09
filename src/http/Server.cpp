@@ -85,6 +85,30 @@ bool Server::handleCGI(HttpRequestHandler &requestHandler, const std::string &pa
     return false;
 }
 
+void Server::executeMethods(HttpRequestHandler &requestHandler, const std::string &path)
+{
+    bool hasTrainlingSlash;
+    hasTrainlingSlash = path[path.length() - 1] == '/';
+
+    if (hasTrainlingSlash)
+        // if index is .php it must be handled by CGI
+        return requestHandler.serveIndexFile(path, this->_config.getIndexes(), this->_config.getAutoIndex());
+
+    if (this->handleCGI(requestHandler, path))
+        return;
+    else
+    {
+        // check for allowed method and decide how to handle it
+        const std::string method = requestHandler.getHttpParser().getMethod();
+        if (this->_config.hasMethod(method) == false)
+            throw HttpForbiddenException();
+        if (method == HTTP_GET)
+            requestHandler.executeGet(path, HTTP_OK, HTTP_OK_MESSAGE);
+        else if (method == HTTP_DELETE)
+            requestHandler.executeDelete(path);
+    }
+}
+
 void Server::initConfig()
 {
     this->_config = this->_configServer;
@@ -109,23 +133,9 @@ void Server::start(HttpRequestHandler &requestHandler)
         }
         else
             this->_config = this->_configServer;
+
         const std::string &path = this->_config.getRoot() + requestHandler.getHttpParser().getRequestTarget().path;
-        bool hasTrainlingSlash;
-
-        if (this->handleCGI(requestHandler, path))
-            return;
-
-        hasTrainlingSlash = path[path.length() - 1] == '/';
-
-        requestHandler.setResponseHttpStatus(HTTP_OK);
-        requestHandler.setIsWritingResponseBodyStatus();
-
-        if (hasTrainlingSlash)
-        {
-            requestHandler.serveIndexFile(path, this->_config.getIndexes(), this->_config.getAutoIndex());
-        }
-        else
-            requestHandler.serveStatic(path, HTTP_OK, HTTP_OK_MESSAGE);
+        this->executeMethods(requestHandler, path);
     }
     catch (const AHttpRequestException &e)
     {
@@ -133,6 +143,6 @@ void Server::start(HttpRequestHandler &requestHandler)
 
         requestHandler.setIsWritingResponseBodyStatus();
         requestHandler.setResponseHttpStatus(status);
-        requestHandler.serveStatic(this->_config.getErrorPagePath(status), status, e.what());
+        requestHandler.executeGet(this->_config.getErrorPagePath(status), status, e.what());
     }
 }

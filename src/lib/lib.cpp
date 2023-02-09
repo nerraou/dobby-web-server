@@ -152,7 +152,7 @@ namespace lib
             const std::string &localPath = std::string(path) + '/' + std::string(entry->d_name);
 
             if (entry->d_type == DT_DIR)
-                result = rm(localPath.c_str());
+                result = removeDirectory(localPath.c_str());
             else
                 result = std::remove(localPath.c_str());
         }

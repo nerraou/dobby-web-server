@@ -7,6 +7,9 @@
 #define HTTP_OK 200
 #define HTTP_OK_MESSAGE "OK"
 
+#define HTTP_NO_CONTENT 204
+#define HTTP_NO_CONTENT_MESSAGE "No Content"
+
 // 3xx redirection
 
 #define HTTP_TEMPORARY_REDIRECT 307

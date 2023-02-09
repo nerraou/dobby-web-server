@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <map>
 
 #include "ConfigServer.hpp"
@@ -50,6 +51,7 @@ public:
     bool hasRewrite() const;
     const std::vector<std::string> &getIndexes() const;
     const std::vector<std::string> &getServerNames() const;
+    bool hasMethod(const std::string &method);
 
     ~Config();
 };
