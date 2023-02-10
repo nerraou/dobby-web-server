@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include <cstring>
 #include <cstdio>
+#include <cstdlib>
 
 namespace lib
 {
@@ -22,6 +23,8 @@ namespace lib
     int replaceDashWithUnderscore(int c);
     bool isMulOverflow(long long A, long long B);
     int removeDirectory(const char *path);
+    bool parseLong(const std::string &str, long &value, int base = 10);
+    bool parseUnsignedLong(const std::string &str, unsigned long &value, int base = 10);
 
     template <typename T>
     std::string toString(T value)

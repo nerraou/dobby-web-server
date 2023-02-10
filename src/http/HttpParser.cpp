@@ -74,7 +74,10 @@ void HttpParser::parseRequestHeader(const ArrayBuffer::const_iterator &beginIt, 
     this->_headers.insert(std::make_pair(fieldName, fieldValue));
 
     if (fieldName.compare("content-length") == 0)
-        this->_contentLength = std::atol(this->_headers.at(fieldName).c_str());
+    {
+        if (lib::parseUnsignedLong(this->_headers.at(fieldName).c_str(), this->_contentLength) == false)
+            throw HttpBadRequestException();
+    }
     else if (fieldName.compare("transfer-encoding") == 0 && fieldValue.compare("chunked") != 0)
         throw HttpBadRequestException();
 }
@@ -272,7 +275,8 @@ void HttpParser::unchunkBody(void)
 
             if (crlfPosition == this->_buffer.end())
                 break;
-            this->_chunkSize = std::strtol(std::string(begin, crlfPosition).c_str(), NULL, 16);
+            if (lib::parseLong(std::string(begin, crlfPosition), this->_chunkSize, 16) == false)
+                throw HttpBadRequestException();
             this->_buffer.erase(begin, crlfPosition + CRLF_LEN);
 
             this->_isLastChunkSize = this->_chunkSize == 0;
