@@ -39,9 +39,9 @@ void ParseConfig::parseHttpContext(const std::string &line, ConfigHttp &httpCont
     {
         httpContext.addIndex(ParseConfig::parseIndex(line.substr(index)));
     }
-    else if (line.find("php_cgi_path ") == 0)
+    else if (line.find("cgi ") == 0)
     {
-        httpContext.setPHPCGIPath(ParseConfig::parseCGIDirective(line.substr(index)));
+        httpContext.addCGI(ParseConfig::parseCGI(line.substr(index)));
     }
     else
         throw ParseConfigException(std::string("unknown http directive: ").append(line));
@@ -86,9 +86,9 @@ void ParseConfig::parseServerContext(const std::string &line, ConfigServer &serv
     {
         serverContext.setClientMaxBodySize(ParseConfig::parseClientMaxBodySize(line.substr(index)));
     }
-    else if (line.find("php_cgi_path ") == 0)
+    else if (line.find("cgi ") == 0)
     {
-        serverContext.setPHPCGIPath(ParseConfig::parseCGIDirective(line.substr(index)));
+        serverContext.addCGI(ParseConfig::parseCGI(line.substr(index)));
     }
     else
         throw ParseConfigException(std::string("unknown server directive: ").append(line));
@@ -130,9 +130,9 @@ void ParseConfig::parseLocationContext(const std::string &line, ConfigLocation &
     {
         locationContext.addIndex(ParseConfig::parseIndex(line.substr(index)));
     }
-    else if (line.find("php_cgi_path ") == 0)
+    else if (line.find("cgi ") == 0)
     {
-        locationContext.setPHPCGIPath(ParseConfig::parseCGIDirective(line.substr(index)));
+        locationContext.addCGI(ParseConfig::parseCGI(line.substr(index)));
     }
     else if (line.find("error_page ") == 0)
     {
@@ -144,16 +144,6 @@ void ParseConfig::parseLocationContext(const std::string &line, ConfigLocation &
     }
     else
         throw ParseConfigException(std::string("unknown location directive: ").append(line));
-}
-
-std::string ParseConfig::parseCGIDirective(const std::string &line)
-{
-    std::string path;
-
-    path = lib::trim(line);
-    if (path.length() == 0)
-        throw(ParseConfig::ParseConfigException("Error Bad cgi directive!"));
-    return (path);
 }
 
 bool ParseConfig::setContext(std::string &line, std::string &context)
@@ -311,6 +301,20 @@ size_t ParseConfig::checkConvertUnit(long size, const char *str)
     return (0);
 }
 
+std::vector<std::string> ParseConfig::parseCGI(const std::string &line)
+{
+    std::string trimLine;
+    std::vector<std::string> cgi;
+
+    trimLine = lib::trim(line);
+    if (trimLine.empty())
+        throw(ParseConfig::ParseConfigException("Error Bad CGI"));
+    cgi = lib::split(trimLine);
+    if (cgi.size() != 2)
+        throw(ParseConfig::ParseConfigException("Error Bad CGI format, you must set: pathCGI Extension."));
+    return cgi;
+}
+
 size_t ParseConfig::parseClientMaxBodySize(const std::string &line)
 {
     size_t size;
@@ -359,7 +363,7 @@ std::vector<std::string> ParseConfig::loadConfigFile(std::string configPath)
 
     while (std::getline(file, line))
     {
-        line = lib::trim(line);
+        line = lib::trimStart(line);
         if (line.size() != 0 && line[0] != '#')
             configVector.push_back(line);
     }

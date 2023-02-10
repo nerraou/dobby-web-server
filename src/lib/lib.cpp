@@ -13,13 +13,30 @@ namespace lib
 
         start = str.find_first_not_of(set);
 
-        if (start == str.npos)
+        if (start == std::string::npos)
             trimmed = "";
         else
         {
             end = str.find_last_not_of(set);
             trimmed = str.substr(start, end - start + 1);
         }
+        return (trimmed);
+    }
+
+    std::string trimStart(const std::string &str, const std::string &set)
+    {
+        size_t start;
+        std::string trimmed;
+
+        if (set.empty())
+            return (str);
+
+        start = str.find_first_not_of(set);
+
+        if (start == std::string::npos)
+            trimmed = "";
+        else
+            trimmed = str.substr(start);
         return (trimmed);
     }
 
@@ -196,5 +213,17 @@ namespace lib
             return false;
         value = parsedValue;
         return true;
+    }
+    std::string extractExtension(const std::string &path)
+    {
+        size_t index;
+        std::string extension;
+
+        index = path.find_last_of(".");
+        if (index == std::string::npos)
+            extension = std::string("");
+        else
+            extension = path.substr(index + 1);
+        return extension;
     }
 }

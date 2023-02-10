@@ -5,7 +5,7 @@
   3. autoindex
   4. client_max_body_size
   5. error_page
-  6. php_cgi_path
+  6. cgi
 
 - server
 
@@ -16,7 +16,7 @@
   5. error_page
   6. autoindex
   7. client_max_body_size
-  8. php_cgi_path
+  8. cgi
 
 - location
 
@@ -27,8 +27,8 @@
   5. accepted_http_methods
   6. rewrite
   7. path
-  8. php_cgi_path
-  9. error_page
+  8. error_page
+  9. cgi
 
 | Attribute                                                                            | Type          | Required in context | Default | Inherited | Description                                                                                                                                             |
 | ------------------------------------------------------------------------------------ | ------------- | ------------------- | ------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |

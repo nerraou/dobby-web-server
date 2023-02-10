@@ -62,31 +62,10 @@ bool Server::resumeWriting(HttpRequestHandler &requestHandler, std::size_t clien
 
 void Server::setEnvVars(void)
 {
-    ::setenv("SERVER_PORT", lib::toString(this->_configServer.getPort()).c_str(), 1);
-    ::setenv("DOCUMENT_ROOT", this->_configServer.getRoot().c_str(), 1);
-    if (this->_configServer.getServerNamesCount() > 0)
-        ::setenv("SERVER_NAME", this->_configServer.getServerName(0).c_str(), 1);
-}
-
-bool Server::handleCGI(HttpRequestHandler &requestHandler, const std::string &path)
-{
-    if (!this->_configServer.getPHPCGIPath().empty() && lib::endsWith(path, ".php"))
-    {
-        if (!lib::isFileExist(path))
-            throw HttpNotFoundException();
-
-        requestHandler.setResponseHttpStatus(HTTP_OK);
-
-        if (requestHandler.getHttpParser().isRequestMethodHasBody())
-            requestHandler.setIsWritingRequestBodyStatus();
-        else
-            requestHandler.setIsDoneStatus();
-
-        this->setEnvVars();
-        requestHandler.runCGI(path, this->_configServer.getPHPCGIPath());
-        return true;
-    }
-    return false;
+    ::setenv("SERVER_PORT", lib::toString(this->_config.getPort()).c_str(), 1);
+    ::setenv("DOCUMENT_ROOT", this->_config.getRoot().c_str(), 1);
+    if (this->_config.getServerNames().size() > 0)
+        ::setenv("SERVER_NAME", this->_config.getServerNames().at(0).c_str(), 1);
 }
 
 void Server::handleClientMaxBodySize(const HttpRequestHandler &requestHandler)
@@ -103,15 +82,18 @@ void Server::executeMethods(HttpRequestHandler &requestHandler, const std::strin
     bool hasTrainlingSlash;
     hasTrainlingSlash = path[path.length() - 1] == '/';
 
+    this->setEnvVars();
+
     if (hasTrainlingSlash)
         // if index is .php it must be handled by CGI
-        return requestHandler.serveIndexFile(path, this->_config.getIndexes(), this->_config.getAutoIndex());
-
-    if (this->handleCGI(requestHandler, path))
-        return;
+        return requestHandler.serveIndexFile(path, this->_config);
+    if (this->_config.hasCGI(path))
+        return requestHandler.handleCGI(path, this->_config.getCGIPath(path));
     else
     {
         const std::string method = requestHandler.getHttpParser().getMethod();
+        if (method == HTTP_POST)
+            throw HttpMethodNotAllowedException();
         if (this->_config.hasMethod(method) == false)
             throw HttpMethodNotAllowedException();
         if (method == HTTP_GET)

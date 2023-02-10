@@ -18,12 +18,12 @@ class ConfigLocation
 private:
     std::string _root;
     std::string _path;
-    std::string _phpCGIPath;
     std::vector<std::string> _indexes;
     size_t _clientMaxBodySize;
     bool _autoIndex;
     std::vector<std::string> _allowedHttpMethods;
     std::map<int, std::string> _errorPages;
+    std::map<std::string, std::string> _cgi;
     Rewrite _rewrite;
 
 public:
@@ -34,9 +34,6 @@ public:
 
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
-
-    const std::string &getPHPCGIPath(void) const;
-    void setPHPCGIPath(const std::string &path);
 
     const std::string &getIndex(size_t index) const;
     void addIndex(std::vector<std::string> index);
@@ -49,6 +46,9 @@ public:
     void setErrorPages(const std::map<int, std::string> &errorPages);
     void addErrorPage(int status, const std::string &path);
     const std::map<int, std::string> &getErrorPages() const;
+
+    void addCGI(const std::vector<std::string> &cgi);
+    const std::map<std::string, std::string> &getCGI() const;
 
     const bool &getAutoIndex() const;
     void setAutoIndex(bool);

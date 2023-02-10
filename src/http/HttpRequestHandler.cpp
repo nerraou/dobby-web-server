@@ -367,11 +367,13 @@ bool HttpRequestHandler::sendStatus(int httpStatus, const std::string &statusMes
     return sentBytes != -1;
 }
 
-void HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std::string> indexs, bool autoIndex)
+void HttpRequestHandler::serveIndexFile(const std::string &path, const Config &config)
 {
     std::stringstream headers;
     FileStat stat;
     std::string indexPath;
+    const std::vector<std::string> &indexs = config.getIndexes();
+    bool autoIndex;
 
     try
     {
@@ -389,6 +391,7 @@ void HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std
         }
         if (i == indexs.size())
         {
+            autoIndex = config.getAutoIndex();
             if (autoIndex == true)
             {
                 this->setResponseHttpStatus(HTTP_OK);
@@ -400,7 +403,12 @@ void HttpRequestHandler::serveIndexFile(const std::string &path, std::vector<std
                 throw HttpForbiddenException();
         }
         else
-            this->executeGet(indexPath, HTTP_OK, HTTP_OK_MESSAGE);
+        {
+            if (config.hasCGI(indexPath) == true)
+                this->handleCGI(indexPath, config.getCGIPath(indexPath));
+            else
+                this->executeGet(indexPath, HTTP_OK, HTTP_OK_MESSAGE);
+        }
     }
     catch (const FileStat::FileStatException &e)
     {
@@ -546,6 +554,21 @@ void HttpRequestHandler::runCGI(const std::string &path, const std::string &cgiB
         ::exit(1);
     }
     ::close(fds[0]);
+}
+
+void HttpRequestHandler::handleCGI(const std::string &path, const std::string &pathCGI)
+{
+    if (!lib::isFileExist(path))
+        throw HttpNotFoundException();
+
+    this->setResponseHttpStatus(HTTP_OK);
+
+    if (this->getHttpParser().isRequestMethodHasBody())
+        this->setIsWritingRequestBodyStatus();
+    else
+        this->setIsDoneStatus();
+
+    this->runCGI(path, pathCGI);
 }
 
 void HttpRequestHandler::logAccess(void) const

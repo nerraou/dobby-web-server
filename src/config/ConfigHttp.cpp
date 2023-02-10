@@ -21,16 +21,6 @@ void ConfigHttp::setRoot(const std::string &root)
     this->_root = root;
 }
 
-const std::string &ConfigHttp::getPHPCGIPath(void) const
-{
-    return this->_phpCGIPath;
-}
-
-void ConfigHttp::setPHPCGIPath(const std::string &path)
-{
-    this->_phpCGIPath = path;
-}
-
 const std::vector<std::string> &ConfigHttp::getIndexes() const
 {
     return this->_indexes;
@@ -73,6 +63,16 @@ void ConfigHttp::addErrorPage(int status, const std::string &path)
 {
     if (this->_errorPages.count(status) == 0)
         this->_errorPages[status] = path;
+}
+
+void ConfigHttp::addCGI(const std::vector<std::string> &cgi)
+{
+    this->_cgi.insert(std::pair<std::string, std::string>(cgi.at(1), cgi.at(0)));
+}
+
+const std::map<std::string, std::string> &ConfigHttp::getCGI() const
+{
+    return this->_cgi;
 }
 
 void ConfigHttp::setErrorPages(const std::map<int, std::string> &errorPages)
@@ -127,6 +127,11 @@ void ConfigHttp::display(bool displayServer) const
     for (std::map<int, std::string>::const_iterator i = this->_errorPages.begin(); i != this->_errorPages.end(); ++i)
     {
         std::cout << " -" << i->first << ": " << i->second << std::endl;
+    }
+    std::cout << "CGI :\n";
+    for (std::map<std::string, std::string>::const_iterator i = this->_cgi.begin(); i != this->_cgi.end(); ++i)
+    {
+        std::cout << " -PathCGI: " << i->first << "  -CGIextension: " << i->second << std::endl;
     }
 
     if (displayServer)

@@ -13,7 +13,7 @@ void ConfigLocation::init()
 {
     this->_root.clear();
     this->_path.clear();
-    this->_phpCGIPath.clear();
+    this->_cgi.clear();
     this->_rewrite.url.clear();
     this->_rewrite.status = -1;
     this->_clientMaxBodySize = 0;
@@ -31,16 +31,6 @@ const std::string &ConfigLocation::getRoot() const
 void ConfigLocation::setRoot(const std::string &root)
 {
     this->_root = root;
-}
-
-const std::string &ConfigLocation::getPHPCGIPath(void) const
-{
-    return this->_phpCGIPath;
-}
-
-void ConfigLocation::setPHPCGIPath(const std::string &path)
-{
-    this->_phpCGIPath = path;
 }
 
 const std::string &ConfigLocation::getIndex(size_t index) const
@@ -95,6 +85,16 @@ const std::map<int, std::string> &ConfigLocation::getErrorPages() const
 void ConfigLocation::setClientMaxBodySize(size_t size)
 {
     this->_clientMaxBodySize = size;
+}
+
+void ConfigLocation::addCGI(const std::vector<std::string> &cgi)
+{
+    this->_cgi.insert(std::pair<std::string, std::string>(cgi.at(1), cgi.at(0)));
+}
+
+const std::map<std::string, std::string> &ConfigLocation::getCGI() const
+{
+    return this->_cgi;
 }
 
 const bool &ConfigLocation::getAutoIndex() const
@@ -163,7 +163,7 @@ void ConfigLocation::inherit(const ConfigServer &configServer)
     this->setAutoIndex(configServer.getAutoIndex());
     this->setClientMaxBodySize(configServer.getClientMaxBodySize());
     this->_indexes = configServer.getIndexes();
-    this->_phpCGIPath = configServer.getPHPCGIPath();
+    this->_cgi = configServer.getCGI();
 }
 
 void ConfigLocation::display() const
@@ -184,6 +184,11 @@ void ConfigLocation::display() const
     std::cout << "Rewrite status " << this->_rewrite.status << std::endl;
     std::cout << "Rewrite url " << this->_rewrite.url << std::endl;
     std::cout << "Path " << this->_path << std::endl;
+    std::cout << "CGI :\n";
+    for (std::map<std::string, std::string>::const_iterator i = this->_cgi.begin(); i != this->_cgi.end(); ++i)
+    {
+        std::cout << " -PathCGI: " << i->first << "  -CGIextension: " << i->second << std::endl;
+    }
 }
 
 ConfigLocation::~ConfigLocation()

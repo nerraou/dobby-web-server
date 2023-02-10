@@ -13,6 +13,7 @@
 namespace lib
 {
     std::string trim(const std::string &line, const std::string &set = " \t");
+    std::string trimStart(const std::string &line, const std::string &set = " \t");
     std::vector<std::string> split(const std::string &str, const std::string &set = " \t");
     void transform(std::string::iterator begin, std::string::iterator end, int (*transformer)(int c));
     std::size_t formatTime(char *buffer, std::size_t bufferSize, const std::string &format, const time_t timestamp);
@@ -25,6 +26,7 @@ namespace lib
     int removeDirectory(const char *path);
     bool parseLong(const std::string &str, long &value, int base = 10);
     bool parseUnsignedLong(const std::string &str, unsigned long &value, int base = 10);
+    std::string extractExtension(const std::string &extension);
 
     template <typename T>
     std::string toString(T value)

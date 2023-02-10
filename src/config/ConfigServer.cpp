@@ -8,9 +8,9 @@ void ConfigServer::init()
 {
     this->_port = 0;
     this->_root.clear();
-    this->_phpCGIPath.clear();
     this->_autoIndex = false;
     this->_errorPages.clear();
+    this->_cgi.clear();
     this->_indexes.clear();
     this->_clientMaxBodySize = 0;
     this->_locationsContext.clear();
@@ -97,16 +97,6 @@ void ConfigServer::setRoot(const std::string &root)
     this->_root = root;
 }
 
-const std::string &ConfigServer::getPHPCGIPath(void) const
-{
-    return this->_phpCGIPath;
-}
-
-void ConfigServer::setPHPCGIPath(const std::string &path)
-{
-    this->_phpCGIPath = path;
-}
-
 const std::vector<std::string> &ConfigServer::getIndexes() const
 {
     return this->_indexes;
@@ -132,6 +122,16 @@ const size_t &ConfigServer::getClientMaxBodySize() const
 void ConfigServer::setClientMaxBodySize(size_t size)
 {
     this->_clientMaxBodySize = size;
+}
+
+void ConfigServer::addCGI(const std::vector<std::string> &cgi)
+{
+    this->_cgi.insert(std::pair<std::string, std::string>(cgi.at(1), cgi.at(0)));
+}
+
+const std::map<std::string, std::string> &ConfigServer::getCGI() const
+{
+    return this->_cgi;
 }
 
 void ConfigServer::addLocationContext(ConfigLocation &location)
@@ -168,7 +168,7 @@ void ConfigServer::inherit(const ConfigHttp &configHttp)
     this->setClientMaxBodySize(configHttp.getClientMaxBodySize());
     this->_indexes = configHttp.getIndexes();
     this->_errorPages = configHttp.getErrorPages();
-    this->_phpCGIPath = configHttp.getPHPCGIPath();
+    this->_cgi = configHttp.getCGI();
 }
 
 void ConfigServer::display(bool displayLocation) const
@@ -189,7 +189,11 @@ void ConfigServer::display(bool displayLocation) const
     {
         std::cout << " -" << i->first << ": " << i->second << std::endl;
     }
-
+    std::cout << "CGI :\n";
+    for (std::map<std::string, std::string>::const_iterator i = this->_cgi.begin(); i != this->_cgi.end(); ++i)
+    {
+        std::cout << " -PathCGI: " << i->first << "  -CGIextension: " << i->second << std::endl;
+    }
     std::cout << "server Names: \n";
     for (size_t i = 0; i < this->_serverNames.size(); i++)
     {
