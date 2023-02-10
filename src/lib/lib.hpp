@@ -23,6 +23,7 @@ namespace lib
     int replaceDashWithUnderscore(int c);
     bool isMulOverflow(long long A, long long B);
     int removeDirectory(const char *path);
+    std::string extractExtension(const std::string &extension);
 
     template <typename T>
     std::string toString(T value)

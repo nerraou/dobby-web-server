@@ -8,9 +8,9 @@ void ConfigServer::init()
 {
     this->_port = 0;
     this->_root.clear();
-    this->_phpCGIPath.clear();
     this->_autoIndex = false;
     this->_errorPages.clear();
+    this->_cgi.clear();
     this->_indexes.clear();
     this->_clientMaxBodySize = 0;
     this->_locationsContext.clear();
@@ -97,16 +97,6 @@ void ConfigServer::setRoot(const std::string &root)
     this->_root = root;
 }
 
-const std::string &ConfigServer::getPHPCGIPath(void) const
-{
-    return this->_phpCGIPath;
-}
-
-void ConfigServer::setPHPCGIPath(const std::string &path)
-{
-    this->_phpCGIPath = path;
-}
-
 const std::vector<std::string> &ConfigServer::getIndexes() const
 {
     return this->_indexes;
@@ -178,7 +168,6 @@ void ConfigServer::inherit(const ConfigHttp &configHttp)
     this->setClientMaxBodySize(configHttp.getClientMaxBodySize());
     this->_indexes = configHttp.getIndexes();
     this->_errorPages = configHttp.getErrorPages();
-    this->_phpCGIPath = configHttp.getPHPCGIPath();
     this->_cgi = configHttp.getCGI();
 }
 

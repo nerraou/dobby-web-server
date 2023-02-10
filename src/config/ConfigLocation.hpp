@@ -18,7 +18,6 @@ class ConfigLocation
 private:
     std::string _root;
     std::string _path;
-    std::string _phpCGIPath;
     std::vector<std::string> _indexes;
     size_t _clientMaxBodySize;
     bool _autoIndex;
@@ -36,9 +35,6 @@ public:
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
 
-    const std::string &getPHPCGIPath(void) const;
-    void setPHPCGIPath(const std::string &path);
-
     const std::string &getIndex(size_t index) const;
     void addIndex(std::vector<std::string> index);
     const std::vector<std::string> &getIndexes() const;
@@ -52,6 +48,8 @@ public:
     const std::map<int, std::string> &getErrorPages() const;
 
     void addCGI(const std::vector<std::string> &cgi);
+    const std::map<std::string, std::string> &getCGI() const;
+
     const bool &getAutoIndex() const;
     void setAutoIndex(bool);
 

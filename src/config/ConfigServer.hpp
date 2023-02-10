@@ -20,7 +20,6 @@ private:
     int _port;
     std::vector<std::string> _serverNames;
     std::string _root;
-    std::string _phpCGIPath;
     bool _autoIndex;
     std::map<int, std::string> _errorPages;
     std::map<std::string, std::string> _cgi;
@@ -46,9 +45,6 @@ public:
 
     const std::string &getRoot() const;
     void setRoot(const std::string &root);
-
-    const std::string &getPHPCGIPath(void) const;
-    void setPHPCGIPath(const std::string &path);
 
     const std::vector<std::string> &getIndexes() const;
     const std::string &getIndex(size_t index) const;

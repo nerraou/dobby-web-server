@@ -114,7 +114,7 @@ public:
     void executeDelete(const std::string &root);
     bool hasDeleted(const std::string &root);
 
-    void serveIndexFile(const std::string &root, std::vector<std::string> indexs, bool autoIndex);
+    void serveIndexFile(const std::string &path, const Config &config);
 
     off_t directoryListing(const std::string &dirPath);
 
@@ -122,6 +122,7 @@ public:
 
     void setCGIEnv(const std::string &path, const HttpParser &httpParser) const;
     void runCGI(const std::string &path, const std::string &cgiBinPath);
+    void handleCGI(const std::string &path, const std::string &pathCGI);
 
     //
     void logAccess(void) const;

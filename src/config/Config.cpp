@@ -11,11 +11,11 @@ Config &Config::operator=(ConfigServer const &other)
     this->_port = other.getPort();
     this->_serverNames = other.getServerNames();
     this->_root = other.getRoot();
-    this->_phpCGIPath = other.getPHPCGIPath();
     this->_indexes = other.getIndexes();
     this->_clientMaxBodySize = other.getClientMaxBodySize();
     this->_autoIndex = other.getAutoIndex();
     this->_errorPages = other.getErrorPages();
+    this->_cgi = other.getCGI();
     return (*this);
 }
 
@@ -24,13 +24,14 @@ Config &Config::operator=(ConfigLocation const &other)
     this->_type = "locationContext";
     this->_root = other.getRoot();
     this->_path = other.getPath();
-    this->_phpCGIPath = other.getPHPCGIPath();
     this->_indexes = other.getIndexes();
     this->_clientMaxBodySize = other.getClientMaxBodySize();
     this->_autoIndex = other.getAutoIndex();
     this->_allowedHttpMethods = other.getAllowedHttpMethods();
     this->_rewrite = other.getRewrite();
     this->_errorPages = other.getErrorPages();
+    this->_cgi = other.getCGI();
+
     return (*this);
 }
 
@@ -54,11 +55,6 @@ const Rewrite &Config::getRewrite() const
 const std::string &Config::getRoot() const
 {
     return this->_root;
-}
-
-const std::string &Config::getPhpCGIPath() const
-{
-    return this->_phpCGIPath;
 }
 
 const std::string &Config::getPath() const
@@ -128,15 +124,32 @@ const std::vector<std::string> &Config::getServerNames() const
 bool Config::hasMethod(const std::string &method)
 {
     if (this->_allowedHttpMethods.size() == 0)
-    {
-
         return true;
-    }
+
     std::vector<std::string>::iterator it = std::find(this->_allowedHttpMethods.begin(), this->_allowedHttpMethods.end(), method);
 
     if (it != this->_allowedHttpMethods.end())
         return true;
     return false;
+}
+
+bool Config::hasCGI(const std::string &path) const
+{
+    if (this->_cgi.size() == 0)
+        return false;
+    const std::string extension = lib::extractExtension(path);
+    if (extension.empty())
+        return false;
+    if (this->_cgi.count(extension) == 0)
+        return false;
+    return true;
+}
+
+const std::string &Config::getCGIPath(const std::string &path) const
+{
+    const std::string extension = lib::extractExtension(path);
+
+    return this->_cgi.at(extension);
 }
 
 Config::~Config()

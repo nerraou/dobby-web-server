@@ -188,4 +188,16 @@ namespace lib
         return result;
     }
 
+    std::string extractExtension(const std::string &path)
+    {
+        size_t index;
+        std::string extension;
+
+        index = path.find_last_of(".");
+        if (index == std::string::npos)
+            extension = std::string("");
+        else
+            extension = path.substr(index + 1);
+        return extension;
+    }
 }
