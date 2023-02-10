@@ -36,17 +36,26 @@ public:
     HttpRequestTimeoutException(void) throw();
     virtual ~HttpRequestTimeoutException() throw();
 };
+
 class HttpForbiddenException : public AHttpRequestException
 {
 public:
     HttpForbiddenException(void) throw();
     virtual ~HttpForbiddenException() throw();
 };
+
 class HttpMethodNotAllowedException : public AHttpRequestException
 {
 public:
     HttpMethodNotAllowedException(void) throw();
     virtual ~HttpMethodNotAllowedException() throw();
+};
+
+class HttpPayloadTooLargeException : public AHttpRequestException
+{
+public:
+    HttpPayloadTooLargeException(void) throw();
+    virtual ~HttpPayloadTooLargeException() throw();
 };
 
 class HttpInternalServerErrorException : public AHttpRequestException

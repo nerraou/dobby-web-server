@@ -71,6 +71,24 @@ HttpForbiddenException::~HttpForbiddenException() throw()
 {
 }
 
+/**
+ * HttpPayloadTooLargeException
+ */
+
+HttpPayloadTooLargeException::HttpPayloadTooLargeException(void) throw()
+{
+    this->_httpStatus = HTTP_PAYLOAD_TOO_LARGE;
+    this->_message = HTTP_PAYLOAD_TOO_LARGE_MESSAGE;
+}
+
+HttpPayloadTooLargeException::~HttpPayloadTooLargeException() throw()
+{
+}
+
+/**
+ * HttpInternalServerErrorException
+ */
+
 HttpInternalServerErrorException::HttpInternalServerErrorException(void) throw()
 {
     this->_httpStatus = HTTP_INTERNAL_SERVER_ERROR;
