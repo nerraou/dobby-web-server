@@ -68,12 +68,6 @@ void Server::setEnvVars(void)
         ::setenv("SERVER_NAME", this->_config.getServerNames().at(0).c_str(), 1);
 }
 
-void Server::handleCGI(HttpRequestHandler &requestHandler, const std::string &path)
-{
-    this->setEnvVars();
-    requestHandler.handleCGI(path, this->_config.getCGIPath(path));
-}
-
 void Server::handleClientMaxBodySize(const HttpRequestHandler &requestHandler)
 {
     const std::size_t contentLength = requestHandler.getHttpParser().getContentLength();
@@ -88,11 +82,13 @@ void Server::executeMethods(HttpRequestHandler &requestHandler, const std::strin
     bool hasTrainlingSlash;
     hasTrainlingSlash = path[path.length() - 1] == '/';
 
+    this->setEnvVars();
+
     if (hasTrainlingSlash)
         // if index is .php it must be handled by CGI
         return requestHandler.serveIndexFile(path, this->_config);
     if (this->_config.hasCGI(path))
-        return this->handleCGI(requestHandler, path);
+        return requestHandler.handleCGI(path, this->_config.getCGIPath(path));
     else
     {
         const std::string method = requestHandler.getHttpParser().getMethod();

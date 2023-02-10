@@ -28,7 +28,6 @@ public:
     void start(HttpRequestHandler &HttpRequestHandler);
     bool resumeWriting(HttpRequestHandler &requestHandler, std::size_t clientMaxBodySize);
     void setEnvVars(void);
-    void handleCGI(HttpRequestHandler &requestHandler, const std::string &path);
     void handleClientMaxBodySize(const HttpRequestHandler &requestHandler);
     void executeMethods(HttpRequestHandler &requestHandler, const std::string &path);
     void initConfig();
