@@ -6,6 +6,17 @@
 make && ./dobby config_file
 ```
 
+![how to use Dobby](assets/doc/how-to-use-dobby.png)
+
+```
+Introduction:
+
+ A brief introduction about what is a web server, the concept of client-server and what is a socket attendant with the difference between client socket and server socket
+
+```
+
+![how to use Dobby](assets/doc/intro.png)
+
 ## Project file structure
 
 ```
