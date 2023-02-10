@@ -4,7 +4,7 @@ HttpParser::HttpParser()
 {
     this->setReadingRequestLineStatus();
     this->_receivedBodySize = 0;
-    this->_contentLength = -1;
+    this->_contentLength = 0;
     this->_chunkSize = -1;
     this->_isLastChunkSize = false;
 }

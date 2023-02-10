@@ -6,6 +6,7 @@
 #include <cstring>
 #include <sstream>
 #include <fstream>
+#include <iterator>
 #include <sys/socket.h>
 #include <cctype>
 #include <cstdlib>
@@ -52,6 +53,7 @@ private:
     time_t _requestLastRead;
     HttpParser _httpParser;
     std::ifstream _staticFile;
+    std::ofstream _putFile;
     ArrayBuffer _restSendBuffer;
     off_t _responseBytesSent;
     off_t _responseContentLength;
@@ -110,11 +112,12 @@ public:
      * serve static files using this->_requestTarget
      */
     void executeGet(const std::string &root, int httpStatus, const std::string &statusMessage);
-
+    void executePut(const std::string &path);
     void executeDelete(const std::string &root);
     bool hasDeleted(const std::string &root);
 
     void serveIndexFile(const std::string &root, std::vector<std::string> indexs, bool autoIndex);
+    bool sendStatus(int httpStatus, const std::string &statusMessage);
 
     off_t directoryListing(const std::string &dirPath);
 
