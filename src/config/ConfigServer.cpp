@@ -134,6 +134,16 @@ void ConfigServer::setClientMaxBodySize(size_t size)
     this->_clientMaxBodySize = size;
 }
 
+void ConfigServer::addCGI(const std::vector<std::string> &cgi)
+{
+    this->_cgi.insert(std::pair<std::string, std::string>(cgi.at(1), cgi.at(0)));
+}
+
+const std::map<std::string, std::string> &ConfigServer::getCGI() const
+{
+    return this->_cgi;
+}
+
 void ConfigServer::addLocationContext(ConfigLocation &location)
 {
     this->_locationsContext.push_back(location);
@@ -169,6 +179,7 @@ void ConfigServer::inherit(const ConfigHttp &configHttp)
     this->_indexes = configHttp.getIndexes();
     this->_errorPages = configHttp.getErrorPages();
     this->_phpCGIPath = configHttp.getPHPCGIPath();
+    this->_cgi = configHttp.getCGI();
 }
 
 void ConfigServer::display(bool displayLocation) const
@@ -189,7 +200,11 @@ void ConfigServer::display(bool displayLocation) const
     {
         std::cout << " -" << i->first << ": " << i->second << std::endl;
     }
-
+    std::cout << "CGI :\n";
+    for (std::map<std::string, std::string>::const_iterator i = this->_cgi.begin(); i != this->_cgi.end(); ++i)
+    {
+        std::cout << " -PathCGI: " << i->first << "  -CGIextension: " << i->second << std::endl;
+    }
     std::cout << "server Names: \n";
     for (size_t i = 0; i < this->_serverNames.size(); i++)
     {

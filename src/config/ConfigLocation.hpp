@@ -24,6 +24,7 @@ private:
     bool _autoIndex;
     std::vector<std::string> _allowedHttpMethods;
     std::map<int, std::string> _errorPages;
+    std::map<std::string, std::string> _cgi;
     Rewrite _rewrite;
 
 public:
@@ -50,6 +51,7 @@ public:
     void addErrorPage(int status, const std::string &path);
     const std::map<int, std::string> &getErrorPages() const;
 
+    void addCGI(const std::vector<std::string> &cgi);
     const bool &getAutoIndex() const;
     void setAutoIndex(bool);
 

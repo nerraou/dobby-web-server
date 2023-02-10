@@ -97,6 +97,11 @@ void ConfigLocation::setClientMaxBodySize(size_t size)
     this->_clientMaxBodySize = size;
 }
 
+void ConfigLocation::addCGI(const std::vector<std::string> &cgi)
+{
+    this->_cgi.insert(std::pair<std::string, std::string>(cgi.at(1), cgi.at(0)));
+}
+
 const bool &ConfigLocation::getAutoIndex() const
 {
     return this->_autoIndex;
@@ -164,6 +169,7 @@ void ConfigLocation::inherit(const ConfigServer &configServer)
     this->setClientMaxBodySize(configServer.getClientMaxBodySize());
     this->_indexes = configServer.getIndexes();
     this->_phpCGIPath = configServer.getPHPCGIPath();
+    this->_cgi = configServer.getCGI();
 }
 
 void ConfigLocation::display() const
@@ -184,6 +190,11 @@ void ConfigLocation::display() const
     std::cout << "Rewrite status " << this->_rewrite.status << std::endl;
     std::cout << "Rewrite url " << this->_rewrite.url << std::endl;
     std::cout << "Path " << this->_path << std::endl;
+    std::cout << "CGI :\n";
+    for (std::map<std::string, std::string>::const_iterator i = this->_cgi.begin(); i != this->_cgi.end(); ++i)
+    {
+        std::cout << " -PathCGI: " << i->first << "  -CGIextension: " << i->second << std::endl;
+    }
 }
 
 ConfigLocation::~ConfigLocation()
