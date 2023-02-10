@@ -26,9 +26,10 @@ public:
     std ::string getErrorPagePath(int status);
     bool isServerNameExist(const std::string &host) const;
     void start(HttpRequestHandler &HttpRequestHandler);
-    bool resumeWriting(HttpRequestHandler &requestHandler);
+    bool resumeWriting(HttpRequestHandler &requestHandler, std::size_t clientMaxBodySize);
     void setEnvVars(void);
     void handleCGI(HttpRequestHandler &requestHandler, const std::string &path);
+    void handleClientMaxBodySize(const HttpRequestHandler &requestHandler);
     void executeMethods(HttpRequestHandler &requestHandler, const std::string &path);
     void initConfig();
     ~Server();

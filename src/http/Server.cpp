@@ -34,13 +34,13 @@ bool Server::isServerNameExist(const std::string &host) const
     return this->_configServer.isServerNameExist(host);
 }
 
-bool Server::resumeWriting(HttpRequestHandler &requestHandler)
+bool Server::resumeWriting(HttpRequestHandler &requestHandler, std::size_t clientMaxBodySize)
 {
     try
     {
         if (requestHandler.isWritingRequestBody())
         {
-            requestHandler.resumeWritingRequestBody();
+            requestHandler.resumeWritingRequestBody(clientMaxBodySize);
             return true;
         }
         else if (requestHandler.isWritingResponseBody())
@@ -49,6 +49,10 @@ bool Server::resumeWriting(HttpRequestHandler &requestHandler)
             return true;
         }
         return false;
+    }
+    catch (const AHttpRequestException &e)
+    {
+        throw e;
     }
     catch (...)
     {
@@ -68,6 +72,15 @@ void Server::handleCGI(HttpRequestHandler &requestHandler, const std::string &pa
 {
     this->setEnvVars();
     requestHandler.handleCGI(path, this->_config.getCGIPath(path));
+}
+
+void Server::handleClientMaxBodySize(const HttpRequestHandler &requestHandler)
+{
+    const std::size_t contentLength = requestHandler.getHttpParser().getContentLength();
+    const std::size_t clientMaxBodySize = this->_config.getClientMaxBodySize();
+
+    if (contentLength > clientMaxBodySize || requestHandler.getHttpParser().getReceivedBodySize() > clientMaxBodySize)
+        throw HttpPayloadTooLargeException();
 }
 
 void Server::executeMethods(HttpRequestHandler &requestHandler, const std::string &path)
@@ -91,6 +104,8 @@ void Server::executeMethods(HttpRequestHandler &requestHandler, const std::strin
             requestHandler.executeGet(path, HTTP_OK, HTTP_OK_MESSAGE);
         else if (method == HTTP_DELETE)
             requestHandler.executeDelete(path);
+        else if (method == HTTP_PUT)
+            requestHandler.executePut(path, this->_config.getClientMaxBodySize());
     }
 }
 
@@ -101,10 +116,6 @@ void Server::initConfig()
 
 void Server::start(HttpRequestHandler &requestHandler)
 {
-
-    if (this->resumeWriting(requestHandler))
-        return;
-
     try
     {
         int locationIndex;
@@ -119,16 +130,18 @@ void Server::start(HttpRequestHandler &requestHandler)
         else
             this->_config = this->_configServer;
 
+        if (this->resumeWriting(requestHandler, this->_config.getClientMaxBodySize()))
+            return;
+
+        this->handleClientMaxBodySize(requestHandler);
+
         const std::string &path = this->_config.getRoot() + requestHandler.getHttpParser().getRequestTarget().path;
         this->executeMethods(requestHandler, path);
     }
     catch (const AHttpRequestException &e)
     {
-
         const int status = e.getHttpStatus();
 
-        requestHandler.setIsWritingResponseBodyStatus();
-        requestHandler.setResponseHttpStatus(status);
         requestHandler.executeGet(this->_config.getErrorPagePath(status), status, e.what());
     }
 }

@@ -16,6 +16,15 @@ std::string HttpRequestHandler::getFileContentType(const std::string &path)
     return ContentType::contentTypes.at(key);
 }
 
+void HttpRequestHandler::handleClientMaxBodySize(std::size_t clientMaxBodySize)
+{
+    if (this->getHttpParser().getReceivedBodySize() > clientMaxBodySize)
+    {
+        std::remove(this->_putFilename.c_str());
+        throw HttpPayloadTooLargeException();
+    }
+}
+
 HttpRequestHandler::HttpRequestHandler(int connectionRef, const sockaddr_in &remoteSin)
 {
     this->_connectionRef = connectionRef;
@@ -145,33 +154,53 @@ void HttpRequestHandler::read(void)
     this->_httpParser.process();
 }
 
-void HttpRequestHandler::resumeWritingRequestBody(void)
+void HttpRequestHandler::resumeWritingRequestBody(std::size_t clientMaxBodySize)
 {
     const ArrayBuffer &body = this->_httpParser.getBody();
     ssize_t writtentSize;
+    bool isDone;
+
+    isDone = false;
+
+    this->handleClientMaxBodySize(clientMaxBodySize);
 
     if (this->_httpParser.getBody().size() != 0)
     {
-        writtentSize = ::write(this->_cgiWriteEnd, &body[0], body.size());
-        this->_requestBodyOffset += body.size();
-        this->_httpParser.clearBody();
-
-        if (writtentSize < 0 || this->_requestBodyOffset == this->_httpParser.getContentLength())
+        if (this->_putFile.is_open())
         {
-            ::close(this->_cgiWriteEnd);
-            this->_cgiWriteEnd = -1;
-            this->setIsDoneStatus();
+            std::copy(body.begin(), body.end(), std::ostream_iterator<unsigned char>(this->_putFile));
+            this->_requestBodyOffset += body.size();
         }
+        else
+        {
+            writtentSize = ::write(this->_cgiWriteEnd, &body[0], body.size());
+            this->_requestBodyOffset += body.size();
+
+            if (writtentSize < 0 || this->_requestBodyOffset == this->_httpParser.getContentLength())
+                isDone = true;
+        }
+        this->_httpParser.clearBody();
     }
 
     if (this->_httpParser.hasHeader("transfer-encoding"))
+        isDone = this->_httpParser.isRequestReady();
+    else
+        isDone = this->_requestBodyOffset == this->_httpParser.getContentLength();
+
+    if (isDone)
     {
-        if (this->_httpParser.isRequestReady())
+        if (this->_cgiWriteEnd != -1)
         {
             ::close(this->_cgiWriteEnd);
             this->_cgiWriteEnd = -1;
-            this->setIsDoneStatus();
         }
+        else if (this->_putFile.is_open())
+        {
+            this->_putFile.close();
+            this->sendStatus(HTTP_CREATED, HTTP_CREATED_MESSAGE);
+        }
+
+        this->setIsDoneStatus();
     }
 }
 
@@ -287,6 +316,55 @@ bool HttpRequestHandler::hasDeleted(const std::string &path)
     if (result == 0)
         return true;
     return false;
+}
+
+void HttpRequestHandler::executePut(const std::string &path, std::size_t clientMaxBodySize)
+{
+    const ArrayBuffer &body = this->_httpParser.getBody();
+    const std::size_t bodySize = body.size();
+    bool isDone;
+
+    if (!this->getHttpParser().hasHeader("content-length") && !this->getHttpParser().hasHeader("transfer-encoding"))
+        throw HttpBadRequestException();
+
+    this->_putFilename.assign(path);
+    this->_putFile.open(path.c_str());
+
+    if (!this->_putFile.good())
+        throw HttpForbiddenException();
+
+    this->handleClientMaxBodySize(clientMaxBodySize);
+
+    this->setIsWritingRequestBodyStatus();
+    this->setResponseHttpStatus(HTTP_CREATED);
+
+    std::copy(body.begin(), body.end(), std::ostream_iterator<unsigned char>(this->_putFile));
+    this->_httpParser.clearBody();
+
+    isDone = false;
+
+    if (this->_httpParser.hasHeader("transfer-encoding"))
+        isDone = this->_httpParser.isRequestReady();
+    else
+        isDone = bodySize == this->_httpParser.getContentLength();
+
+    if (isDone)
+    {
+        this->_putFile.close();
+        this->sendStatus(HTTP_CREATED, HTTP_CREATED_MESSAGE);
+        this->setIsDoneStatus();
+    }
+}
+
+bool HttpRequestHandler::sendStatus(int httpStatus, const std::string &statusMessage)
+{
+    std::stringstream message;
+
+    message << "HTTP/1.1 " << httpStatus << " " << statusMessage << CRLF CRLF;
+    const std::string &statusString = message.str();
+    ssize_t sentBytes = ::send(this->_connectionRef, statusString.c_str(), statusString.length(), 0);
+
+    return sentBytes != -1;
 }
 
 void HttpRequestHandler::serveIndexFile(const std::string &path, const Config &config)

@@ -6,6 +6,7 @@
 #include <cstring>
 #include <sstream>
 #include <fstream>
+#include <iterator>
 #include <sys/socket.h>
 #include <cctype>
 #include <cstdlib>
@@ -52,6 +53,8 @@ private:
     time_t _requestLastRead;
     HttpParser _httpParser;
     std::ifstream _staticFile;
+    std::ofstream _putFile;
+    std::string _putFilename;
     ArrayBuffer _restSendBuffer;
     off_t _responseBytesSent;
     off_t _responseContentLength;
@@ -62,6 +65,7 @@ private:
     void setRemoteAddressIp(void);
 
     std::string getFileContentType(const std::string &path);
+    void handleClientMaxBodySize(std::size_t clientMaxBodySize);
 
 public:
     HttpRequestHandler(int connectionRef, const sockaddr_in &remoteSin);
@@ -100,7 +104,7 @@ public:
 
     void read(void);
 
-    void resumeWritingRequestBody(void);
+    void resumeWritingRequestBody(std::size_t clientMaxBodySize);
 
     void resumeWritingResponseBody(void);
 
@@ -110,11 +114,12 @@ public:
      * serve static files using this->_requestTarget
      */
     void executeGet(const std::string &root, int httpStatus, const std::string &statusMessage);
-
+    void executePut(const std::string &path, std::size_t clientMaxBodySize);
     void executeDelete(const std::string &root);
     bool hasDeleted(const std::string &root);
 
     void serveIndexFile(const std::string &path, const Config &config);
+    bool sendStatus(int httpStatus, const std::string &statusMessage);
 
     off_t directoryListing(const std::string &dirPath);
 
