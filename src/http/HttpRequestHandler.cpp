@@ -313,7 +313,7 @@ void HttpRequestHandler::executePut(const std::string &path)
     const std::size_t bodySize = body.size();
     bool isDone;
 
-    if (!this->getHttpParser().hasHeader("content-length"))
+    if (!this->getHttpParser().hasHeader("content-length") && !this->getHttpParser().hasHeader("transfer-encoding"))
         throw HttpBadRequestException();
 
     this->_putFile.open(path.c_str());
