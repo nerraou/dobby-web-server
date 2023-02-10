@@ -11,7 +11,9 @@ make && ./dobby config_file
 ```
 Introduction:
 
- A brief introduction about what is a web server, the concept of client-server and what is a socket attendant with the difference between client socket and server socket
+ A brief introduction about what is a web server,
+ the concept of client-server and what is a socket,
+ attendant with the difference between client socket and server socket
 
 ```
 
