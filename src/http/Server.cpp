@@ -105,6 +105,8 @@ void Server::executeMethods(HttpRequestHandler &requestHandler, const std::strin
             requestHandler.executeGet(path, HTTP_OK, HTTP_OK_MESSAGE);
         else if (method == HTTP_DELETE)
             requestHandler.executeDelete(path);
+        else if (method == HTTP_PUT)
+            requestHandler.executePut(path);
     }
 }
 
@@ -141,8 +143,6 @@ void Server::start(HttpRequestHandler &requestHandler)
 
         const int status = e.getHttpStatus();
 
-        requestHandler.setIsWritingResponseBodyStatus();
-        requestHandler.setResponseHttpStatus(status);
         requestHandler.executeGet(this->_config.getErrorPagePath(status), status, e.what());
     }
 }

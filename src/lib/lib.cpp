@@ -141,6 +141,7 @@ namespace lib
         else
             return true;
     }
+
     int removeDirectory(const char *path)
     {
         DIR *dir;
@@ -171,4 +172,29 @@ namespace lib
         return result;
     }
 
+    bool parseLong(const std::string &str, long &value, int base)
+    {
+        char *endPtr;
+        long parsedValue;
+
+        parsedValue = std::strtol(str.c_str(), &endPtr, base);
+
+        if (endPtr[0] != '\0')
+            return false;
+        value = parsedValue;
+        return true;
+    }
+
+    bool parseUnsignedLong(const std::string &str, unsigned long &value, int base)
+    {
+        char *endPtr;
+        unsigned long parsedValue;
+
+        parsedValue = std::strtoul(str.c_str(), &endPtr, base);
+
+        if (endPtr[0] != '\0')
+            return false;
+        value = parsedValue;
+        return true;
+    }
 }
