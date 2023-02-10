@@ -293,6 +293,7 @@ void HttpParser::unchunkBody(void)
             this->_buffer.erase(begin, begin + availableChunkSize);
 
             this->_chunkSize -= availableChunkSize;
+            this->_receivedBodySize += availableChunkSize;
         }
     }
 }
@@ -311,6 +312,8 @@ void HttpParser::process(void)
     {
         this->_body.insert(this->_body.end(), this->_buffer.begin(), this->_buffer.end());
         this->_buffer.clear();
+
+        this->_receivedBodySize += this->_body.size();
 
         if (this->getReceivedBodySize() == this->getContentLength())
             this->setRequestReadyStatus();
@@ -334,7 +337,6 @@ void HttpParser::process(void)
         }
         else if (crlfPosition == begin)
         {
-            this->_receivedBodySize += this->_body.size();
             if (this->hasHeader("transfer-encoding"))
                 this->setReadingChunkedRequestBodyStatus();
             else
@@ -351,6 +353,8 @@ void HttpParser::process(void)
             else
             {
                 this->_body.insert(this->_body.end(), crlfPosition + CRLF_LEN, this->_buffer.end());
+                this->_receivedBodySize += this->_body.size();
+
                 this->_buffer.clear();
                 break;
             }

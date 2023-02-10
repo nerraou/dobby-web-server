@@ -16,6 +16,15 @@ std::string HttpRequestHandler::getFileContentType(const std::string &path)
     return ContentType::contentTypes.at(key);
 }
 
+void HttpRequestHandler::handleClientMaxBodySize(std::size_t clientMaxBodySize)
+{
+    if (this->getHttpParser().getReceivedBodySize() > clientMaxBodySize)
+    {
+        std::remove(this->_putFilename.c_str());
+        throw HttpPayloadTooLargeException();
+    }
+}
+
 HttpRequestHandler::HttpRequestHandler(int connectionRef, const sockaddr_in &remoteSin)
 {
     this->_connectionRef = connectionRef;
@@ -145,13 +154,15 @@ void HttpRequestHandler::read(void)
     this->_httpParser.process();
 }
 
-void HttpRequestHandler::resumeWritingRequestBody(void)
+void HttpRequestHandler::resumeWritingRequestBody(std::size_t clientMaxBodySize)
 {
     const ArrayBuffer &body = this->_httpParser.getBody();
     ssize_t writtentSize;
     bool isDone;
 
     isDone = false;
+
+    this->handleClientMaxBodySize(clientMaxBodySize);
 
     if (this->_httpParser.getBody().size() != 0)
     {
@@ -307,7 +318,7 @@ bool HttpRequestHandler::hasDeleted(const std::string &path)
     return false;
 }
 
-void HttpRequestHandler::executePut(const std::string &path)
+void HttpRequestHandler::executePut(const std::string &path, std::size_t clientMaxBodySize)
 {
     const ArrayBuffer &body = this->_httpParser.getBody();
     const std::size_t bodySize = body.size();
@@ -316,10 +327,13 @@ void HttpRequestHandler::executePut(const std::string &path)
     if (!this->getHttpParser().hasHeader("content-length") && !this->getHttpParser().hasHeader("transfer-encoding"))
         throw HttpBadRequestException();
 
+    this->_putFilename.assign(path);
     this->_putFile.open(path.c_str());
 
     if (!this->_putFile.good())
         throw HttpForbiddenException();
+
+    this->handleClientMaxBodySize(clientMaxBodySize);
 
     this->setIsWritingRequestBodyStatus();
     this->setResponseHttpStatus(HTTP_CREATED);
