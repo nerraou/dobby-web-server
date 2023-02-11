@@ -84,23 +84,26 @@ void HttpParser::parseRequestHeader(const ArrayBuffer::const_iterator &beginIt, 
 
 void HttpParser::setMethod(const std::string &method)
 {
+    const int methodsCount = 9;
     const std::string methods[] = {
-        "GET",
-        "POST",
-        "PATCH",
-        "PUT",
-        "DELETE",
-    };
-    const int methodsCount = 5;
+        "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
+    const std::string _acceptedMethods[] = {
+        "GET", "POST", "PUT", "PATCH", "DELETE"};
+    const std::vector<std::string> acceptedMethods(_acceptedMethods, _acceptedMethods + 5);
 
     for (int i = 0; i < methodsCount; i++)
     {
         if (method.compare(methods[i]) == 0)
         {
             this->_method = method;
+            bool isAllowedMethod = std::find(acceptedMethods.begin(), acceptedMethods.end(), method) != acceptedMethods.end();
+
+            if (!isAllowedMethod)
+                throw HttpMethodNotAllowedException();
             return;
         }
     }
+
     throw HttpBadRequestException();
 }
 
