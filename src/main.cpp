@@ -8,6 +8,7 @@
 #include "Http.hpp"
 #include "ParseConfig.hpp"
 #include "ContentType.hpp"
+#include "typedefs.hpp"
 
 #define CONTENT_TYPE_PATH "./src/contentType/contentType.txt"
 
@@ -31,18 +32,19 @@ int main(int ac, char *av[])
 
     std::signal(SIGCHLD, sig_child_handler);
     std::signal(SIGPIPE, SIG_IGN);
+    std::string configPath;
 
     initEnvVars();
 
     try
     {
         if (ac != 2)
-        {
-            std::cerr << "usage: ./dobby config_file_path" << std::endl;
-            return 1;
-        }
+            configPath = DEFAULT_CONFIG_PATH;
+        else
+            configPath = av[1];
+
         ContentType::loadContentTypes(CONTENT_TYPE_PATH);
-        httpConfig = ParseConfig::parse(av[1]);
+        httpConfig = ParseConfig::parse(configPath);
 
         Http http(httpConfig);
         http.start();
