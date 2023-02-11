@@ -1,0 +1,8 @@
+http {
+  root /Users/nerraou/Desktop/dobby-web-server/www
+  autoindex on
+
+  server {
+    listen 8080
+  }
+}

@@ -407,7 +407,11 @@ void HttpRequestHandler::serveIndexFile(const std::string &path, const Config &c
             if (config.hasCGI(indexPath) == true)
                 this->handleCGI(indexPath, config.getCGIPath(indexPath));
             else
+            {
+                if (this->_httpParser.getMethod() != HTTP_GET)
+                    throw HttpMethodNotAllowedException();
                 this->executeGet(indexPath, HTTP_OK, HTTP_OK_MESSAGE);
+            }
         }
     }
     catch (const FileStat::FileStatException &e)

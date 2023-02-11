@@ -100,7 +100,6 @@ void ParseConfig::parseLocationContext(const std::string &line, ConfigLocation &
     std::vector<std::string> parsedErrorPages;
     std::string errorPagePath;
 
-    index = 0;
     index = line.find_first_of(" \t");
     if (line.find("path ") == 0)
     {
@@ -190,12 +189,14 @@ ConfigHttp ParseConfig::parse(std::string configPath)
     configVector = ParseConfig::loadConfigFile(configPath);
     for (i = 0; i < configVector.size(); ++i)
     {
+        std::string curlyBrace;
         if (ParseConfig::setContext(configVector[i], context))
             continue;
 
         if (context == "http")
         {
-            if (configVector[i].compare("}") == 0)
+            curlyBrace = lib::trim(configVector[i]);
+            if (curlyBrace.compare("}") == 0)
             {
                 if (i != configVector.size() - 1)
                     throw ParseConfigException("bad config file");
@@ -216,7 +217,8 @@ ConfigHttp ParseConfig::parse(std::string configPath)
                 isNewServerContext = false;
             }
 
-            if (configVector[i] == "}")
+            curlyBrace = lib::trim(configVector[i]);
+            if (curlyBrace.compare("}") == 0)
             {
                 isNewServerContext = true;
                 if (serverContext.isGood() == true)
@@ -240,7 +242,8 @@ ConfigHttp ParseConfig::parse(std::string configPath)
                 isNewLocationContext = false;
             }
 
-            if (configVector[i] == "}")
+            curlyBrace = lib::trim(configVector[i]);
+            if (curlyBrace.compare("}") == 0)
             {
                 isNewLocationContext = true;
                 if (locationContext.isGood() == true)
@@ -434,12 +437,28 @@ std::vector<std::string> ParseConfig::parseServerName(const std::string &line)
 
 std::vector<std::string> ParseConfig::parseAcceptedHttpMethods(const std::string &line)
 {
+
+    const char *_methdos[] = {"GET", "POST", "PATCH", "PUT", "DELETE"};
+    std::vector<std::string> methods(_methdos, _methdos + 5);
+
     std::string trimLine;
+    std::vector<std::string> vec;
 
     trimLine = lib::trim(line);
     if (trimLine.empty())
         throw(ParseConfig::ParseConfigException("Error Bad Http methods"));
-    return lib::split(trimLine);
+    vec = lib::split(trimLine);
+    if (vec.size() > 5)
+        throw(ParseConfig::ParseConfigException("Error Bad Http methods"));
+
+    std::vector<std::string>::const_iterator it;
+    for (size_t i = 0; i < vec.size(); i++)
+    {
+        it = std::find(methods.begin(), methods.end(), vec[i]);
+        if (it == methods.end())
+            throw(ParseConfig::ParseConfigException("Error Not Allowed Http method, use { GET, POST, PATCH, PUT, DELETE} "));
+    }
+    return vec;
 }
 
 std::vector<std::string> ParseConfig::parseRewrite(const std::string &line)

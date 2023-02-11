@@ -92,7 +92,7 @@ void Server::executeMethods(HttpRequestHandler &requestHandler, const std::strin
     else
     {
         const std::string method = requestHandler.getHttpParser().getMethod();
-        if (method == HTTP_POST)
+        if (method == HTTP_POST || method == HTTP_PATCH)
             throw HttpMethodNotAllowedException();
         if (this->_config.hasMethod(method) == false)
             throw HttpMethodNotAllowedException();
