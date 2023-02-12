@@ -391,6 +391,8 @@ void HttpRequestHandler::serveIndexFile(const std::string &path, const Config &c
         }
         if (i == indexs.size())
         {
+            if (this->_httpParser.getMethod() != HTTP_GET)
+                throw HttpMethodNotAllowedException();
             autoIndex = config.getAutoIndex();
             if (autoIndex == true)
             {
@@ -518,6 +520,7 @@ void HttpRequestHandler::setCGIEnv(const std::string &path, const HttpParser &ht
     {
         headerName = "HTTP_" + it->first;
         lib::transform(headerName.begin(), headerName.end(), lib::replaceDashWithUnderscore);
+        lib::transform(headerName.begin(), headerName.end(), std::toupper);
         ::setenv(headerName.c_str(), it->second.c_str(), 1);
     }
 }
@@ -526,6 +529,7 @@ void HttpRequestHandler::runCGI(const std::string &path, const std::string &cgiB
 {
     extern char **environ;
     const HttpParser &httpParser = this->getHttpParser();
+    pid_t pid;
 
     int fds[2];
     char *argv[] = {
@@ -533,23 +537,45 @@ void HttpRequestHandler::runCGI(const std::string &path, const std::string &cgiB
         const_cast<char *>(path.c_str()),
         NULL,
     };
-    (void)argv;
-    (void)(environ);
 
-    if (::pipe(fds) == -1)
-        throw HttpInternalServerErrorException();
-
-    this->_cgiWriteEnd = fds[1];
-
-    if (::fork() == 0)
+    if (httpParser.isRequestMethodHasBody())
     {
-        ::dup2(fds[0], 0);
-        ::close(fds[0]);
-        ::close(fds[1]);
+        if (::pipe(fds) == -1)
+            throw HttpInternalServerErrorException();
+        this->_cgiWriteEnd = fds[1];
+        std::cerr << this->_cgiWriteEnd << std::endl;
+    }
+
+    pid = ::fork();
+
+    if (pid == -1)
+    {
+        if (this->_cgiWriteEnd != -1)
+        {
+            ::close(fds[0]);
+            ::close(fds[1]);
+            this->_cgiWriteEnd = -1;
+        }
+        throw HttpInternalServerErrorException();
+    }
+
+    if (pid == 0)
+    {
+        if (httpParser.isRequestMethodHasBody())
+        {
+            if (::dup2(fds[0], 0) == -1)
+                exit(1);
+            ::close(fds[0]);
+            ::close(fds[1]);
+        }
 
         this->setCGIEnv(path, httpParser);
 
-        ::dup2(this->getConnectionRef(), 1);
+        if (::dup2(this->getConnectionRef(), 1) == -1)
+            exit(1);
+
+        if (::close(this->getConnectionRef()) == -1)
+            exit(1);
 
         if (::send(1, "HTTP/1.1 200 OK" CRLF, 17, 0) <= 0)
             exit(1);
@@ -557,7 +583,9 @@ void HttpRequestHandler::runCGI(const std::string &path, const std::string &cgiB
         ::execve(cgiBinPath.c_str(), argv, environ);
         ::exit(1);
     }
-    ::close(fds[0]);
+
+    if (httpParser.isRequestMethodHasBody())
+        ::close(fds[0]);
 }
 
 void HttpRequestHandler::handleCGI(const std::string &path, const std::string &pathCGI)

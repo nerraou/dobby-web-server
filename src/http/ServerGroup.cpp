@@ -25,7 +25,7 @@ ServerGroup::ServerGroup(int serverGroupPort)
 {
     this->_socket.create();
     this->_socket.bind(serverGroupPort);
-    this->_socket.listen(1000);
+    this->_socket.listen(10000);
 }
 
 void ServerGroup::addVirtualServer(const ConfigServer &configServer)

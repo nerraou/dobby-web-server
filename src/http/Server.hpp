@@ -30,6 +30,7 @@ public:
     void setEnvVars(void);
     void handleClientMaxBodySize(const HttpRequestHandler &requestHandler);
     void executeMethods(HttpRequestHandler &requestHandler, const std::string &path);
+    std::string resolvePath(const std::string &matchedLocationPath, const std::string &requestPath);
     void initConfig();
     ~Server();
 };

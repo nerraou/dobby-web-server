@@ -79,14 +79,19 @@ void Server::handleClientMaxBodySize(const HttpRequestHandler &requestHandler)
 
 void Server::executeMethods(HttpRequestHandler &requestHandler, const std::string &path)
 {
-    bool hasTrainlingSlash;
-    hasTrainlingSlash = path[path.length() - 1] == '/';
+    FileStat fileStat;
 
     this->setEnvVars();
 
-    if (hasTrainlingSlash)
-        // if index is .php it must be handled by CGI
-        return requestHandler.serveIndexFile(path, this->_config);
+    if (lib::isFileExist(path))
+    {
+        fileStat = FileStat::open(path);
+
+        if (fileStat.isFolder())
+            // if index is .php it must be handled by CGI
+            return requestHandler.serveIndexFile(path, this->_config);
+    }
+
     if (this->_config.hasCGI(path))
         return requestHandler.handleCGI(path, this->_config.getCGIPath(path));
     else
@@ -105,6 +110,19 @@ void Server::executeMethods(HttpRequestHandler &requestHandler, const std::strin
     }
 }
 
+std::string Server::resolvePath(const std::string &matchedLocationPath, const std::string &requestPath)
+{
+    std::size_t slashIndex;
+    std::string resolvedPath;
+
+    slashIndex = requestPath.find_first_of('/', matchedLocationPath.length() - 1);
+    if (slashIndex == std::string::npos)
+        return std::string("");
+
+    resolvedPath = requestPath.substr(slashIndex);
+    return resolvedPath;
+}
+
 void Server::initConfig()
 {
     this->_config = this->_configServer;
@@ -115,8 +133,9 @@ void Server::start(HttpRequestHandler &requestHandler)
     try
     {
         int locationIndex;
+        const std::string &requestPath = requestHandler.getHttpParser().getRequestTarget().path;
 
-        locationIndex = this->findLocationPathMatch(requestHandler.getHttpParser().getRequestTarget().path);
+        locationIndex = this->findLocationPathMatch(requestPath);
         if (locationIndex != -1)
         {
             this->_config = this->getConfigLocation(locationIndex);
@@ -131,7 +150,16 @@ void Server::start(HttpRequestHandler &requestHandler)
 
         this->handleClientMaxBodySize(requestHandler);
 
-        const std::string &path = this->_config.getRoot() + requestHandler.getHttpParser().getRequestTarget().path;
+        std::string path;
+
+        if (this->_config.getType().compare("locationContext") == 0)
+        {
+            std::string resolvedPath = this->resolvePath(this->_config.getPath(), requestPath);
+            path = this->_config.getRoot() + resolvedPath;
+        }
+        else
+            path = this->_config.getRoot() + requestPath;
+
         this->executeMethods(requestHandler, path);
     }
     catch (const AHttpRequestException &e)
@@ -139,5 +167,9 @@ void Server::start(HttpRequestHandler &requestHandler)
         const int status = e.getHttpStatus();
 
         requestHandler.executeGet(this->_config.getErrorPagePath(status), status, e.what());
+    }
+    catch (...)
+    {
+        throw HttpInternalServerErrorException();
     }
 }
