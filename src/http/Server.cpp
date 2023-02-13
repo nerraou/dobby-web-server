@@ -10,7 +10,7 @@ const std::string &Server::getRoot() const
     return this->_configServer.getRoot();
 }
 
-std::string Server::getErrorPagePath(int status)
+std::string Server::getErrorPagePath(int status) const
 {
     return this->_config.getErrorPagePath(status);
 }
@@ -80,27 +80,36 @@ void Server::handleClientMaxBodySize(const HttpRequestHandler &requestHandler)
 void Server::executeMethods(HttpRequestHandler &requestHandler, const std::string &path)
 {
     FileStat fileStat;
+    const std::string &method = requestHandler.getHttpParser().getMethod();
 
     this->setEnvVars();
+
+    if (this->_config.hasMethod(method) == false)
+        throw HttpMethodNotAllowedException();
 
     if (lib::isFileExist(path))
     {
         fileStat = FileStat::open(path);
 
         if (fileStat.isFolder())
+        {
+            if (method == HTTP_DELETE)
+                return requestHandler.executeDelete(path);
+            else if (method == HTTP_PUT)
+                throw HttpForbiddenException();
+
             // if index is .php it must be handled by CGI
             return requestHandler.serveIndexFile(path, this->_config);
+        }
     }
 
     if (this->_config.hasCGI(path))
         return requestHandler.handleCGI(path, this->_config.getCGIPath(path));
     else
     {
-        const std::string method = requestHandler.getHttpParser().getMethod();
         if (method == HTTP_POST || method == HTTP_PATCH)
             throw HttpMethodNotAllowedException();
-        if (this->_config.hasMethod(method) == false)
-            throw HttpMethodNotAllowedException();
+
         if (method == HTTP_GET)
             requestHandler.executeGet(path, HTTP_OK, HTTP_OK_MESSAGE);
         else if (method == HTTP_DELETE)
@@ -126,6 +135,11 @@ std::string Server::resolvePath(const std::string &matchedLocationPath, const st
 void Server::initConfig()
 {
     this->_config = this->_configServer;
+}
+
+const Config &Server::getConfig(void) const
+{
+    return this->_config;
 }
 
 void Server::start(HttpRequestHandler &requestHandler)
@@ -164,9 +178,7 @@ void Server::start(HttpRequestHandler &requestHandler)
     }
     catch (const AHttpRequestException &e)
     {
-        const int status = e.getHttpStatus();
-
-        requestHandler.executeGet(this->_config.getErrorPagePath(status), status, e.what());
+        throw e;
     }
     catch (...)
     {

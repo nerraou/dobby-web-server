@@ -122,7 +122,7 @@ namespace lib
 
     bool isFileExist(const std::string &path)
     {
-        return (::access(path.c_str(), F_OK) == 0);
+        return (::access(path.c_str(), F_OK | R_OK) == 0);
     }
 
     bool endsWith(const std::string &str, const std::string &ending)

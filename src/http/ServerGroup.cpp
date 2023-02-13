@@ -25,7 +25,7 @@ ServerGroup::ServerGroup(int serverGroupPort)
 {
     this->_socket.create();
     this->_socket.bind(serverGroupPort);
-    this->_socket.listen(10000);
+    this->_socket.listen(SOMAXCONN);
 }
 
 void ServerGroup::addVirtualServer(const ConfigServer &configServer)
@@ -108,20 +108,29 @@ void ServerGroup::start(std::vector<PollFd> &connections)
             }
 
             const HttpParser &httpParser = requestHandler->getHttpParser();
-
             serverIndex = this->getServerIndex(httpParser);
-            this->_virtualServers[serverIndex]->initConfig();
 
             if (!requestHandler->isTimeout())
                 this->handleTimeout(nowTimestamp, requestHandler->getRequestLastRead(), requestHandler->getRequestTimeout());
 
+            if (connection->revents & POLLERR || connection->revents & POLLNVAL || connection->revents & POLLHUP)
+            {
+                requestHandler->setIsDoneStatus();
+                continue;
+            }
+
             if (connection->revents & POLLIN)
                 requestHandler->read();
+
+            if (serverIndex == 0)
+                serverIndex = this->getServerIndex(httpParser);
 
             canWrite = requestHandler->getHttpParser().isRequestReady() ||
                        requestHandler->getHttpParser().isReadingRequestBody() ||
                        requestHandler->getHttpParser().isReadingChunkedRequestBody() ||
                        requestHandler->isWritingResponseBody();
+
+            this->_virtualServers[serverIndex]->initConfig();
 
             if (canWrite && connection->revents & POLLOUT)
                 this->_virtualServers.at(serverIndex)->start(*requestHandler);
@@ -130,12 +139,23 @@ void ServerGroup::start(std::vector<PollFd> &connections)
     catch (const AHttpRequestException &e)
     {
         const int status = e.getHttpStatus();
-        const std::string &path = this->_virtualServers[serverIndex]->getErrorPagePath(status);
+        const Server *server = this->_virtualServers.at(serverIndex);
+        const Config &config = server->getConfig();
+        const std::string &path = server->getErrorPagePath(status);
+
+        requestHandler->setResponseHttpStatus(status);
 
         if (connection->revents & POLLOUT)
-            requestHandler->executeGet(path, status, e.what());
+        {
+            if (config.hasCGI(path))
+                requestHandler->handleCGI(path, config.getCGIPath(path));
+            else
+                requestHandler->executeGet(path, status, e.what());
+        }
         else
+        {
             requestHandler->setIsDoneStatus();
+        }
     }
 }
 

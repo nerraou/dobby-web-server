@@ -38,7 +38,7 @@ public:
     Config &operator=(ConfigServer const &other);
     Config &operator=(ConfigLocation const &other);
 
-    std::string getErrorPagePath(int status);
+    std::string getErrorPagePath(int status) const;
 
     const std::string &getType() const;
 

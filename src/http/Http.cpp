@@ -20,11 +20,14 @@ inline void Http::removeBadConnections(void)
 {
     std::vector<PollFd>::iterator last;
 
+    if (this->_connections.empty())
+        return;
+
     std::sort(this->_connections.begin(), this->_connections.end(), Http::comparePollFdByFd);
     last = std::find_if(this->_connections.begin(), this->_connections.end(), Http::isBadPollFd);
 
     if (last != this->_connections.end())
-        this->_connections.erase(last);
+        this->_connections.erase(last, this->_connections.end());
 }
 
 void Http::createServerGroups()
@@ -51,7 +54,9 @@ void Http::createServerGroups()
 
 void Http::start(void)
 {
+    std::size_t maxPollConnections;
     std::map<int, ServerGroup *>::const_iterator it;
+    int readyCount;
 
     while (true)
     {
@@ -73,10 +78,16 @@ void Http::start(void)
         if (this->_connections.size() == 0)
             continue;
 
-        int readyCount = ::poll(&this->_connections[0], this->_connections.size(), 10);
-        (void)readyCount;
-
         this->removeBadConnections();
+
+        maxPollConnections = this->_connections.size();
+        if (maxPollConnections > LIMIT_NOFILE)
+            maxPollConnections = LIMIT_NOFILE;
+
+        readyCount = ::poll(&this->_connections[0], maxPollConnections, 10);
+
+        if (readyCount == -1)
+            continue;
 
         it = this->_serverGroups.begin();
         while (it != this->_serverGroups.end())

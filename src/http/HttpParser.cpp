@@ -149,12 +149,12 @@ const StringStringMap &HttpParser::getHeaders(void) const
     return this->_headers;
 }
 
-const std::string &HttpParser::getHeader(const std::string headerName) const
+const std::string &HttpParser::getHeader(const std::string &headerName) const
 {
     return this->_headers.at(headerName);
 }
 
-bool HttpParser::hasHeader(const std::string headerName) const
+bool HttpParser::hasHeader(const std::string &headerName) const
 {
     return this->_headers.count(headerName) != 0;
 }
