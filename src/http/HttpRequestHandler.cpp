@@ -262,6 +262,7 @@ void HttpRequestHandler::executeGet(const std::string &path, int httpStatus, con
         contentType = this->getFileContentType(path);
         headers << "HTTP/1.1 " << httpStatus << " " << statusMessage << CRLF;
         headers << "Content-Length: " << this->_responseContentLength << CRLF;
+        headers << "Accept-Ranges: none" << CRLF;
         if (contentType.empty() == false)
             headers << "Content-Type: " << contentType << CRLF;
         headers << CRLF;
