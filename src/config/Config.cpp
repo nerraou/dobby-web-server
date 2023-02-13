@@ -71,7 +71,7 @@ bool Config::hasErrorPage(int status) const
     return true;
 }
 
-std::string Config::getErrorPagePath(int status)
+std::string Config::getErrorPagePath(int status) const
 {
     std::string path;
 

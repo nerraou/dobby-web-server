@@ -59,8 +59,8 @@ public:
     const std::string &getHttpVersion(void) const;
     const Url &getRequestTarget(void) const;
     const StringStringMap &getHeaders(void) const;
-    const std::string &getHeader(const std::string headerName) const;
-    bool hasHeader(const std::string headerName) const;
+    const std::string &getHeader(const std::string &headerName) const;
+    bool hasHeader(const std::string &headerName) const;
     const ArrayBuffer &getBody(void) const;
 
     bool isRequestReady(void) const;

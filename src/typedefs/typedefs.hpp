@@ -8,6 +8,8 @@
 #define KB 1024
 #define MB 1048576
 
+#define LIMIT_NOFILE 10240
+
 #define DEFAULT_CONFIG_PATH "./assets/default-config/default-config"
 
 typedef struct pollfd PollFd;

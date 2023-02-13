@@ -23,13 +23,15 @@ private:
 public:
     Server(const ConfigServer &config);
     const std::string &getRoot() const;
-    std ::string getErrorPagePath(int status);
+    std ::string getErrorPagePath(int status) const;
     bool isServerNameExist(const std::string &host) const;
     void start(HttpRequestHandler &HttpRequestHandler);
     bool resumeWriting(HttpRequestHandler &requestHandler, std::size_t clientMaxBodySize);
     void setEnvVars(void);
     void handleClientMaxBodySize(const HttpRequestHandler &requestHandler);
     void executeMethods(HttpRequestHandler &requestHandler, const std::string &path);
+    std::string resolvePath(const std::string &matchedLocationPath, const std::string &requestPath);
     void initConfig();
+    const Config &getConfig(void) const;
     ~Server();
 };

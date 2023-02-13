@@ -56,6 +56,8 @@ void ParseConfig::parseServerContext(const std::string &line, ConfigServer &serv
     index = line.find_first_of(" \t");
     if (line.find("listen ") == 0)
     {
+        if (serverContext.getPort() != 0)
+            throw ParseConfigException("Duplicate listen directive");
         serverContext.setPort(ParseConfig::parseListen(line.substr(index)));
     }
     else if (line.find("server_name ") == 0)

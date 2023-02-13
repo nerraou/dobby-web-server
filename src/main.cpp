@@ -15,6 +15,7 @@
 static void sig_child_handler(int sig)
 {
     (void)sig;
+    wait(NULL);
 }
 
 static void initEnvVars(void)
