@@ -6,6 +6,22 @@
 make && ./dobby config_file
 ```
 
+![how to use Dobby](assets/doc/how-to-use-dobby.png)
+
+```
+What is an HTTP Server?
+
+```
+
+![Http server](assets/doc/http-server.png)
+
+```
+ I/O Multiplexing
+
+```
+
+![ I/O Multiplexing](assets/doc/socket.png)
+
 ## Project file structure
 
 ```
