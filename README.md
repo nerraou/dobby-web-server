@@ -17,6 +17,7 @@ What is an HTTP Server?
 
 ```
  I/O Multiplexing
+
 ```
 
 ![ I/O Multiplexing](assets/doc/socket.png)
